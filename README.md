@@ -115,8 +115,8 @@ words rather than handing over a control panel:
 
 > **How big should the whole campaign be, and what return do you want
 > guaranteed on it?** I would say $60,000 at 5× — that is $302,300 of revenue
-> we would owe you, and it is the smallest plan on which I can call a 5×
-> promise high confidence.
+> we guarantee, and it is the smallest plan on which I can call a 5× promise
+> high confidence.
 
 **There is no slider.** Type `$40,000 at 5×`, or `make it $25,000`, or just
 `8×`, and the agent answers with its confidence in that pair and the

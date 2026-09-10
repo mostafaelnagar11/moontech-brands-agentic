@@ -912,7 +912,7 @@ function ChatInner() {
           say(
             `Before I build it, two numbers to settle.\n\n` +
             `How big should the whole campaign be, and what return do you want guaranteed on it? ` +
-            `I would say ${fmtUSD(sug.planBudget)} at ${sug.roas}× — that is ${fmtUSD(ladderTotals(sug.planBudget, sug.roas).revenue)} of revenue we would owe you, and it is the smallest plan on which I can call a ${sug.roas}× promise high confidence.\n\n` +
+            `I would say ${fmtUSD(sug.planBudget)} at ${sug.roas}× — that is ${fmtUSD(ladderTotals(sug.planBudget, sug.roas).revenue)} of revenue we guarantee, and it is the smallest plan on which I can call a ${sug.roas}× promise high confidence.\n\n` +
             `Tell me either number, or both, and I will tell you how confident I am. Nothing is built, and nothing is charged, until we agree on the pair.`
           );
           push({ kind: "score", planBudget: sug.planBudget, roas: sug.roas });
