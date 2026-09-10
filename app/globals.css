@@ -1,0 +1,185 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ══════════════════════════════════════════════════════════════════
+   Base
+   ══════════════════════════════════════════════════════════════════ */
+
+html, body {
+  background: #f7f7f8;
+  color: #191234;
+  -webkit-font-smoothing: antialiased;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+button { font: inherit; cursor: pointer; }
+input, textarea, select { font: inherit; }
+
+/* The current app sets `input:focus, button:focus { outline: none }` with a
+   replacement ring for inputs only, which leaves every button, tab and menu
+   row in the product invisible to a keyboard. Here the outline is removed
+   ONLY for pointer focus, and a visible ring is guaranteed for keyboard
+   focus on everything. */
+:focus { outline: none; }
+:focus-visible {
+  outline: 2px solid #4D2FB0;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.dark-surface :focus-visible { outline-color: #ffffff; }
+
+/* Arabic gets its own stack; the layout swaps `dir` and the font together. */
+[lang="ar"], [lang="ar"] body { font-family: var(--font-ar), var(--font-geist-sans), system-ui, sans-serif; }
+
+/* ══════════════════════════════════════════════════════════════════
+   THE SIGNATURE MARKS
+   Shared byte-for-byte with the current web app and the MoonTech mobile
+   app, so all three clients draw the phased model the same way.
+
+   In the current app this mark is drawn three different ways — the
+   shared classes here, a flat inline reimplementation on the dashboard,
+   and a third instrument on the phase page. Here there is one.
+   ══════════════════════════════════════════════════════════════════ */
+
+.keyline-grad {
+  background: linear-gradient(90deg, #4D2FB0 0%, #9B7BF0 55%, #F4A8D8 100%);
+}
+
+/* The 80% unlock line. Not crossed: a grey pin standing ahead of the fill.
+   Crossed: a white cut through the keyline gradient.
+   `inset-inline-start` rather than `left`, so it lands on the correct end
+   of the track under RTL. */
+.unlock-notch {
+  position: absolute;
+  top: 50%;
+  inset-inline-start: 80%;
+  height: 10px;
+  width: 2px;
+  transform: translate(-50%, -50%);
+  border-radius: 9999px;
+  background: #c9c6d6;
+  pointer-events: none;
+}
+[dir="rtl"] .unlock-notch { transform: translate(50%, -50%); }
+.unlock-notch--crossed {
+  background: #ffffff;
+  box-shadow: 0 0 0 0.5px rgba(25, 18, 52, 0.14);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bar-fill {
+    transform-origin: left center;
+    animation: bar-reveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--bd, 0.25s) both;
+  }
+  [dir="rtl"] .bar-fill { transform-origin: right center; }
+}
+@keyframes bar-reveal { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* Legibility guard for white type over photography. */
+.ad-shadow { text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95); }
+
+/* ══════════════════════════════════════════════════════════════════
+   Streaming
+   The agent's work arrives in layers. These are the marks that say
+   "still arriving" — none of them is a fixed-duration choreography;
+   they loop until the stream actually stops.
+   ══════════════════════════════════════════════════════════════════ */
+
+.skeleton {
+  background: linear-gradient(90deg, #EDE9FB, #E6E0FF);
+  border-radius: 6px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .skeleton { animation: skeleton 1.3s ease-in-out infinite; }
+  .stream-caret::after { animation: caret 1s step-end infinite; }
+}
+.stream-caret::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-inline-start: 2px;
+  vertical-align: -0.15em;
+  background: #4D2FB0;
+}
+
+/* A layer of the read landing. Reduced-motion users get it instantly and
+   in place; everyone else gets a short rise. */
+@media (prefers-reduced-motion: no-preference) {
+  .layer-in { animation: layer-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both; }
+}
+
+/* The working ring on the dock and the monitor: a real indeterminate
+   spinner, shown only while a stream is open. */
+.working-ring {
+  border: 2px solid rgba(77, 47, 176, 0.18);
+  border-top-color: #4D2FB0;
+  border-radius: 9999px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .working-ring { animation: spin-slow 0.9s linear infinite; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Controls
+   ══════════════════════════════════════════════════════════════════ */
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  height: 8px;
+}
+input[type="range"]::-webkit-slider-runnable-track { background: transparent; height: 8px; border-radius: 9999px; }
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 18px; width: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #4D2FB0;
+  margin-top: -5px;
+  box-shadow: 0 1px 4px rgba(16, 12, 40, 0.3);
+}
+input[type="range"]::-moz-range-track { background: transparent; height: 8px; border-radius: 9999px; }
+input[type="range"]::-moz-range-thumb {
+  height: 18px; width: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #4D2FB0;
+  box-shadow: 0 1px 4px rgba(16, 12, 40, 0.3);
+}
+
+/* Hide a scrollbar without hiding the scroll. */
+.no-bar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-bar::-webkit-scrollbar { display: none; }
+
+/* ══════════════════════════════════════════════════════════════════
+   Evidence
+   Every claim the agent makes carries one of these. The dotted underline
+   is the affordance: it says "this came from somewhere, and you can see
+   where".
+   ══════════════════════════════════════════════════════════════════ */
+
+.sourced {
+  border-block-end: 1px dotted rgba(77, 47, 176, 0.45);
+  cursor: help;
+}
+.sourced:hover { border-block-end-color: #4D2FB0; }
+
+/* ── The warm-up strip ─────────────────────────────────────────────
+   Three figures side by side when there is room for three, stacked
+   when there is not. It has to be a CONTAINER query rather than a
+   viewport one: the same plan card renders in the 720px reading column
+   and in the panel beside it, which can be 360px wide on the same
+   display, and `sm:` cannot tell those apart. Below the threshold the
+   cells stack and the rule between them turns with them. */
+.stat-strip { container-type: inline-size; }
+.stat-row { display: grid; grid-template-columns: minmax(0, 1fr); }
+.stat-divide { border-top: 1px solid rgba(0, 0, 0, 0.06); }
+
+@container (min-width: 26rem) {
+  .stat-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .stat-divide { border-top: 0; border-inline-start: 1px solid rgba(0, 0, 0, 0.06); }
+}
