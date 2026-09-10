@@ -449,6 +449,34 @@ right-aligned English.
 
 ---
 
+## 11a. The agent builds; the dashboard runs — ANSWERED
+
+**Decided: two surfaces.** The five running views left the chat's panel for
+`/dashboard`. The agent at `/c` reads the store, settles two numbers, builds
+the campaign, takes the payment and connects the store, and then it is done.
+What comes after is a phase running for weeks, which is a place you check
+rather than a thread you scroll.
+
+Keeping them beside the conversation made two claims that were not true: that
+the agent stays with you through the phase, and that a brand who has not built
+anything yet has five things to look at. **Go to dashboard** is now the last
+step, and it appears only once the store is connected.
+
+**Still open, and the reason this section exists:** the dashboard has no
+assistant. Every question the builder can answer about a plan — why this
+creator, why this number, what happens if I change it — has an equivalent
+about a running phase, and there is nobody on that page to ask. It is the next
+thing to build, and it is a different agent: the builder knows a store, and
+this one would have to know a phase in flight. Whether they share a thread, a
+memory or nothing at all is undecided.
+
+*Minor consequence, unresolved:* `panel.view` is one store field shared by both
+surfaces, so returning to `/c` after looking at Ads leaves that name behind.
+The chat panel answers with a card saying where the view went, which is honest
+but is a redirect standing in for two pieces of state.
+
+---
+
 ## 11. The rail — ANSWERED, it is gone
 
 **Decided: no sidebar.** Onboarding creates one campaign. There is no second

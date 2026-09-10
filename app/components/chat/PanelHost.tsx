@@ -8,24 +8,19 @@
  * they were in the conversation rather than on a previous page.
  */
 
+import Link from "next/link";
+import { ArrowRight } from "@phosphor-icons/react";
 import { PanelFrame } from "./ChatShell";
 import { PlanPanel } from "../panels/PlanPanel";
 import { ReadPanel } from "../panels/ReadPanel";
-import { CampaignPanel } from "../panels/CampaignPanel";
-import { AdsPanel } from "../panels/AdsPanel";
-import { InboxPanel } from "../panels/InboxPanel";
-import { ActivityPanel } from "../panels/ActivityPanel";
-import { AutonomyPanel } from "../panels/AutonomyPanel";
-import { useActivePlan, useAds, usePaid, usePanel, useStore } from "../../lib/store";
+import { useActivePlan, usePaid, usePanel, useStore } from "../../lib/store";
 import { phaseTitle, livePhase } from "../../lib/mock/campaigns";
 
 export function PanelHost() {
   const { view } = usePanel();
   const plan = useActivePlan();
   const paid = usePaid();
-  const ads = useAds();
   const url = useStore((s) => Object.values(s.reads)[0]?.url ?? "your store");
-  const waiting = ads.filter((a) => a.state === "waiting").length;
   const live = livePhase();
 
   switch (view) {
@@ -44,35 +39,35 @@ export function PanelHost() {
           <ReadPanel />
         </PanelFrame>
       );
-    case "campaign":
+    /* The five running views live on /dashboard now. The panel can
+       still be ASKED for one — the store holds a single view name and
+       the dashboard writes to it too, so coming back here after
+       looking at Ads leaves that name behind — so rather than
+       rendering a phase view beside a finished conversation, it says
+       where the thing went. */
+    default:
       return (
-        <PanelFrame title={live ? phaseTitle(live.phaseNo) : "Campaign"} sub="What happened, and what it means">
-          <CampaignPanel />
-        </PanelFrame>
-      );
-    case "ads":
-      return (
-        <PanelFrame title="Ads" sub={waiting ? `${waiting} waiting on you` : "Everything is decided"}>
-          <AdsPanel />
-        </PanelFrame>
-      );
-    case "inbox":
-      return (
-        <PanelFrame title="Needs you" sub="Ordered by what it costs to leave it">
-          <InboxPanel />
-        </PanelFrame>
-      );
-    case "activity":
-      return (
-        <PanelFrame title="What I did on my own" sub="Each one with a reason and an undo">
-          <ActivityPanel />
-        </PanelFrame>
-      );
-    case "autonomy":
-      return (
-        <PanelFrame title="What I may do alone" sub="Money and publishing are never on the list">
-          <AutonomyPanel />
+        <PanelFrame title="This lives in your dashboard" sub={live ? phaseTitle(live.phaseNo) : undefined}>
+          <p className="text-prose leading-6 text-ink-soft">
+            {RUNNING_LABEL[view] ?? "That view"} belongs to the phase while it runs, not to this conversation. My
+            job here is building the campaign; once it is paid for and your store is connected, everything about
+            the running phase is on its own page.
+          </p>
+          <Link
+            href="/dashboard"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-control bg-brand px-3.5 py-2 text-body font-semibold text-white transition hover:bg-brand-hover"
+          >
+            Go to dashboard <ArrowRight size={13} weight="bold" aria-hidden className="rtl:rotate-180" />
+          </Link>
         </PanelFrame>
       );
   }
 }
+
+const RUNNING_LABEL: Partial<Record<string, string>> = {
+  campaign: "How the phase is doing",
+  ads: "The drafts waiting on you",
+  inbox: "What needs you",
+  activity: "What the agents did on their own",
+  autonomy: "What they may do alone",
+};

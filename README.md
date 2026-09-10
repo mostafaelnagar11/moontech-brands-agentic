@@ -38,14 +38,29 @@ to browse and nothing to switch between; a rail here would be three rows of
 furniture pretending to be navigation. The MoonTech mark sits top-left over a
 white fade and is the way back to a new read.
 
-The panel's own tabs are gated on what exists, because a tab with nothing
-behind it is a promise the panel cannot keep. **Read** appears once a store has
-been read, **Plan** once there is a plan, and **Campaign · Needs you · Ads ·
-Activity · Autonomy** only once a phase is paid for. Below two tabs the switcher
-does not render at all.
+The panel carries **Read** and **Plan**, and nothing else. Both are gated on
+existing: Read appears once a store has been read, Plan once there is a plan,
+and below two tabs the switcher does not render at all. A tab with nothing
+behind it is a promise the panel cannot keep.
 
-Three routes exist. `/` is the front door, `/c` is the entire application, and
-a catch-all redirects every old bookmark to `/c`.
+**The agent builds a campaign; it does not run one.** Its job starts at a
+pasted link and ends when the store is connected. What follows is a phase
+running for weeks — drafts arriving, budget moving, revenue landing against a
+guarantee — and that is not a conversation you scroll back through, it is a
+place you check. So it has its own surface at `/dashboard`, and the last thing
+the agent says is where to find it.
+
+```
+/                the front door. One field.
+/c               the agent. Conversation + a panel of Read and Plan.
+/dashboard       the running campaign. Campaign · Needs you · Ads ·
+                 Activity · Autonomy.
+/[...legacy]     every old bookmark redirects to /c.
+```
+
+An assistant belongs on the dashboard too, eventually, one that knows the
+running phase the way the builder knows the store. It is not in this
+prototype, and nothing there pretends otherwise.
 
 Under 768px the panel covers the conversation and a back arrow returns to it.
 
@@ -265,11 +280,16 @@ engineer arrives with a plan rather than questions.
 Connecting comes after payment on purpose: it measures the guarantee, it does
 not qualify the brand.
 
-### 8. Running — all in the panel
+### 8. Running — on the dashboard
 
-The panel now offers **Campaign**, **Needs you**, **Ads**, **Activity** and
-**Autonomy** — five tabs that did not exist before the phase was paid for. Or ask: *"how is this doing"*, *"show me the ads"*, *"what did
-you do on your own"* — the agent answers and opens the right view.
+**Go to dashboard** is the last thing in the conversation, and it appears only
+once the store is connected. Before that there is nothing for a dashboard to
+count, and offering it early sends a brand to an empty room.
+
+The dashboard holds the five views the panel used to: **Campaign**, **Needs
+you**, **Ads**, **Activity** and **Autonomy**. Its own cross-links work between
+them — *Review them* opens Ads, *See all, and undo* opens Activity — and
+**Back to the agent** returns to the conversation, which is still there.
 
 - **Campaign** — the Agent Monitor (what happened, what it means, what I did,
   what I need from you), the pace forecast against the 80% line, the phase
@@ -300,7 +320,8 @@ better informed than the one before.
 ```
 app/
   page.tsx        the landing. One field.
-  c/page.tsx      THE application — the conversation and the panel
+  c/page.tsx      the agent — the conversation and its panel
+  dashboard/      the running campaign, once the agent has handed over
   [...legacy]     every old route redirects here
   components/chat/    ChatShell, Composer, Turn, PanelHost
   components/panels/  plan · read · campaign · ads · inbox · activity · autonomy

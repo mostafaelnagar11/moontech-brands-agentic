@@ -7,6 +7,7 @@
    — the plan card in the thread IS the plan card on the proposal screen,
    reading the same object. */
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   ArrowRight, Check, CheckCircle, Lightning, LockSimple, Receipt as ReceiptIcon,
@@ -1007,9 +1008,13 @@ export function IntegrationBlock({ onConnect }: { onConnect: (k: StorePlatform) 
             MoonScore AI watches which creators are converting and moves the warm-up budget towards them while the phase
             runs; MoonLearning AI keeps what it finds for your next campaign. You are good to go.
           </p>
-          <button onClick={() => openPanel("campaign")} className="mt-3 inline-flex items-center gap-1.5 text-body font-semibold text-brand hover:underline">
-          Open the dashboard <ArrowRight size={13} weight="bold" aria-hidden className="rtl:rotate-180" />
-        </button>
+          {/* The last step in the whole flow, and the way out of it.
+              Everything after this belongs to a running phase, which
+              lives on its own surface rather than beside a
+              conversation that is finished. */}
+          <Link href="/dashboard" className="mt-3 inline-flex items-center gap-1.5 text-body font-semibold text-brand hover:underline">
+            Go to dashboard <ArrowRight size={13} weight="bold" aria-hidden className="rtl:rotate-180" />
+          </Link>
         </div>
       </Card>
     );

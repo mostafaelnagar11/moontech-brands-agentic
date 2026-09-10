@@ -82,7 +82,7 @@ const PRE_CHIPS = ["Kuwait only", "Guarantee 8× instead", WHY_CHIP, "Show me th
    for a dashboard to count. Offering it early sends a brand to an empty
    room and puts the step that makes the guarantee measurable behind a
    chip they have already walked past. */
-const POST_CHIPS = ["What happens next?", "Open the dashboard"];
+const POST_CHIPS = ["What happens next?", "Go to dashboard"];
 const POST_CHIPS_UNCONNECTED = ["What happens next?"];
 
 /* What each agent is doing while the store is read, in the brand's own
@@ -355,7 +355,11 @@ function ChatInner() {
       "From here MoonLive AI puts out every ad you approve and MoonScore AI moves the warm-up budget towards whichever creators " +
       "are converting. I will tell you what happened, what it means, and the one thing I need from you — and nothing publishes " +
       "without your approval.",
-      postChips
+      /* POST_CHIPS, not `postChips`. This closure was built on the
+         render BEFORE `connectStore` ran, so `connected` is still null
+         in it and the dashboard chip would be withheld at the exact
+         moment it becomes the right next step. */
+      POST_CHIPS
     );
   };
 
@@ -657,9 +661,17 @@ function ChatInner() {
     /* Chips the agent itself offered about where the brand is in the
        flow. They are answered here rather than sent through `interpret`,
        because they are not requests about the plan. */
-    if (/open the dashboard/.test(lower)) {
-      say("Opening your campaign in the panel beside this conversation. Everything on it reads from this same plan, and I am still right here if you want to ask me something about it.");
-      openPanel("campaign");
+    if (/go to (the )?dashboard|open the dashboard/.test(lower)) {
+      /* A handoff, not another panel. My job ends when the campaign is
+         built, paid for and connected; the phase that follows runs for
+         weeks and lives somewhere you check rather than somewhere you
+         scroll back through. */
+      say(
+        "Taking you to your dashboard. That is where the phase runs from here — what the creators earn you against " +
+        "the guarantee, the drafts waiting on your approval, and everything the agents did on their own, each with " +
+        "an undo. Come back here any time you want another campaign built."
+      );
+      router.push("/dashboard");
       return;
     }
     if (/what happens next|what.s next|what now/.test(lower)) {
@@ -978,7 +990,7 @@ function ChatInner() {
         case "show-brief": say(out.say); push({ kind: "brief-card" }); return;
         /* The numbers assemble in the conversation, where they can be
            stopped; the phase they belong to opens beside it. */
-        case "show-report": say(out.say); runReport(); openPanel("campaign"); return;
+        case "show-report": say(out.say); runReport(); return;
       }
     }
 

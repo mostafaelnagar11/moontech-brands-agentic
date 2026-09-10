@@ -18,7 +18,7 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { CaretLeft, X } from "@phosphor-icons/react";
-import { closePanel, setPanelView, useActivePlan, usePaid, usePanel, useStore } from "../../lib/store";
+import { closePanel, setPanelView, useActivePlan, usePanel, useStore } from "../../lib/store";
 import type { PanelView } from "../../lib/store";
 
 export function ChatShell({ children, panel }: { children: ReactNode; panel: ReactNode }) {
@@ -73,29 +73,27 @@ export function ChatShell({ children, panel }: { children: ReactNode; panel: Rea
    These are the views a brand can reach at each stage — the same set
    the agent opens when asked, so typing "show me the ads" and pressing
    Ads land in exactly the same place. */
-type Gate = "read" | "plan" | "paid";
+/* Only the two artifacts of BUILDING a campaign. The running views —
+   Campaign, Needs you, Ads, Activity, Autonomy — moved to /dashboard,
+   because they belong to a phase that runs for weeks rather than to
+   this conversation, which ends the moment the store is connected.
+   Beside the chat they implied the agent stays with you through the
+   phase, which it does not. */
+type Gate = "read" | "plan";
 
 const VIEWS: { key: PanelView; label: string; needs: Gate }[] = [
   { key: "plan", label: "Plan", needs: "plan" },
   { key: "read", label: "Read", needs: "read" },
-  { key: "campaign", label: "Campaign", needs: "paid" },
-  { key: "inbox", label: "Needs you", needs: "paid" },
-  { key: "ads", label: "Ads", needs: "paid" },
-  { key: "activity", label: "Activity", needs: "paid" },
-  { key: "autonomy", label: "Autonomy", needs: "paid" },
 ];
 
 export function PanelFrame({ title, sub, children }: { title: string; sub?: string; children: ReactNode }) {
   const { view } = usePanel();
-  const paid = usePaid();
   const hasPlan = !!useActivePlan();
   const hasRead = useStore((st) => Object.keys(st.reads).length > 0);
   /* A tab with nothing behind it is a promise the panel cannot keep.
      Plan appears when there is a plan, Read when the store has been
-     read, and the running views only once a phase is paid for. */
-  const available = VIEWS.filter((v) =>
-    v.needs === "paid" ? paid : v.needs === "plan" ? hasPlan : hasRead
-  );
+     read. */
+  const available = VIEWS.filter((v) => (v.needs === "plan" ? hasPlan : hasRead));
   return (
     <>
       <header className="flex h-[56px] shrink-0 items-center gap-2 border-b border-hairline px-4">
