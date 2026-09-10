@@ -462,13 +462,30 @@ the agent stays with you through the phase, and that a brand who has not built
 anything yet has five things to look at. **Go to dashboard** is now the last
 step, and it appears only once the store is connected.
 
-**Still open, and the reason this section exists:** the dashboard has no
-assistant. Every question the builder can answer about a plan — why this
-creator, why this number, what happens if I change it — has an equivalent
-about a running phase, and there is nobody on that page to ask. It is the next
-thing to build, and it is a different agent: the builder knows a store, and
-this one would have to know a phase in flight. Whether they share a thread, a
-memory or nothing at all is undecided.
+**The dashboard now has an assistant, and it is a different agent.** The
+builder knows a store; this one knows a phase in flight. It answers from the
+figures already on the page, opens any view by name, prepares an approval, and
+undoes anything an agent did on its own. It sits in the third column, where
+"back to the agent" used to, and the shell around it is the current app's own —
+210px rail, 67px top bar, full-bleed main — so a brand who uses MoonTech today
+reads the same numbers in the same place.
+
+The safety envelope is the builder's, unchanged: approving produces a request
+with the brand's name on the button, and the assistant cannot publish, move
+money or sign. Every action it takes leaves a card in the thread naming what
+changed, because an assistant that says "done" while something moves off-screen
+is the failure mode this whole product is arguing against.
+
+*Still open:* the two agents share nothing. The builder does not know the phase
+it built is behind pace, and the assistant cannot say why a creator was picked
+without re-deriving it. One conversation per brand with the campaign as an
+artifact inside it would fix both, and it is the same question section 13 asks
+from the other end.
+
+*Also open:* the assistant's reach stops at the five views. It cannot pause one
+ad, move budget between creators, or write a note back to a creator — all
+things a brand mid-phase actually asks for, and all things that need a real
+tool rather than a regex. `interpretDashboard` is the seam; it says so.
 
 *Minor consequence, unresolved:* `panel.view` is one store field shared by both
 surfaces, so returning to `/c` after looking at Ads leaves that name behind.

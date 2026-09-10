@@ -11,7 +11,8 @@
 
 import { ArrowRight, CheckCircle, Clock, Lightning } from "@phosphor-icons/react";
 import { fmtUSD, pace, phaseTitle, type Phase } from "../lib/mock/campaigns";
-import { openPanel, useActivity, useAds } from "../lib/store";
+import { useActivity, useAds } from "../lib/store";
+import { useGo } from "../lib/surface";
 import { Card, Eyebrow, Pill } from "./ui";
 import { RevenueRuler } from "./Ruler";
 
@@ -34,6 +35,7 @@ function Block({ label, children, tone = "plain" }: { label: string; children: R
 }
 
 export function AgentMonitor({ phase, compact = false }: { phase: Phase; compact?: boolean }) {
+  const go = useGo();
   const activity = useActivity();
   const ads = useAds().filter((a) => a.campaignId === phase.id);
   const waiting = ads.filter((a) => a.state === "waiting");
@@ -89,7 +91,7 @@ export function AgentMonitor({ phase, compact = false }: { phase: Phase; compact
             <>
               <span className="font-semibold text-ink">{last.title}.</span> {last.because}{" "}
               <span className="text-ink-faint">{ago(last.at)}</span>{" "}
-              <button onClick={() => openPanel("activity")} className="font-semibold text-brand underline-offset-2 hover:underline">
+              <button onClick={() => go("activity")} className="font-semibold text-brand underline-offset-2 hover:underline">
                 See all, and undo
               </button>
             </>
@@ -110,7 +112,7 @@ export function AgentMonitor({ phase, compact = false }: { phase: Phase; compact
                 Nothing publishes until you decide.
               </p>
               <button
-                onClick={() => openPanel("ads")}
+                onClick={() => go("ads")}
                 className="mt-2.5 inline-flex items-center gap-1.5 rounded-control bg-danger px-3 py-1.5 text-meta font-semibold text-white transition hover:bg-danger-deep"
               >
                 Review them <ArrowRight size={12} weight="bold" aria-hidden />

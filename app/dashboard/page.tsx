@@ -3,94 +3,99 @@
 /* The dashboard: where a campaign LIVES, once the agent has finished
    building it.
  *
- * This is deliberately a different surface from the conversation, and
- * the split is the product's, not a layout choice. The agent at `/c`
- * has one job — read the store, settle two numbers, build the campaign,
- * take the payment, connect the store — and it ends. What happens after
- * that is a phase running for weeks: drafts arriving, budget moving,
- * revenue landing against a guarantee. That is not a conversation you
- * scroll back through, it is a place you check.
+ * A different surface from the conversation, and the split is the
+ * product's rather than a layout choice. The agent at `/c` has one job
+ * — read the store, settle two numbers, build the campaign, take the
+ * payment, connect the store — and it ends. What follows is a phase
+ * running for weeks: drafts arriving, budget moving, revenue landing
+ * against a guarantee. That is not a thread you scroll back through,
+ * it is a place you check.
  *
- * So the running views moved out of the chat's panel and came here.
- * Keeping them beside the conversation implied the agent stays with you
- * through the phase, which it does not, and it put five tabs in front
- * of a brand who had not yet built anything.
+ * The chrome is the current app's, deliberately: a 210px rail that
+ * collapses to 60px, a 67px translucent top bar, and a full-bleed main
+ * column on the canvas. A brand who uses MoonTech today should not
+ * have to learn a new shell to look at the same numbers. What has
+ * changed is the third column.
  *
- * An assistant belongs on this page too, eventually — one that knows
- * the running phase the way the builder knows the store. It is not in
- * this prototype, and nothing here pretends otherwise.
+ * Where the current app has no assistant and this prototype had a
+ * "back to the agent" link, there is now a rail you can talk to. It is
+ * a different agent from the builder — that one knows a store, this
+ * one knows a phase in flight — and it can move the page, answer from
+ * the figures already on it, and prepare an approval. It cannot
+ * publish, move money or sign, which is what makes it safe to put a
+ * text box this close to a live campaign.
  */
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft } from "@phosphor-icons/react";
+import { ArrowRight, Sparkle } from "@phosphor-icons/react";
 import { CampaignPanel } from "../components/panels/CampaignPanel";
 import { AdsPanel } from "../components/panels/AdsPanel";
 import { InboxPanel } from "../components/panels/InboxPanel";
 import { ActivityPanel } from "../components/panels/ActivityPanel";
 import { AutonomyPanel } from "../components/panels/AutonomyPanel";
-import { setPanelView, useActivePlan, useAds, usePaid, usePanel } from "../lib/store";
+import { DashboardSidebar, NAV } from "../components/dashboard/Sidebar";
+import { DashboardTopbar } from "../components/dashboard/Topbar";
+import { DashboardAssistant } from "../components/dashboard/Assistant";
+import { setDashboardView, useActivePlan, useAds, useDashboardView, usePaid } from "../lib/store";
+import { SurfaceProvider } from "../lib/surface";
 import { livePhase, phaseTitle } from "../lib/mock/campaigns";
-
-type View = "campaign" | "inbox" | "ads" | "activity" | "autonomy";
-
-const VIEWS: { key: View; label: string }[] = [
-  { key: "campaign", label: "Campaign" },
-  { key: "inbox", label: "Needs you" },
-  { key: "ads", label: "Ads" },
-  { key: "activity", label: "Activity" },
-  { key: "autonomy", label: "Autonomy" },
-];
+import type { DashboardView } from "../lib/agent/dashboard";
 
 export default function DashboardPage() {
-  /* The current view is held in the same store field the chat panel
-     uses, rather than in local state, so the cross-links inside these
-     panels — "see all, and undo", "review them", "what may I do alone"
-     — keep working here without every one of them learning which
-     surface it is on. Anything that is not a dashboard view falls back
-     to the campaign, which is where you land from the conversation. */
-  const stored = usePanel().view;
-  const view: View = (VIEWS.some((v) => v.key === stored) ? stored : "campaign") as View;
-  const setView = setPanelView;
+  /* The dashboard's own view. It used to share `panel.view` with the
+     conversation, which meant moving around here silently repointed
+     the panel over there — and, because the cross-links went through
+     `openPanel`, armed it open on a surface the brand was not on. Two
+     fields, one owner each; the cross-links reach this one through
+     the surface context below. */
+  const stored = useDashboardView();
+  const view: DashboardView = (NAV.some((v) => v.key === stored) ? stored : "campaign") as DashboardView;
+
   const plan = useActivePlan();
   const paid = usePaid();
   const ads = useAds();
   const waiting = ads.filter((a) => a.state === "waiting").length;
   const live = livePhase();
 
-  /* Nothing runs until a phase is paid for, and a dashboard for a
-     campaign that does not exist is a set of empty frames. Send them
-     back to the one place that can change that. */
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileNav, setMobileNav] = useState(false);
+  const [assistant, setAssistant] = useState(true);
+
+  /* A column of its own needs room for two. On a phone there is only
+     ever room for one, so it starts closed there and takes the whole
+     width when opened — the same rule the conversation's panel uses at
+     /c. It is never an overlay: nothing here floats above the thing it
+     is answering about. */
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 768) setAssistant(false);
+  }, []);
+
   if (!paid || !plan) {
     return (
-      <div className="grid min-h-[100dvh] place-items-center bg-rail px-6">
+      <div className="grid min-h-[100dvh] place-items-center bg-canvas px-6">
         <div className="max-w-[420px] text-center">
-          <Image src="/logo.svg" alt="MoonTech" width={104} height={19} className="mx-auto h-[18px] w-auto" priority />
-          <p className="mt-6 text-prose leading-6 text-ink">
+          <Image src="/logo.svg" alt="MoonTech" width={110} height={20} priority className="mx-auto h-[19px] w-auto" />
+          <p className="mt-6 text-prose text-ink">
             There is no campaign running yet. This is where one lives once Phase 1 is started and your store is
-            connected — the numbers against the guarantee, the drafts waiting on you, and everything the agents did
-            on their own.
+            connected — what the creators earn you against the guarantee, the drafts waiting on you, and everything
+            the agents did on their own.
           </p>
           <Link
             href="/c"
             className="mt-5 inline-flex items-center gap-2 rounded-control bg-brand px-4 py-2 text-body font-semibold text-white transition hover:bg-brand-hover"
           >
-            <ArrowLeft size={14} weight="bold" aria-hidden className="rtl:rotate-180" />
-            Build a campaign first
+            <Sparkle size={14} weight="fill" aria-hidden />
+            Build one first
+            <ArrowRight size={13} weight="bold" aria-hidden className="rtl:rotate-180" />
           </Link>
         </div>
       </div>
     );
   }
 
-  const sub: Record<View, string> = {
-    campaign: "What happened, and what it means",
-    inbox: "Ordered by what it costs to leave it",
-    ads: waiting ? `${waiting} waiting on you` : "Everything is decided",
-    activity: "Each one with a reason and an undo",
-    autonomy: "Money and publishing are never on the list",
-  };
-  const title: Record<View, string> = {
+  const TITLE: Record<DashboardView, string> = {
     campaign: live ? phaseTitle(live.phaseNo) : "Campaign",
     inbox: "Needs you",
     ads: "Ads",
@@ -99,52 +104,66 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-rail">
-      <header className="sticky top-0 z-10 border-b border-hairline bg-white/85 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-[900px] items-center gap-3 px-4">
-          <Link href="/c" aria-label="Back to the agent" className="rounded transition hover:opacity-70">
-            <Image src="/logo.svg" alt="MoonTech" width={104} height={19} className="h-[18px] w-auto" priority />
-          </Link>
-          <span aria-hidden className="h-4 w-px bg-black/10" />
-          <p className="truncate text-body font-semibold text-ink">{plan.brandName}</p>
-          <Link
-            href="/c"
-            className="ms-auto hidden shrink-0 items-center gap-1.5 text-meta font-semibold text-brand transition hover:underline sm:inline-flex"
-          >
-            <ArrowLeft size={12} weight="bold" aria-hidden className="rtl:rotate-180" />
-            Back to the agent
-          </Link>
-        </div>
-        <div className="mx-auto flex max-w-[900px] gap-1 overflow-x-auto px-3 pb-2 no-bar">
-          {VIEWS.map((v) => (
-            <button
-              key={v.key}
-              onClick={() => setView(v.key)}
-              aria-current={v.key === view}
-              className={`shrink-0 rounded-pill px-3 py-1.5 text-[11px] font-semibold transition ${
-                v.key === view ? "bg-brand text-white" : "text-ink-faint hover:bg-black/[0.05] hover:text-ink"
-              }`}
-            >
-              {v.label}
-              {v.key === "inbox" && waiting > 0 && (
-                <span className="ms-1.5 rounded-pill bg-danger px-1.5 py-0.5 text-[10px] text-white">{waiting}</span>
-              )}
-            </button>
-          ))}
-        </div>
-      </header>
+    /* Everything inside moves THIS surface. A panel's cross-link asks
+       for `useGo()` and never learns which page it is on. */
+    <SurfaceProvider go={setDashboardView}>
+    <div className="flex h-[100dvh] overflow-hidden bg-canvas">
+      <DashboardSidebar
+        collapsed={collapsed}
+        view={view}
+        onView={setDashboardView}
+        waiting={waiting}
+        brandName={plan.brandName}
+        mobileOpen={mobileNav}
+        onMobileClose={() => setMobileNav(false)}
+      />
 
-      <main className="mx-auto max-w-[900px] px-4 py-5">
-        <div className="mb-3">
-          <h1 className="text-h2 font-semibold text-ink">{title[view]}</h1>
-          <p className="mt-0.5 text-meta text-ink-faint">{sub[view]}</p>
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <DashboardTopbar
+          title={TITLE[view]}
+          waiting={waiting}
+          assistantOpen={assistant}
+          onToggleAssistant={() => setAssistant((o) => !o)}
+          /* One control, two jobs, the way the current app does it: it
+             collapses the rail where there is room for one and opens
+             the drawer where there is not. */
+          onToggleNav={() => {
+            if (typeof window !== "undefined" && window.innerWidth < 768) setMobileNav((o) => !o);
+            else setCollapsed((o) => !o);
+          }}
+        />
+
+        <div className="flex min-h-0 flex-1 overflow-hidden">
+          {/* Below 768 the two columns cannot both fit, so the open
+              assistant takes the width and the dashboard steps aside
+              rather than being dimmed behind it. */}
+          <main
+            className={`flex-1 space-y-6 overflow-y-auto px-4 py-5 sm:px-6 sm:py-7 lg:px-8 ${
+              assistant ? "hidden md:block" : "block"
+            }`}
+          >
+            {view === "campaign" && <CampaignPanel />}
+            {view === "inbox" && <InboxPanel />}
+            {view === "ads" && <AdsPanel />}
+            {view === "activity" && <ActivityPanel />}
+            {view === "autonomy" && <AutonomyPanel />}
+          </main>
+
+          {/* A column, not an overlay. It sits in the row beside the
+              dashboard and the dashboard reflows around it, so nothing
+              is ever dimmed or covered. Collapsing it is one press,
+              from the top bar or from its own header. */}
+          {assistant && (
+            <aside
+              className="animate-slide-in-end flex w-full shrink-0 flex-col border-s border-hairline md:w-[clamp(320px,30vw,400px)]"
+              aria-label="Assistant"
+            >
+              <DashboardAssistant onClose={() => setAssistant(false)} />
+            </aside>
+          )}
         </div>
-        {view === "campaign" && <CampaignPanel />}
-        {view === "inbox" && <InboxPanel />}
-        {view === "ads" && <AdsPanel />}
-        {view === "activity" && <ActivityPanel />}
-        {view === "autonomy" && <AutonomyPanel />}
-      </main>
+      </div>
     </div>
+    </SurfaceProvider>
   );
 }

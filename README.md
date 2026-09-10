@@ -53,14 +53,24 @@ the agent says is where to find it.
 ```
 /                the front door. One field.
 /c               the agent. Conversation + a panel of Read and Plan.
-/dashboard       the running campaign. Campaign · Needs you · Ads ·
-                 Activity · Autonomy.
+/dashboard       the running campaign, on the current app's own shell.
 /[...legacy]     every old bookmark redirects to /c.
 ```
 
-An assistant belongs on the dashboard too, eventually, one that knows the
-running phase the way the builder knows the store. It is not in this
-prototype, and nothing there pretends otherwise.
+**The dashboard wears the current app's chrome**, deliberately: a 210px white
+rail that collapses to 60px, a 67px translucent top bar, and a full-bleed main
+column on the canvas. A brand who uses MoonTech today should not have to learn
+a new shell to read the same numbers. Two things differ. The active nav item is
+derived from the current view rather than from a label string each page seeds
+for itself, which in the original leaves the highlight stale whenever you reach
+a page any way but clicking its own row. And the brand switcher is a brand
+tile, because this prototype has one campaign and a switcher with one row is
+furniture.
+
+**The third column is an assistant you can talk to.** It is a different agent
+from the builder — that one knows a store, this one knows a phase in flight —
+and it lives where "back to the agent" used to. Beside the dashboard above
+1280px, over it below. See step 8.
 
 Under 768px the panel covers the conversation and a back arrow returns to it.
 
@@ -289,7 +299,27 @@ count, and offering it early sends a brand to an empty room.
 The dashboard holds the five views the panel used to: **Campaign**, **Needs
 you**, **Ads**, **Activity** and **Autonomy**. Its own cross-links work between
 them — *Review them* opens Ads, *See all, and undo* opens Activity — and
-**Back to the agent** returns to the conversation, which is still there.
+**Build a campaign** in the rail returns to the agent, which is still there.
+
+**Ask MoonTech** opens the assistant. Four things it does, and one it does not:
+
+| Say | What happens |
+| --- | --- |
+| *"How is it doing?"* | The pace against the guarantee, from the same figures the monitor above renders |
+| *"Show me the drafts"* | Opens Ads, and drops a card in the thread naming what it moved |
+| *"Approve all"* | Builds the approval list with its read on each draft. **You** press the button |
+| *"Undo that"* | Reverts the last thing an agent did on its own, and says which |
+| Anything else | Says what it can do, rather than guessing |
+
+**It cannot publish, move money or sign**, and the line under the message box
+says so. Approving is the only thing here that reaches the outside world, and
+it arrives as a request with your name on the button — the same rule the
+builder works under, and the reason a text box can sit this close to a live
+campaign at all.
+
+Every action leaves a card in the thread naming what changed. An assistant that
+says "done" while something moves off-screen is the thing this product exists
+not to be.
 
 - **Campaign** — the Agent Monitor (what happened, what it means, what I did,
   what I need from you), the pace forecast against the 80% line, the phase
@@ -321,7 +351,9 @@ better informed than the one before.
 app/
   page.tsx        the landing. One field.
   c/page.tsx      the agent — the conversation and its panel
-  dashboard/      the running campaign, once the agent has handed over
+  dashboard/      the running campaign, on the current app's shell
+  components/dashboard/  Sidebar · Topbar · Assistant
+  lib/agent/dashboard.ts the assistant's own tool layer
   [...legacy]     every old route redirects here
   components/chat/    ChatShell, Composer, Turn, PanelHost
   components/panels/  plan · read · campaign · ads · inbox · activity · autonomy

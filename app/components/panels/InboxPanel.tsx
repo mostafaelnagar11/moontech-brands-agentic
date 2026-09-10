@@ -16,7 +16,8 @@
 import { ArrowRight, CheckCircle, Clock, Images, Lightning, Sliders } from "@phosphor-icons/react";
 import { Card, Eyebrow, Pill, Btn } from "../ui";
 import { ApprovalCard } from "../AdCards";
-import { dismissInbox, openPanel, useAds, useStore, type PanelView } from "../../lib/store";
+import { dismissInbox, useAds, useStore, type PanelView } from "../../lib/store";
+import { useGo } from "../../lib/surface";
 import { fmtUSD, livePhase, pace, phaseTitle, readyPhase, withVat } from "../../lib/mock/campaigns";
 
 type Urgency = "money" | "blocking" | "fyi";
@@ -28,6 +29,7 @@ const TONE: Record<Urgency, { pill: "danger" | "brand" | "muted"; word: string }
 };
 
 export function InboxPanel() {
+  const goTo = useGo();
   const ads = useAds();
   const dismissed = useStore((s) => s.dismissedInbox);
   const live = livePhase()!;
@@ -129,7 +131,7 @@ export function InboxPanel() {
                         <div className="mt-3 flex flex-wrap items-center gap-2">
                           {go && (
                             <button
-                              onClick={() => openPanel(go)}
+                              onClick={() => goTo(go)}
                               className="inline-flex items-center gap-1.5 rounded-control bg-brand px-3 py-2 text-meta font-semibold text-white transition hover:bg-brand-hover"
                             >
                               {it.cta} <ArrowRight size={12} weight="bold" aria-hidden className="rtl:rotate-180" />

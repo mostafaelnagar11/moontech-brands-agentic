@@ -195,6 +195,10 @@ export interface Conversation {
 
 export interface State {
   panel: { view: PanelView; open: boolean };
+  /* The dashboard's own view, kept apart from the panel's. They used
+     to be one field with two owners, which meant moving around one
+     surface silently rearranged the other — and armed a panel on it. */
+  dashboardView: PanelView;
   conversations: Conversation[];
   reads: Record<string, BrandRead>;
   plans: Record<string, Plan>;
@@ -236,6 +240,7 @@ function initial(): State {
     locale: "en",
     connectedStore: null,
     dismissedInbox: [],
+    dashboardView: "campaign",
   };
 }
 
@@ -454,6 +459,11 @@ export const usePanel = () => useStore((s) => s.panel);
 export const openPanel = (view: PanelView) => set({ panel: { view, open: true } });
 export const closePanel = () => set((s) => ({ panel: { ...s.panel, open: false } }));
 export const setPanelView = (view: PanelView) => set((s) => ({ panel: { view, open: s.panel.open } }));
+
+/* The dashboard's view. Separate setter, separate field: nothing here
+   can open, close or repoint the conversation's panel. */
+export const useDashboardView = () => useStore((s) => s.dashboardView);
+export const setDashboardView = (view: PanelView) => set({ dashboardView: view });
 
 export const useConversations = () => useStore((s) => s.conversations);
 

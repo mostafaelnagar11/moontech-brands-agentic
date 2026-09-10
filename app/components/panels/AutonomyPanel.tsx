@@ -32,7 +32,8 @@
 import { ArrowsClockwise, Info, LockSimple } from "@phosphor-icons/react";
 import { Card, Eyebrow, Pill } from "../ui";
 import { countWord } from "../blocks";
-import { openPanel, setAutonomy, useActivity, useAutonomy, type AutonomyLevel } from "../../lib/store";
+import { setAutonomy, useActivity, useAutonomy, type AutonomyLevel } from "../../lib/store";
+import { useGo } from "../../lib/surface";
 
 const LEVELS: { key: AutonomyLevel; label: string; hint: string }[] = [
   { key: "alone", label: "On its own", hint: "Does it, tells you after, undoable" },
@@ -71,6 +72,7 @@ const PIPELINE: { agent: string; stage: string; job: string; needsYou?: string }
 const LOCKED_COUNT = PIPELINE.filter((p) => p.needsYou).length;
 
 export function AutonomyPanel() {
+  const go = useGo();
   const rules = useAutonomy();
   const activity = useActivity();
   const locked = rules.filter((r) => r.locked);
@@ -166,7 +168,7 @@ export function AutonomyPanel() {
                 <p className="mt-1 text-meta leading-5 text-ink-soft">{r.detail}</p>
                 {used > 0 && (
                   <button
-                    onClick={() => openPanel("activity")}
+                    onClick={() => go("activity")}
                     className="mt-1.5 rounded bg-brand/[0.07] px-1.5 py-0.5 text-[11px] font-semibold text-brand hover:underline"
                   >
                     Used {used}× this week — see what I did
@@ -213,7 +215,7 @@ export function AutonomyPanel() {
         <p className="text-body font-semibold text-ink">Everything I have done on my own</p>
         <p className="mt-0.5 text-meta text-ink-faint">With the reason, and an undo where one is possible.</p>
         <button
-          onClick={() => openPanel("activity")}
+          onClick={() => go("activity")}
           className="mt-3 inline-flex items-center gap-1.5 rounded-control border border-hairline bg-white px-3 py-2 text-meta font-semibold text-ink-soft transition hover:bg-neutral-50"
         >
           Open the activity log

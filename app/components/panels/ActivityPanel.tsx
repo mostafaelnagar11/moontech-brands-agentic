@@ -11,7 +11,8 @@
 
 import { ArrowCounterClockwise, ArrowRight, LockSimple, Sliders } from "@phosphor-icons/react";
 import { Card, Pill, Btn } from "../ui";
-import { openPanel, redoActivity, undoActivity, useActivity, useAutonomy, type ActivityEntry } from "../../lib/store";
+import { redoActivity, undoActivity, useActivity, useAutonomy, type ActivityEntry } from "../../lib/store";
+import { useGo } from "../../lib/surface";
 
 /** Which of the seven agents did it. The field is being added to the
     log entries themselves; until every entry carries one, an entry
@@ -31,6 +32,7 @@ const ago = (ts: number) => {
 };
 
 export function ActivityPanel() {
+  const go = useGo();
   const activity = useActivity();
   const autonomy = useAutonomy();
   const ruleOf = (k: string) => autonomy.find((r) => r.key === k);
@@ -42,7 +44,7 @@ export function ActivityPanel() {
         used, and each one that can be reversed has an undo.
       </p>
       <button
-        onClick={() => openPanel("autonomy")}
+        onClick={() => go("autonomy")}
         className="mt-3 inline-flex items-center gap-1.5 rounded-control border border-hairline bg-white px-3 py-2 text-meta font-semibold text-ink-soft transition hover:bg-neutral-50"
       >
         <Sliders size={13} weight="bold" aria-hidden /> Change what I may do
@@ -95,7 +97,7 @@ export function ActivityPanel() {
                   )}
                   {rule && (
                     <button
-                      onClick={() => openPanel("autonomy")}
+                      onClick={() => go("autonomy")}
                       className="inline-flex items-center gap-1 text-meta font-medium text-brand hover:underline"
                     >
                       Stop me doing this <ArrowRight size={11} weight="bold" aria-hidden className="rtl:rotate-180" />

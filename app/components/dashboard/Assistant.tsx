@@ -32,11 +32,11 @@ import {
 } from "../../lib/agent/dashboard";
 import {
   putApproval,
-  setPanelView,
   undoActivity,
   useActivity,
   useAds,
 } from "../../lib/store";
+import { useGo } from "../../lib/surface";
 import { livePhase } from "../../lib/mock/campaigns";
 import { tools } from "../../lib/agent/tools";
 import type { ApprovalRequest } from "../../lib/agent/types";
@@ -67,6 +67,9 @@ export function DashboardAssistant({ onClose }: { onClose?: () => void }) {
   const activity = useActivity();
   const phase = livePhase() ?? null;
   const undoable = activity.find((a) => !a.undone && a.undoable) ?? null;
+  /* Moves whichever surface this rail is mounted on, which is the
+     dashboard — it must not reach across and repoint the chat. */
+  const go = useGo();
 
   const [turns, setTurns] = useState<Turn[]>(() => [
     {
@@ -111,7 +114,7 @@ export function DashboardAssistant({ onClose }: { onClose?: () => void }) {
 
     switch (intent.kind) {
       case "open":
-        setPanelView(intent.view);
+        go(intent.view);
         add({
           role: "did",
           label: `Opened ${VIEW_LABEL[intent.view]}`,
@@ -122,7 +125,7 @@ export function DashboardAssistant({ onClose }: { onClose?: () => void }) {
         const waiting = ads.filter((a) => a.state === "waiting");
         const req = tools.request_approval({ adIds: waiting.map((a) => a.id) });
         putApproval(req);
-        setPanelView("ads");
+        go("ads");
         add({ role: "approval", req });
         return;
       }
