@@ -753,12 +753,23 @@ function ChatInner() {
          high-confidence reading raised the plan and left the guarantee
          exactly where the brand had just asked for more of it. */
       const wantsMore = /guarantee more|more return|higher (guarantee|return|multiple)|more aggressive/.test(lower);
-      if (wantsMore && !mult) next.roas = Math.min(ROAS_MAX, next.roas + 1);
+      if (wantsMore && !mult) {
+        const r = Math.min(ROAS_MAX, next.roas + 1);
+        if (r === next.roas) adjusted.push(`${ROAS_MAX}× is the most I will ever guarantee, so there is nowhere above this to go.`);
+        next.roas = r;
+      }
+      /* A nudge that hits a bound and moves nothing has to say so. It
+         leaves the pair identical to the one on screen, and silence
+         there is read as agreement by the branch below. */
       if (/smaller|less|cheaper|lower the plan|lower the budget/.test(lower) && !money) {
-        next.planBudget = Math.max(PLAN_BUDGET_MIN, Math.round((next.planBudget * 0.6) / 500) * 500);
+        const b = Math.max(PLAN_BUDGET_MIN, Math.round((next.planBudget * 0.6) / 500) * 500);
+        if (b === next.planBudget) adjusted.push(`${fmtUSD(PLAN_BUDGET_MIN)} is the smallest plan I can build, so this is as far down as it goes.`);
+        next.planBudget = b;
       }
       if (/bigger|larger|more budget|raise the plan|raise the budget/.test(lower) && !mult && !money) {
-        next.planBudget = Math.min(PLAN_BUDGET_MAX, Math.round((next.planBudget * 1.5) / 500) * 500);
+        const b = Math.min(PLAN_BUDGET_MAX, Math.round((next.planBudget * 1.5) / 500) * 500);
+        if (b === next.planBudget) adjusted.push(`${fmtUSD(PLAN_BUDGET_MAX)} is the largest plan I can commit to, so this is as far up as it goes.`);
+        next.planBudget = b;
       }
 
       const changed = next.planBudget !== shape.planBudget || next.roas !== shape.roas;
@@ -803,6 +814,18 @@ function ChatInner() {
       const same =
         shown?.kind === "score" && shown.planBudget === next.planBudget && shown.roas === next.roas;
       const note = adjusted.length ? `${adjusted.join(" ")} ` : "";
+
+      /* Answering with the pair already on screen IS the confirmation.
+         Reading the reading back and then asking "shall I build it?"
+         made the brand agree twice to the same two numbers, under a bar
+         that had not changed — the second question carried no new
+         information, so it could only read as hesitation on our part.
+
+         Two things disqualify a match from counting as agreement: a
+         reading we will not build at, and a figure the parser threw
+         away. In the second case the pair is identical because we
+         rejected something, not because they agreed to anything. */
+      if (same && !adjusted.length && conf.level !== "low") { confirmShape(next); return; }
       /* When a number was clamped away, "still" is a lie by omission —
          the brand did ask for something and did not get it. Lead with
          what happened to it, then say where that leaves the pair. */

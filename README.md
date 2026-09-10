@@ -133,6 +133,13 @@ the multiple, and commit at **12,000 and above**. Below **4,000** we do not.
 | 4,000–12,000 | **Medium** | Builds, but the agent pushes for high first |
 | under 4,000 | **Low** | **Will not build.** Only the ways out are offered |
 
+**Answering with the pair already on screen is the confirmation**, and it
+builds. Reading the reading back and then asking again made a brand agree
+twice to the same two numbers under a bar that had not moved. The exception
+is a figure the parser could not use: "$400" leaves the pair identical
+because it was rejected, not because anyone agreed, so the agent says what
+it did with the number and asks.
+
 Low confidence is a refusal, not a warning. There is no *Build it anyway* chip
 below the medium line, and typing "build it anyway" gets *"I am not going to
 build that one"* — the guarantee is the product, and one we expect to pay out

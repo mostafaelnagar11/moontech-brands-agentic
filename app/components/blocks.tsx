@@ -467,13 +467,20 @@ export function TaskRoster({ tasks, done, live, title, framed = true }: {
             : "Did not get to this";
           return (
             <li key={name} className="flex items-start gap-3 px-4 py-2.5">
+              {/* State, not identity. The initial in this circle was
+                  the same letter for six of the seven agents, so it
+                  identified nothing and read as an avatar for a person
+                  who does not exist. What a brand wants from this
+                  column is which row is moving: a ring that turns while
+                  an agent works, a tick when it is finished, and an
+                  empty outline for the ones still queued. */}
               <span
                 aria-hidden
-                className={`mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] font-bold ${
-                  allDone ? "bg-good/15 text-good-deep" : current ? "bg-brand text-white" : "bg-neutral-100 text-ink-faint"
+                className={`mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full ${
+                  allDone ? "bg-good/15 text-good-deep" : current ? "" : "border border-dashed border-black/15"
                 }`}
               >
-                {allDone ? <Check size={11} weight="bold" /> : name[0]}
+                {allDone ? <Check size={12} weight="bold" /> : current ? <span className="working-ring h-4 w-4" /> : null}
               </span>
               <span className="min-w-0 flex-1">
                 <span className="flex flex-wrap items-baseline gap-x-2">
