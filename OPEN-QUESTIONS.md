@@ -406,6 +406,25 @@ beside the progress line in the thread, which put the way out on a row that
 scrolls: a brand who decided to stop had to find the control again, and it had
 moved. The progress line now reports and does not offer.
 
+**Stopping is now cheap, which made the cancel paths matter.** With the
+control on the send button a brand can stop any run in one click, and an
+adversarial pass over those paths found five places where a partial was
+treated as a finished result: a stopped read overwrote a complete one it
+shared an id with; the completion claim was spent by the cancel, silencing
+the read that followed; a build stopped before the crew step was committed
+as the active plan, which showed a fully priced campaign with nobody on it
+AND permanently closed the two-number question, since that only opens while
+there is no plan; a cancelled report was pushed into the thread a third time
+under a heading saying it was finished; and a run that threw left the button
+stuck on stop with nothing to stop. All five are fixed. The rule they now
+share: a partial is kept and shown, and never written over something whole.
+
+*Still open:* "read it again" starts from the top rather than resuming from
+the last completed layer. Resuming is what the streaming contract is shaped
+for — every yield is a complete-so-far result — but a real resume needs
+`read_site` to accept a starting point, and nobody has decided whether a
+half-read store should be re-read for freshness anyway.
+
 **The plan no longer opens by calling itself a proposal.** "This is a proposal,
 not a decision" handed the brand a reason to hesitate at the moment the plan is
 ready to start, and made our own work sound provisional. It reads "The plan is
