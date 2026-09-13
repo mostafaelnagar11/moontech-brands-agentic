@@ -27,7 +27,7 @@
    rather than qualifying the brand, and the copy explains that rather
    than leaving the brand to wonder why. */
 
-import { Suspense, useEffect, useRef, useState, type ReactNode } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   BUILD_TASKS, PHASE1_BUDGET, PHASE1_ROAS, READ_TASKS, STRATEGY_META, ladderTotals, marketName, repair, suggestPlanShape,
@@ -175,7 +175,17 @@ function ChatInner() {
      would offer a second answer to a question the block already asks. */
   /* The agent is waiting on two numbers. This is not a form — it is a
      question, and it stays open until the brand answers it in words. */
-  const awaitingShape = !shapeSettled && !plan && thread.some((i) => i.kind === "say" && /two numbers to settle/.test(i.text));
+  /* Whether the two-numbers question is on the table.
+ 
+     This used to be detected by grepping the thread for the phrase
+     "two numbers to settle". Rewriting that sentence silently killed
+     the entire calculator: `awaitingShape` went permanently false, and
+     answering "$60,000 at 5×" fell through to the plan interpreter,
+     which read the 5× as a strategy change. A copy edit should never
+     be able to switch off a branch of the product, so the state is
+     state now and the sentence is just a sentence. */
+  const [shapeAsked, setShapeAsked] = useState(false);
+  const awaitingShape = shapeAsked && !shapeSettled && !plan;
   const [awaitingCorrection, setAwaitingCorrection] = useState(false);
   /* Which agent messages have finished typing. Held here rather than in
      the store: it is a property of this viewing, not of the thread. */
@@ -215,9 +225,30 @@ function ChatInner() {
      by this thread earlier, or before the panel was opened on it. */
   const storedRead = readUrl ? reads[readIdFor(readUrl)] ?? null : null;
 
-  useEffect(() => {
-    scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: "smooth" });
-  }, [thread.length, report.partial]);
+  /* Bring the TOP of the newest turn to the top of the column, and
+     leave it there.
+ 
+     This used to jump to the bottom of the scroller on every change,
+     and then again on every typewriter tick. On a long answer that
+     means the brand watches the last line being written and never sees
+     the first — you read the end of a paragraph, then scroll back up
+     to find out what it was about. Alex caught it on the review call.
+ 
+     Measured against the two rects rather than `offsetTop`, which is
+     relative to the nearest positioned ancestor and would silently
+     change meaning if anything between here and the turn ever gained
+     `position: relative`. `scrollTo` clamps, so a short thread simply
+     lands where it can. */
+  const park = useCallback((smooth: boolean) => {
+    const box = scroller.current;
+    if (!box) return;
+    const last = box.querySelector<HTMLElement>("[data-last-turn]");
+    if (!last) return;
+    const top = box.scrollTop + (last.getBoundingClientRect().top - box.getBoundingClientRect().top) - 16;
+    box.scrollTo({ top: Math.max(0, top), behavior: smooth ? "smooth" : "auto" });
+  }, []);
+
+  useEffect(() => { park(true); }, [thread.length, report.partial, park]);
 
   /* The build happens HERE, in the conversation, not on a page the
      conversation comes after. The agent narrates what it is doing, the
@@ -241,8 +272,8 @@ function ChatInner() {
       push({
         kind: "say",
         text:
-          `I am running ${countWord(READ_AGENTS.length)} agents on ${readUrl} — ${READ_TEAM}. ` +
-          `You will see each finding as it lands, with the agent that found it, and you can stop me at any point and keep whatever has arrived.`,
+          `Reading ${readUrl} now. ${READ_TEAM}.\n\n` +
+          `Findings appear as they land. Stop any time; everything found stays.`,
       });
       push({ kind: "read", url: readUrl });
       return;
@@ -253,9 +284,9 @@ function ChatInner() {
       push({
         kind: "say",
         text:
-          `I have read ${read.url}. Give me a moment and I will build the whole campaign from it. ` +
-          `The price is already settled — Phase 1 is a ${fmtUSD(PHASE1_BUDGET)} warm-up, the same for every brand — so what I am working out is ` +
-          `the markets, which creators that ${fmtUSD(PHASE1_BUDGET)} briefs, what we can guarantee on them, and the brief they are given.`,
+          `${read.url} is read. Building the campaign now.\n\n` +
+          `The price is settled: Phase 1 is ${fmtUSD(PHASE1_BUDGET)} for every brand. What I am working out is the markets, ` +
+          `the creators, the guarantee and the brief.`,
       });
       return;
     }
@@ -263,9 +294,9 @@ function ChatInner() {
       push({
         kind: "say",
         text: paid
-          ? `Here is your campaign for ${existing.brandName}. Phase 1 is started and paid. Ask me anything about it, and tell me what you would like carried into Phase 2.`
-          : `Here is the campaign I propose for ${existing.brandName}. Phase 1 is the ${fmtUSD(PHASE1_BUDGET)} warm-up, the same for every brand. ` +
-            `Change what it is pointed at in plain words and I will show you what moves.`,
+          ? `Your campaign for ${existing.brandName}. Phase 1 is live and paid. Ask me anything, or tell me what to carry into Phase 2.`
+          : `Your campaign for ${existing.brandName}. Phase 1 is the ${fmtUSD(PHASE1_BUDGET)} warm-up.\n\n` +
+            `Tell me what to change in plain words. I will show you what moves.`,
       });
       push({ kind: "plan-card" });
       if (paid) setAsking({ q: "", options: postChips });
@@ -284,13 +315,12 @@ function ChatInner() {
     if (ok) {
       setPendingRead(v);
       ask(
-        `That is your store, read end to end, and it clears the one check that matters: ${v.eligibility!.line.value.toLowerCase()}.\n\n` +
-        `Before I build the campaign on it — does what I found look right? If anything is off, tell me and I will correct it first. ` +
-        `Nothing is charged at this stage.`,
+        `That is your store. ${v.eligibility!.line.value}.\n\n` +
+        `Does it look right? Tap anything above to correct it. Nothing is charged yet.`,
         ["Looks right, build the plan", "Something is off"]
       );
     } else {
-      say(`One thing did not clear: ${v.eligibility!.line.value}. That is the only thing standing in the way, and none of the rest of this is wasted.`);
+      say(`One thing did not clear. ${v.eligibility!.line.value}\n\nIt is the only thing in the way. The rest of the read still stands.`);
       push({ kind: "rejected", readId: v.id });
       ask("Anything you want to correct in what I read, or shall I log a manual re-check?", ["Log a re-check", "Read a different store"]);
     }
@@ -438,8 +468,8 @@ function ChatInner() {
           if (wholeEnough) putPlan(v);
           say(
             wholeEnough
-              ? "Stopped there. What I had is below — tell me what to change and I will finish it around your answer, or say “build the plan” and I will finish it as it stands."
-              : "Stopped before I had anything worth showing you — I had not matched the creators yet, and everything after that is built on them. Say “build the plan” and I will run it again."
+              ? "Stopped. What I had is below. Tell me what to change, or say “build the plan” to finish it as it stands."
+              : "Stopped too early to show you anything. The creators had not been matched, and the rest builds on them. Say “build the plan” to run it again."
           );
           if (wholeEnough) push({ kind: "plan-card" });
           setAsking({ q: "", options: ["Build the plan"] });
@@ -455,11 +485,10 @@ function ChatInner() {
         push({
           kind: "say",
           text:
-            `Here is the campaign I propose. It is ${m.name.toLowerCase()}: ${m.sentence}.\n\n` +
-            `It runs in three phases and you only start the first. Phase 1 is the warm-up, and it is ${fmtUSD(v.budget.value)} — ` +
-            `the same price for every brand, not sized from your store and not negotiated. That ${fmtUSD(v.budget.value)} briefs ` +
-            `${v.creators.value.length} creators in ${v.markets.value.map(marketName).join(", ")}, and if the phase closes under ` +
-            `${fmtUSD(v.price.revenueTarget.value)} in revenue we pay you the difference.`,
+            `Here is your campaign. ${m.sentence}.\n\n` +
+            `Three phases, and you start the first. Phase 1 is ${fmtUSD(v.budget.value)} for every brand. ` +
+            `It briefs ${v.creators.value.length} creators in ${v.markets.value.map(marketName).join(", ")}.\n\n` +
+            `Close under ${fmtUSD(v.price.revenueTarget.value)} in sales and we pay you the difference.`,
         });
         push({ kind: "plan-card" });
         if (v.ladder.value.length) push({ kind: "ladder" });
@@ -479,13 +508,10 @@ function ChatInner() {
              provisional. The plan IS ready; what stays open is what it
              is pointed at, and saying so is the same honesty without
              the apology. */
-          `The plan is ready to start. What is on it is still yours to change — the markets, the products, ` +
-          `how ambitious the guarantee is — and I will rebuild it around your answer. The price is not one of the things that moves: ` +
-          `Phase 1 is ${fmtUSD(PHASE1_BUDGET)} whichever of the three plans you pick.\n\n` +
-          `Here is how this goes: I have read your store; this is the campaign I propose; when you start Phase 1 you pay ` +
-          `${fmtUSD(v.price.total.value)}, which is the ${fmtUSD(PHASE1_BUDGET)} warm-up plus VAT and nothing after it; ` +
-          `then, as the last step, you connect your store so I can count the revenue — that comes after payment because it is for ` +
-          `measuring the guarantee, not for qualifying you.`,
+          `Ready to start. Everything on it is still yours to change — markets, products, how hard the guarantee pushes. ` +
+          `The price is not: Phase 1 is ${fmtUSD(PHASE1_BUDGET)} whatever you change.\n\n` +
+          `What happens next: you start Phase 1 and pay ${fmtUSD(v.price.total.value)}, the warm-up plus VAT. ` +
+          `Then you connect your store so I can count the sales. That is the last step, not a qualification.`,
           ["Start Phase 1", "Kuwait only", "Go more aggressive", WHY_CHIP, "Show me the three phases"]
         );
       }
@@ -847,8 +873,8 @@ function ChatInner() {
 
       if (!same) {
         const line =
-          `${fmtUSD(next.planBudget)} at ${next.roas}× is ${fmtUSD(ladderTotals(next.planBudget, next.roas).revenue)} of guaranteed revenue. ` +
-          `${fmtUSD(next.planBudget)} ÷ ${next.roas} is ${Math.round(conf.ratio).toLocaleString("en-US")}, and we commit at ${CONFIDENCE_HIGH_RATIO.toLocaleString("en-US")} and above.`;
+          `${fmtUSD(next.planBudget)} at ${next.roas}× guarantees you ${fmtUSD(ladderTotals(next.planBudget, next.roas).revenue)} in sales. ` +
+          `${fmtUSD(next.planBudget)} ÷ ${next.roas} = ${Math.round(conf.ratio).toLocaleString("en-US")}. We commit at ${CONFIDENCE_HIGH_RATIO.toLocaleString("en-US")}.`;
         say(`${note}${conf.label}. ${line} ${conf.desc}`);
         push({ kind: "score", planBudget: next.planBudget, roas: next.roas });
       }
@@ -944,11 +970,12 @@ function ChatInner() {
           const sug = suggestPlanShape(5);
           setShape(sug);
           setShapeSettled(false);
+          setShapeAsked(true);
           say(
-            `Before I build it, two numbers to settle.\n\n` +
-            `How big should the whole campaign be, and what return do you want guaranteed on it? ` +
-            `I would say ${fmtUSD(sug.planBudget)} at ${sug.roas}× — that is ${fmtUSD(ladderTotals(sug.planBudget, sug.roas).revenue)} of revenue we guarantee, and it is the smallest plan on which I can call a ${sug.roas}× promise high confidence.\n\n` +
-            `Tell me either number, or both, and I will tell you how confident I am. Nothing is built, and nothing is charged, until we agree on the pair.`
+            `Two numbers first. How big is the campaign, and what return do you want guaranteed on it?\n\n` +
+            `Start at ${fmtUSD(sug.planBudget)} and ${sug.roas}×. That guarantees you ${fmtUSD(ladderTotals(sug.planBudget, sug.roas).revenue)} in sales, ` +
+            `and it is the smallest plan I can back at high confidence.\n\n` +
+            `Change either one. I will tell you how confident I am before anything is built.`
           );
           push({ kind: "score", planBudget: sug.planBudget, roas: sug.roas });
           ask("", [`${fmtUSD(sug.planBudget)} at ${sug.roas}×`, "Something smaller", "Guarantee 8× instead"]);
@@ -957,8 +984,8 @@ function ChatInner() {
         case "correct": {
           setAwaitingCorrection(true);
           ask(
-            "Tell me what is off, in a sentence — the category, a price, a market we should not be in, a product that is not " +
-            "a bestseller. I will note it against the read and build the plan with your version, not mine.",
+            "What is off? A category, a price, a market, a product that is not really a bestseller. " +
+            "I will keep your version and build on that.",
             []
           );
           return;
@@ -1080,11 +1107,10 @@ function ChatInner() {
             {typedDone[item.id] || item.id !== lastSay?.id ? (
               <p className="whitespace-pre-line text-prose text-ink">{item.text}</p>
             ) : (
-              <Typed
-                text={item.text}
-                onTick={() => scroller.current?.scrollTo({ top: scroller.current.scrollHeight })}
-                onDone={() => finish(item.id)}
-              />
+              /* No onTick scroll here any more. The view is parked at
+                 the top of this turn and the text grows downward into
+                 it, which is the direction people read. */
+              <Typed text={item.text} onTick={() => park(false)} onDone={() => finish(item.id)} />
             )}
           </AgentTurn>
         );
@@ -1222,8 +1248,14 @@ function ChatInner() {
     <ChatShell panel={<PanelHost />}>
       <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-[720px] space-y-7 px-4 pb-8 pt-16">
-          {groups.map((g) => (
-            <div key={g[0].id} className="space-y-5">{g.map((r) => r.node)}</div>
+          {groups.map((g, i) => (
+            <div
+              key={g[0].id}
+              data-last-turn={i === groups.length - 1 ? "" : undefined}
+              className="space-y-5"
+            >
+              {g.map((r) => r.node)}
+            </div>
           ))}
 
           {(readRun.status === "running" || build.status === "running") && !isTyping && <Thinking />}

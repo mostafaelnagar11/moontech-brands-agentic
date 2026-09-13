@@ -199,6 +199,10 @@ export interface State {
      to be one field with two owners, which meant moving around one
      surface silently rearranged the other — and armed a panel on it. */
   dashboardView: PanelView;
+  /* Which read layer the panel should scroll to and open. Set when a
+     brand taps a finding in the conversation; cleared once the panel
+     has honoured it. */
+  readFocus: string | null;
   conversations: Conversation[];
   reads: Record<string, BrandRead>;
   plans: Record<string, Plan>;
@@ -241,6 +245,7 @@ function initial(): State {
     connectedStore: null,
     dismissedInbox: [],
     dashboardView: "campaign",
+    readFocus: null,
   };
 }
 
@@ -464,6 +469,13 @@ export const setPanelView = (view: PanelView) => set((s) => ({ panel: { view, op
    can open, close or repoint the conversation's panel. */
 export const useDashboardView = () => useStore((s) => s.dashboardView);
 export const setDashboardView = (view: PanelView) => set({ dashboardView: view });
+
+/* Open the read panel on one layer. Tapping a finding in the thread is
+   the fastest correction path there is: the brand is already looking
+   at the thing that is wrong. */
+export const useReadFocus = () => useStore((s) => s.readFocus);
+export const focusReadLayer = (k: string) => set({ panel: { view: "read", open: true }, readFocus: k });
+export const clearReadFocus = () => set({ readFocus: null });
 
 export const useConversations = () => useStore((s) => s.conversations);
 

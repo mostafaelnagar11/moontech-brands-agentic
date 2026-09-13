@@ -15,7 +15,7 @@ import {
 } from "@phosphor-icons/react";
 import type { ApprovalRequest, BrandRead, FundingRequest, Plan, PlanChange, ReadLayerKey, Report } from "../lib/agent/types";
 import { fmtUSD, phaseTitle } from "../lib/mock/campaigns";
-import { confirmFunding, cancelFunding, openPanel, setAdState, setApprovalState, useAds, usePaid, useStore } from "../lib/store";
+import { confirmFunding, cancelFunding, focusReadLayer, openPanel, setAdState, setApprovalState, useAds, usePaid, useStore } from "../lib/store";
 import { Btn, Card, Eyebrow, Pill } from "./ui";
 import { Claim, EvidenceRow, Figure } from "./Evidence";
 import { READ_ORDER, ReadValue, srcFor } from "./ReadValue";
@@ -331,12 +331,21 @@ export function PlanBlock({ plan, onOpenCreators }: { plan: Plan; onOpenCreators
   return (
     <div>
       <PlanCard plan={plan} dense onOpenCreators={onOpenCreators} />
-      <button
-        onClick={() => openPanel("plan")}
-        className="mt-2 text-[11px] font-semibold text-brand hover:underline"
-      >
-        Open the whole campaign
-      </button>
+      {/* "Open the whole campaign" read as a viewer. Alex pointed out
+          that nothing on this card says the plan is editable — the
+          brand has to read the placeholder in the message box to find
+          that out. The label now says what the panel is for. */}
+      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+        <button
+          onClick={() => openPanel("plan")}
+          className="text-[11px] font-semibold text-brand hover:underline"
+        >
+          Open and edit the campaign
+        </button>
+        <span className="text-[11px] text-ink-faint">
+          or tell me what to change — “Kuwait only”, “women 25 to 40”
+        </span>
+      </div>
     </div>
   );
 }
@@ -584,7 +593,21 @@ export function ReadBlock({ read, live }: { read: BrandRead | null; live: boolea
           const by = agentFor(k);
           if (!has(k)) return null;
           return (
-            <div key={k} className="px-4 py-2.5">
+            /* Tapping a finding opens it in the panel, ready to
+               correct. The brand is already looking at the thing that
+               is wrong, so asking them to find it again in a list is
+               the slowest correction path we could have built. */
+            <div
+              key={k}
+              role="button"
+              tabIndex={0}
+              onClick={() => focusReadLayer(k)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") { e.preventDefault(); focusReadLayer(k); }
+              }}
+              aria-label={`${LAYER_LABEL[k]} — open to correct`}
+              className="cursor-pointer px-4 py-2.5 transition hover:bg-brand/[0.03] focus-visible:bg-brand/[0.04] focus-visible:outline-none"
+            >
               <div className="flex items-start gap-3">
                 <dt className="w-[86px] shrink-0 pt-0.5 text-[11px] font-semibold uppercase tracking-wide text-ink-faint">
                   {LAYER_LABEL[k]}
@@ -594,7 +617,7 @@ export function ReadBlock({ read, live }: { read: BrandRead | null; live: boolea
                   {src && (
                     <>
                       <button
-                        onClick={() => setOpen(open === k ? null : k)}
+                        onClick={(e) => { e.stopPropagation(); setOpen(open === k ? null : k); }}
                         aria-expanded={open === k}
                         className="mt-1.5 text-[11px] font-medium text-brand hover:underline"
                       >

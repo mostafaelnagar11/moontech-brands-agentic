@@ -7,7 +7,7 @@
    object, same component — which is the point. "Adjust manually" is not
    a second wizard; it is this, with the fields unlocked. */
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CaretRight, Lightning, PencilSimple } from "@phosphor-icons/react";
 import type { Plan } from "../lib/agent/types";
 import { fmtUSD } from "../lib/mock/campaigns";
@@ -34,29 +34,6 @@ function Row({ label, children, onEdit, editLabel }: { label: string; children: 
           <PencilSimple size={13} aria-hidden />
         </button>
       )}
-    </div>
-  );
-}
-
-/** One cell of the warm-up strip. Every cell is label, figure, reason —
-    in that order and with the same spacing — so three numbers of
-    different lengths still sit on one line. The divider is a border on
-    the cell rather than `divide-x`, because the strip stacks on a
-    narrow panel and the rule has to turn with it — see `.stat-divide`
-    in globals.css, which is a container query rather than a viewport
-    one because this card renders at two very different widths on the
-    same display. */
-function Stat({ label, note, divide = false, children }: {
-  label: string;
-  note: string;
-  divide?: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <div className={`min-w-0 px-3.5 py-3 ${divide ? "stat-divide" : ""}`}>
-      <p className="text-[10px] font-semibold uppercase tracking-[0.09em] text-ink-faint">{label}</p>
-      <div className="mt-1.5">{children}</div>
-      <p className="mt-1 text-[11px] leading-4 text-ink-faint">{note}</p>
     </div>
   );
 }
@@ -100,26 +77,45 @@ export function PlanCard({
         <span className="ms-auto text-meta text-ink-faint">{plan.brandName}</span>
       </div>
 
-      {/* Three figures that only mean anything next to each other: what
-          you pay, the floor under it, and what we actually expect. As
-          three loose stats the first two read as the same number
-          printed twice by mistake — same size, no relationship, one of
-          them arbitrarily larger. So they sit in one strip in that
-          order, every cell built identically (label, figure, one line
-          saying why), which lines the baselines up and lets the two
-          $1,000s read as the point rather than as a bug. */}
-      <div className="stat-strip mt-3.5">
-        <div className="stat-row overflow-hidden rounded-control border border-hairline">
-        <Stat label={t("plan.youPay")} note={t("plan.youPayNote")}>
-          <Figure src={plan.budget} render={fmtUSD(plan.budget.value)} size="md" />
-        </Stat>
-        <Stat label={t("plan.backGuaranteed")} note={t("plan.backGuaranteedNote")} divide>
-          <Figure src={plan.price.revenueTarget} render={fmtUSD(target)} size="md" />
-        </Stat>
-        <Stat label={t("plan.expected")} note={t("plan.expectedNote")} divide>
-          <Figure src={plan.price.expected} render={`${fmtUSD(exp.low)} – ${fmtUSD(exp.high)}`} size="md" />
-        </Stat>
+      {/* Two figures, not three.
+ 
+          It used to be three cells of equal weight: what you pay, what
+          is guaranteed, and what we expect. Alex read it off the screen
+          on the review call and said the design was telling him the
+          expected range was the target — when the guarantee is the
+          product and the range is upside. Three equal cells cannot say
+          which one is the promise, so they all read as the promise.
+ 
+          Now the guarantee is the big number and the range is a line
+          underneath it saying you may do better. The spend sits beside
+          it, smaller, because it is a cost and not an outcome. */}
+      <div className="mt-3.5 overflow-hidden rounded-control border border-hairline">
+        <div className="flex flex-wrap items-end gap-x-8 gap-y-3 p-3.5">
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.09em] text-ink-faint">
+              {t("plan.backGuaranteed")}
+            </p>
+            <div className="mt-1">
+              <Figure src={plan.price.revenueTarget} render={fmtUSD(target)} size="lg" />
+            </div>
+            <p className="mt-1 text-[11px] leading-4 text-ink-faint">{t("plan.backGuaranteedNote")}</p>
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.09em] text-ink-faint">{t("plan.youPay")}</p>
+            <div className="mt-1">
+              <Figure src={plan.budget} render={fmtUSD(plan.budget.value)} size="md" />
+            </div>
+            <p className="mt-1 text-[11px] leading-4 text-ink-faint">{t("plan.youPayNote")}</p>
+          </div>
         </div>
+        {/* Upside, as a note. Never a figure of its own — a second big
+            number beside the guarantee is a second promise. */}
+        <p className="border-t border-hairline bg-neutral-50 px-3.5 py-2 text-[11px] leading-4 text-ink-soft">
+          <Claim src={plan.price.expected}>
+            {t("plan.upsideLead")} <span className="font-semibold text-ink">{fmtUSD(exp.low)} – {fmtUSD(exp.high)}</span>.{" "}
+            {t("plan.upsideTail")}
+          </Claim>
+        </p>
       </div>
 
       <div className="mt-4">

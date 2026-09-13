@@ -111,10 +111,17 @@ export const STR: Dict = {
      The first two are the same number on purpose, which is why each
      one carries the line underneath that says why. */
   "plan.youPay": { en: "You pay today", ar: "تدفع اليوم" },
-  "plan.youPayNote": { en: "Phase 1, and nothing after it", ar: "المرحلة ١ فقط، ولا شيء بعدها" },
-  "plan.backGuaranteed": { en: "Guaranteed back", ar: "مضمون رجوعه" },
+  "plan.youPayNote": { en: "your spend on Phase 1", ar: "إنفاقك على المرحلة ١" },
+  "plan.backGuaranteed": { en: "Guaranteed back in sales", ar: "مبيعات مضمونة" },
   "plan.backGuaranteedNote": { en: "or we pay you the difference", ar: "أو ندفع لك الفرق" },
   "plan.expectedNote": { en: "from this crew, in these markets", ar: "من هذا الفريق، في هذه الأسواق" },
+  /* Upside reads as a note under the guarantee, never as a second
+     figure beside it. Two big numbers are two promises. */
+  "plan.upsideLead": { en: "We expect this crew to do", ar: "نتوقع من هذا الفريق تحقيق" },
+  "plan.upsideTail": {
+    en: "That is what we think happens. The number above is what we owe you if it does not.",
+    ar: "هذا ما نتوقع حدوثه. الرقم أعلاه هو ما ندين لك به إذا لم يحدث.",
+  },
   "plan.markets": { en: "Markets", ar: "الأسواق" },
   "plan.audience": { en: "Audience", ar: "الجمهور" },
   "plan.creators": { en: "Creators", ar: "صنّاع المحتوى" },

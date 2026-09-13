@@ -18,12 +18,12 @@
    is short of the traffic floor the read still stands, and what we
    learned, what is missing and the way back sit underneath it. */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, CheckCircle, Info, PencilSimple, Plus, WarningCircle } from "@phosphor-icons/react";
 import { READ_TASKS } from "../../lib/agent/tools";
 import type { BrandRead, Correction, ReadLayerKey } from "../../lib/agent/types";
 import { useT } from "../../lib/i18n";
-import { correctRead, useStore } from "../../lib/store";
+import { clearReadFocus, correctRead, useReadFocus, useStore } from "../../lib/store";
 import { EvidenceRow } from "../Evidence";
 import { READ_ORDER, ReadValue, srcFor } from "../ReadValue";
 import { RejectedBlock, TaskRoster , rosterTitle } from "../blocks";
@@ -91,6 +91,18 @@ function Layer({ readId, k, read }: { readId: string; k: ReadLayerKey; read: Bra
   const [openEv, setOpenEv] = useState(false);
   const [mode, setMode] = useState<"idle" | "fix" | "add">("idle");
   const [draft, setDraft] = useState("");
+  /* Arriving from a tap on this finding in the conversation: scroll to
+     it and open the correction box, so the brand lands on the control
+     rather than on the list containing it. */
+  const focus = useReadFocus();
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (focus !== k) return;
+    box.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+    setMode("fix");
+    setDraft("");
+    clearReadFocus();
+  }, [focus, k]);
   const src = srcFor(read, k);
   const mine = read.corrections.filter((c) => c.layer === k);
   const confirmed = mine.some((c) => c.field === "confirmed");
@@ -126,7 +138,8 @@ function Layer({ readId, k, read }: { readId: string; k: ReadLayerKey; read: Bra
      third of this panel, and the findings are what the brand came to
      read. */
   return (
-    <Card className="p-3.5">
+    <div ref={box}>
+    <Card className={`p-3.5 ${focus === k ? "ring-2 ring-brand/30" : ""}`}>
       <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-faint">{t(`layer.${k}`)}</p>
       <div className="mt-1.5">
         <ReadValue read={read} k={k} />
@@ -209,6 +222,7 @@ function Layer({ readId, k, read }: { readId: string; k: ReadLayerKey; read: Bra
         </div>
       )}
     </Card>
+    </div>
   );
 }
 
