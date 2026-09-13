@@ -39,7 +39,8 @@ import { DashboardSidebar, NAV } from "../components/dashboard/Sidebar";
 import { DashboardTopbar } from "../components/dashboard/Topbar";
 import { DashboardAssistant } from "../components/dashboard/Assistant";
 import {
-  campaignLabel, setDashboardView, useActiveCampaign, useAds, useDashboardView, useLivePhase, usePaid,
+  campaignLabel, setDashboardView, showCampaignList, useActiveCampaign, useAds, useDashboardView,
+  useCampaigns, useDrill, usePaid,
 } from "../lib/store";
 import { SurfaceProvider } from "../lib/surface";
 import { phaseTitle } from "../lib/mock/campaigns";
@@ -56,10 +57,11 @@ export default function DashboardPage() {
   const view: DashboardView = (NAV.some((v) => v.key === stored) ? stored : "campaign") as DashboardView;
 
   const camp = useActiveCampaign();
+  const anyCampaign = useCampaigns().length > 0;
+  const drill = useDrill();
   const paid = usePaid();
   const ads = useAds();
   const waiting = ads.filter((a) => a.state === "waiting").length;
-  const live = useLivePhase();
 
   const [collapsed, setCollapsed] = useState(false);
   const [mobileNav, setMobileNav] = useState(false);
@@ -74,22 +76,25 @@ export default function DashboardPage() {
     if (typeof window !== "undefined" && window.innerWidth < 768) setAssistant(false);
   }, []);
 
-  if (!paid || !camp) {
+  /* The gate is "is there a campaign at all", not "is this one paid".
+     An unpaid campaign still belongs in the list and still has phases
+     worth reading; it is the RUNNING views that need a live phase, and
+     they say so themselves below. */
+  if (!anyCampaign) {
     return (
       <div className="grid min-h-[100dvh] place-items-center bg-canvas px-6">
         <div className="max-w-[420px] text-center">
           <Image src="/logo.svg" alt="MoonTech" width={110} height={20} priority className="mx-auto h-[19px] w-auto" />
           <p className="mt-6 text-prose text-ink">
-            {camp
-              ? `${campaignLabel(camp)} is built but not started. Start Phase 1 and connect the store, and this is where it runs — what the creators earn you against the guarantee, the drafts waiting on you, and everything the agents did on their own.`
-              : "No campaign yet. Build one and this is where it runs — what the creators earn you against the guarantee, the drafts waiting on you, and everything the agents did on their own."}
+            No campaign yet. Build one and this is where it runs — what the creators earn you against the guarantee,
+            the drafts waiting on you, and everything the agents did on their own.
           </p>
           <Link
             href="/c"
             className="mt-5 inline-flex items-center gap-2 rounded-control bg-brand px-4 py-2 text-body font-semibold text-white transition hover:bg-brand-hover"
           >
             <Sparkle size={14} weight="fill" aria-hidden />
-            {camp ? "Open the conversation" : "Build one first"}
+            Build one first
             <ArrowRight size={13} weight="bold" aria-hidden className="rtl:rotate-180" />
           </Link>
         </div>
@@ -97,8 +102,22 @@ export default function DashboardPage() {
     );
   }
 
+  /* The Campaign heading follows the drill: the list, then the
+     campaign, then the phase. A page titled "Phase 2 · Scale" while
+     you are looking at a list of campaigns is the header disagreeing
+     with the body. */
+  const drilled =
+    drill.level === "list" || !camp
+      ? "Campaigns"
+      : drill.level === "phase"
+        ? (() => {
+            const ph = camp.phases.find((x) => x.id === drill.phaseId);
+            return ph ? `${campaignLabel(camp)} · ${phaseTitle(ph.phaseNo)}` : campaignLabel(camp);
+          })()
+        : campaignLabel(camp);
+
   const TITLE: Record<DashboardView, string> = {
-    campaign: live ? phaseTitle(live.phaseNo) : "Campaign",
+    campaign: drilled,
     inbox: "Needs you",
     ads: "Ads",
     activity: "What I did on my own",
@@ -113,9 +132,9 @@ export default function DashboardPage() {
       <DashboardSidebar
         collapsed={collapsed}
         view={view}
-        onView={setDashboardView}
+        onView={(v) => { setDashboardView(v); if (v === "campaign") showCampaignList(); }}
         waiting={waiting}
-        brandName={campaignLabel(camp)}
+        brandName={camp ? campaignLabel(camp) : "Campaigns"}
         mobileOpen={mobileNav}
         onMobileClose={() => setMobileNav(false)}
       />
@@ -145,10 +164,20 @@ export default function DashboardPage() {
             }`}
           >
             {view === "campaign" && <CampaignView />}
-            {view === "inbox" && <InboxView />}
-            {view === "ads" && <AdsView />}
-            {view === "activity" && <ActivityView />}
-            {view === "autonomy" && <AutonomyView />}
+            {view !== "campaign" && !paid && (
+              /* The running views need a phase in flight. Saying so
+                 beats five empty frames. */
+              <div className="rounded-card border border-hairline bg-white p-6 text-center shadow-card">
+                <p className="text-body text-ink-soft">
+                  {camp ? `${campaignLabel(camp)} has not started yet.` : "Nothing is running."} Start Phase 1 and
+                  connect the store, and this fills in.
+                </p>
+              </div>
+            )}
+            {view === "inbox" && paid && <InboxView />}
+            {view === "ads" && paid && <AdsView />}
+            {view === "activity" && paid && <ActivityView />}
+            {view === "autonomy" && paid && <AutonomyView />}
           </main>
 
           {/* A column, not an overlay. It sits in the row beside the

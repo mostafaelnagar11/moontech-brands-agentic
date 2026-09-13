@@ -17,10 +17,15 @@
  * assistant beside the page, where asking is the whole point.
  */
 
-import { ArrowRight, Lightning, Warning } from "@phosphor-icons/react";
-import { fmtUSD, pace, phaseTitle, UNLOCK_AT } from "../../lib/mock/campaigns";
-import { useActivity, useAds, useCampaignPhases, useLivePhase } from "../../lib/store";
+import { ArrowRight, CaretRight, Lightning, Warning } from "@phosphor-icons/react";
+import { fmtUSD, pace, phaseTitle, UNLOCK_AT, type Phase } from "../../lib/mock/campaigns";
+import {
+  campaignLabel, openCampaign, openPhase, showCampaignList, useActiveCampaign, useActivity, useAds,
+  useCampaignPhases, useDrill, useLivePhase, type Campaign,
+} from "../../lib/store";
 import { useGo } from "../../lib/surface";
+import { CampaignsList } from "./CampaignsList";
+import { PhaseDetail } from "./PhaseDetail";
 import { RevenueChart } from "./RevenueChart";
 import { ActionBar, DataRow, Detail, Section, Surface, Tile } from "./kit";
 
@@ -32,7 +37,49 @@ const ago = (ts: number) => {
   return h < 24 ? `${h}h ago` : `${Math.round(h / 24)}d ago`;
 };
 
+/* Three levels behind one nav item: every campaign, one campaign with
+   its phases, one phase. Pressing Campaign in the rail always returns
+   to the list, which is the only way a drill-down stays escapable. */
 export function CampaignView() {
+  const drill = useDrill();
+  const campaign = useActiveCampaign();
+  const phases = useCampaignPhases();
+
+  if (drill.level === "list" || !campaign) return <CampaignsList />;
+
+  const phase = drill.phaseId ? phases.find((p) => p.id === drill.phaseId) ?? null : null;
+
+  return (
+    <div className="space-y-4">
+      <Crumbs campaign={campaign} phase={phase} />
+      {phase ? <PhaseDetail campaign={campaign} phase={phase} /> : <OneCampaign />}
+    </div>
+  );
+}
+
+function Crumbs({ campaign, phase }: { campaign: Campaign; phase: Phase | null }) {
+  return (
+    <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 text-[11px]">
+      <button onClick={showCampaignList} className="font-semibold text-brand hover:underline">
+        Campaigns
+      </button>
+      <CaretRight size={9} weight="bold" aria-hidden className="text-ink-faint rtl:rotate-180" />
+      {phase ? (
+        <>
+          <button onClick={() => openCampaign(campaign.id)} className="font-semibold text-brand hover:underline">
+            {campaignLabel(campaign)}
+          </button>
+          <CaretRight size={9} weight="bold" aria-hidden className="text-ink-faint rtl:rotate-180" />
+          <span className="text-ink-faint">{phaseTitle(phase.phaseNo)}</span>
+        </>
+      ) : (
+        <span className="text-ink-faint">{campaignLabel(campaign)}</span>
+      )}
+    </nav>
+  );
+}
+
+function OneCampaign() {
   const go = useGo();
   const activity = useActivity();
   const phase = useLivePhase();
@@ -124,7 +171,11 @@ export function CampaignView() {
                 const isLive = ph.id === phase.id;
                 const done = ph.status === "ended";
                 return (
-                  <li key={ph.id} className="flex items-center gap-3 px-4 py-3">
+                  <li key={ph.id}>
+                  <button
+                    onClick={() => openPhase(ph.id)}
+                    className="flex w-full items-center gap-3 px-4 py-3 text-start transition hover:bg-brand/[0.03]"
+                  >
                     <span
                       aria-hidden
                       className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[11px] font-bold ${
@@ -142,6 +193,8 @@ export function CampaignView() {
                     <span className="shrink-0 text-body font-semibold tabular-nums text-ink">
                       {ph.rev ? fmtUSD(ph.rev) : "—"}
                     </span>
+                    <CaretRight size={11} weight="bold" aria-hidden className="shrink-0 text-ink-faint rtl:rotate-180" />
+                  </button>
                   </li>
                 );
               })}

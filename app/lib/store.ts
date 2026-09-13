@@ -229,6 +229,10 @@ export interface State {
      brand taps a finding in the conversation; cleared once the panel
      has honoured it. */
   readFocus: string | null;
+  /* How deep the Campaign view is: the list of campaigns, one campaign
+     with its phases, or one phase. Held in the store rather than in the
+     view so the sidebar and the assistant can move it too. */
+  drill: { level: "list" | "campaign" | "phase"; phaseId: string | null };
   campaigns: Record<string, Campaign>;
   /** Newest last, so the rail reads in the order they were built. */
   campaignOrder: string[];
@@ -280,6 +284,7 @@ function initial(): State {
     dismissedInbox: [],
     dashboardView: "campaign",
     readFocus: null,
+    drill: { level: "list", phaseId: null },
   };
 }
 
@@ -632,6 +637,23 @@ export const renameCampaign = (id: string, name: string) =>
 export const campaignLabel = (c: Campaign) => c.label ?? c.brandName;
 
 export const useCampaigns = () => useStore(campaignList);
+
+export const useDrill = () => useStore((s) => s.drill);
+export const showCampaignList = () => set({ drill: { level: "list", phaseId: null } });
+export const openCampaign = (id: string) =>
+  set((s) => {
+    const c = s.campaigns[id];
+    if (!c) return {};
+    claimed.clear();
+    return {
+      activeCampaignId: id,
+      activePlanId: c.planId ?? null,
+      activeThreadId: c.threadId,
+      drill: { level: "campaign" as const, phaseId: null },
+      dashboardView: "campaign" as PanelView,
+    };
+  });
+export const openPhase = (phaseId: string) => set({ drill: { level: "phase", phaseId } });
 export const useActiveCampaign = () => useStore((s) => (s.activeCampaignId ? s.campaigns[s.activeCampaignId] ?? null : null));
 export const useActiveThreadId = () => useStore((s) => s.activeThreadId);
 export const activeCampaignLive = () => (state.activeCampaignId ? state.campaigns[state.activeCampaignId] ?? null : null);
