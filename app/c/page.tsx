@@ -41,8 +41,9 @@ import {
 } from "../lib/agent/model";
 import { useStream } from "../lib/agent/useStream";
 import {
-  activePlanLive, claimOnce, connectStore, correctRead, openPanel, push, putApproval, putFunding, putPlan,
-  putRead, threadIsEmpty, useActivePlan, useAds, usePaid, useStore, type PanelView,
+  activePlanLive, activeThread, claimOnce, connectStore, correctRead, markPaid, openPanel,
+  push, putApproval, putCampaign, putFunding, putPlan, putRead, threadIsEmpty,
+  useActivePlan, useAds, useCampaigns, useActiveThreadId, usePaid, useStore, type PanelView,
 } from "../lib/store";
 import { fmtUSD, livePhase } from "../lib/mock/campaigns";
 import { getRead, readIdFor } from "../lib/agent/registry";
@@ -109,6 +110,11 @@ const READ_TEAM = listOf(READ_AGENTS.map((a) => READ_CLAUSE[a] ?? `${a} is worki
 
 const NOTE = "MoonTech never moves money or publishes anything without you.";
 
+/* A domain, with or without a scheme or a path. Deliberately narrow —
+   it only has to beat "Kuwait only" and "guarantee 8x", not validate a
+   URL, and `normaliseUrl` does the tidying afterwards. */
+const LOOKS_LIKE_STORE = /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,}(\/\S*)?$/i;
+
 const ALREADY_PAID = "Phase 1 is already started and paid. Phase 2 is offered when Phase 1 reaches 80% of its revenue target.";
 const LOCKED = "Phase 1 is paid and its plan is locked. I will carry that change into Phase 2 when it is offered.";
 const SHOW_PHASES = "Here is the whole plan, all three phases. You are only starting the first; Phases 2 and 3 are offered one at a time, each on the results of the one before.";
@@ -146,15 +152,17 @@ function ChatInner() {
   const { t } = useT();
   const router = useRouter();
   const plan = useActivePlan();
-  const thread = useStore((s) => s.thread);
+  const thread = useStore(activeThread);
+  const threadId = useActiveThreadId();
   const funding = useStore((s) => s.funding);
   const approvals = useStore((s) => s.approvals);
-  const connected = useStore((s) => s.connectedStore);
+  const connected = useStore((s) => (s.activeCampaignId ? s.campaigns[s.activeCampaignId]?.connectedStore ?? null : null));
   /* The chips the thread offers once Phase 1 is paid for. */
   const postChips = connected ? POST_CHIPS : POST_CHIPS_UNCONNECTED;
   const ads = useAds();
   const paid = usePaid();
 
+  const campaignCount = useCampaigns().length;
   const [text, setText] = useState("");
   const [changes, setChanges] = useState<Record<string, PlanChange[]>>({});
   const [reports, setReports] = useState<Record<string, Report>>({});
@@ -302,10 +310,21 @@ function ChatInner() {
       if (paid) setAsking({ q: "", options: postChips });
       else ask("Anything you want different about it?", ["Markets are right", "Kuwait only", "Go more aggressive", "Show me the three phases"]);
     } else {
-      push({ kind: "say", text: "Nothing is planned yet. Read a store and I will build a campaign from it." });
+      push({
+        kind: "say",
+        text: campaignCount
+          ? "A new campaign, then. Paste the store link and I will read it the same way."
+          : "Nothing is planned yet. Paste a store link and I will build a campaign from it.",
+      });
+      setAsking({ q: "", options: ["ounass.com", "lunabeauty.ae", "freshgrocer.ae"] });
     }
+    /* Keyed on the thread, not on mount. Opening a second conversation
+       swaps the thread under this component rather than remounting it,
+       so an empty new one has to be greeted the same way the first was.
+       `threadIsEmpty` above keeps it from re-greeting one that already
+       has a transcript. */
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [threadId]);
 
   /* What the agent says once a read is complete: the one eligibility line
      that matters, then — if it clears — the question that puts the next
@@ -334,10 +353,10 @@ function ChatInner() {
   /* Extracted so a brand who stopped a read can ask for it again. The
      completion claim is spent only by a run that FINISHES, so the
      second attempt is free to report. */
-  const runRead = () => {
-    if (!readUrl) return;
+  const runRead = (url: string | null = readUrl) => {
+    if (!url) return;
     readRun.start(
-      (ctx) => tools.read_site({ url: readUrl }, ctx),
+      (ctx) => tools.read_site({ url }, ctx),
       (v, cancelled) => {
         if (!v) return;
         /* A cancelled read is a SHORTER read, and it must never be
@@ -476,6 +495,10 @@ function ChatInner() {
           return;
         }
         putPlan(v);
+        /* The plan is what makes a campaign real. Before there is one
+           there is a read and a conversation about it, and nothing to
+           put in a rail or a dashboard. */
+        putCampaign(v, read.url);
         /* Only a FINISHED build claims the result. A cancelled one must
            not, or the brand could never ask for it to be finished. The
            torn-down first run of a development double-mount never gets
@@ -576,6 +599,7 @@ function ChatInner() {
     if (!plan) return;
     const { plan: next, changes: made } = tools.edit_plan({ plan, patch, because, by: "brand" });
     putPlan(next);
+    putCampaign(next);
     if (sayText) say(sayText);
     const id = push({ kind: "changes", changeIds: made.map((c) => c.id) });
     setChanges((c) => ({ ...c, [id]: made }));
@@ -647,6 +671,20 @@ function ChatInner() {
     setText("");
     setAsking(null);
     const lower = v.toLowerCase();
+
+    /* A store link, typed. This is the only way into a read for a
+       SECOND campaign: the first one arrives with `?read=` on the URL,
+       but "build another" opens an empty conversation and the brand
+       has nothing to paste it into but the message box. Guarded on
+       there being no plan yet, so "ounass.com" said in the middle of
+       an edit is still an edit. */
+    if (!plan && LOOKS_LIKE_STORE.test(v) && readRun.status !== "running") {
+      const url = normaliseUrl(v);
+      say(`Reading ${url} now. ${READ_TEAM}.\n\nFindings appear as they land. Stop any time; everything found stays.`);
+      push({ kind: "read", url });
+      runRead(url);
+      return;
+    }
 
     /* A stopped read, picked back up or accepted as it stands. The agent
        offers both in the sentence it says on cancel, so both have to be
@@ -1147,6 +1185,9 @@ function ChatInner() {
             <FundingBlock
               req={req}
               onConfirmed={() => {
+                /* Per campaign, not global. A second campaign is not
+                   paid for because the first one was. */
+                markPaid();
                 /* Paid → receipt → the three steps → the last step. No
                    creator cards here: the plan beside the conversation
                    holds the crew, and the full roster belongs on the

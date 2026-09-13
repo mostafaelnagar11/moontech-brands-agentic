@@ -18,8 +18,8 @@
  */
 
 import { ArrowRight, Lightning, Warning } from "@phosphor-icons/react";
-import { fmtUSD, livePhase, pace, phaseTitle, PHASES, UNLOCK_AT } from "../../lib/mock/campaigns";
-import { useActivity, useAds } from "../../lib/store";
+import { fmtUSD, pace, phaseTitle, UNLOCK_AT } from "../../lib/mock/campaigns";
+import { useActivity, useAds, useCampaignPhases, useLivePhase } from "../../lib/store";
 import { useGo } from "../../lib/surface";
 import { RevenueChart } from "./RevenueChart";
 import { ActionBar, DataRow, Detail, Section, Surface, Tile } from "./kit";
@@ -35,7 +35,8 @@ const ago = (ts: number) => {
 export function CampaignView() {
   const go = useGo();
   const activity = useActivity();
-  const phase = livePhase();
+  const phase = useLivePhase();
+  const phases = useCampaignPhases();
   const ads = useAds().filter((a) => !phase || a.campaignId === phase.id);
   const waiting = ads.filter((a) => a.state === "waiting");
   const live = ads.filter((a) => a.state === "live");
@@ -119,7 +120,7 @@ export function CampaignView() {
         <Section title="The phases">
           <Surface>
             <ul className="divide-y divide-hairline">
-              {PHASES.map((ph) => {
+              {phases.map((ph) => {
                 const isLive = ph.id === phase.id;
                 const done = ph.status === "ended";
                 return (

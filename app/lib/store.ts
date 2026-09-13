@@ -21,7 +21,7 @@ import type {
   FundingRequest, Plan,
 } from "./agent/types";
 import { rememberRead } from "./agent/registry";
-import { ADS } from "./mock/campaigns";
+import { ADS, PHASES, type Phase } from "./mock/campaigns";
 
 /* ------------------------------------------------------------------ */
 /* Thread blocks                                                       */
@@ -186,12 +186,36 @@ export const SEED_ACTIVITY: ActivityEntry[] = [
 
 export type PanelView = "plan" | "read" | "campaign" | "ads" | "inbox" | "activity" | "autonomy";
 
-export interface Conversation {
+/* A campaign, and the conversation that built it.
+
+   The product ran on one of each for a while, and the rail that would
+   have listed them was removed precisely because a list of one is
+   furniture. It comes back the moment there is a second, which is the
+   only honest trigger for it.
+
+   A campaign OWNS its phases. They used to be a module-level fixture —
+   one ladder for the whole app — which was fine while there was one
+   campaign and wrong the instant there were two. */
+export interface Campaign {
   id: string;
-  title: string;
-  sub: string;
-  active: boolean;
+  /** The conversation that built it. One thread, one campaign. */
+  threadId: string;
+  brandName: string;
+  url: string;
+  readId: string | null;
+  planId: string | null;
+  /** This campaign's own three rungs. */
+  phases: Phase[];
+  /** Which ad ids belong to it. Empty until drafts arrive. */
+  adIds: string[];
+  createdAt: number;
+  /** Payment and the store connection are per campaign. A second
+      campaign is not paid for because the first one was. */
+  paid: boolean;
+  connectedStore: StorePlatform | null;
 }
+
+export type StorePlatform = "salla" | "zid" | "shopify" | "magento";
 
 export interface State {
   panel: { view: PanelView; open: boolean };
@@ -203,11 +227,16 @@ export interface State {
      brand taps a finding in the conversation; cleared once the panel
      has honoured it. */
   readFocus: string | null;
-  conversations: Conversation[];
+  campaigns: Record<string, Campaign>;
+  /** Newest last, so the rail reads in the order they were built. */
+  campaignOrder: string[];
+  activeCampaignId: string | null;
   reads: Record<string, BrandRead>;
   plans: Record<string, Plan>;
   activePlanId: string | null;
-  thread: ThreadItem[];
+  /** One thread per campaign, keyed by the campaign's threadId. */
+  threads: Record<string, ThreadItem[]>;
+  activeThreadId: string;
   funding: Record<string, FundingRequest>;
   approvals: Record<string, ApprovalRequest>;
   ads: Record<string, AdState>;
@@ -216,9 +245,11 @@ export interface State {
   activity: ActivityEntry[];
   autonomy: AutonomyRule[];
   locale: "en" | "ar";
-  connectedStore: "salla" | "zid" | "shopify" | "magento" | null;
   dismissedInbox: string[];
 }
+
+/** The thread a conversation starts on before it has a campaign. */
+export const FIRST_THREAD = "t-1";
 
 const LOCALE_KEY = "mtab_locale";
 const AUTONOMY_KEY = "mtab_autonomy";
@@ -226,15 +257,17 @@ const AUTONOMY_KEY = "mtab_autonomy";
 function initial(): State {
   return {
     panel: { view: "plan", open: false },
-    conversations: [
-      { id: "c1", title: "Ounass", sub: "Luxury fashion · Phase 1 proposed", active: true },
-      { id: "c2", title: "Luna Beauty", sub: "Own-label beauty · read only", active: false },
-      { id: "c3", title: "FreshGrocer", sub: "Below the traffic floor", active: false },
-    ],
+    /* No seeded campaigns. The first one is the one the brand builds,
+       and until then the dashboard says so rather than showing someone
+       else's numbers. */
+    campaigns: {},
+    campaignOrder: [],
+    activeCampaignId: null,
     reads: {},
     plans: {},
     activePlanId: null,
-    thread: [],
+    threads: { [FIRST_THREAD]: [] },
+    activeThreadId: FIRST_THREAD,
     funding: {},
     approvals: {},
     ads: Object.fromEntries(ADS.map((a) => [a.id, a.state])),
@@ -242,7 +275,6 @@ function initial(): State {
     activity: SEED_ACTIVITY,
     autonomy: DEFAULT_AUTONOMY,
     locale: "en",
-    connectedStore: null,
     dismissedInbox: [],
     dashboardView: "campaign",
     readFocus: null,
@@ -321,19 +353,30 @@ export const setActivePlan = (id: string | null) => set({ activePlanId: id });
 type DistOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 export type NewThreadItem = DistOmit<ThreadItem, "id" | "at"> & { id?: string };
 
+/** The items of whichever conversation is open. */
+export const activeThread = (s: State) => s.threads[s.activeThreadId] ?? [];
+
 export const push = (item: NewThreadItem) => {
   const full = { ...item, id: item.id ?? nextId(item.kind), at: Date.now() } as ThreadItem;
-  set((s) => ({ thread: [...s.thread, full] }));
+  set((s) => ({ threads: { ...s.threads, [s.activeThreadId]: [...(s.threads[s.activeThreadId] ?? []), full] } }));
   return full.id;
 };
 
 export const patchThread = (id: string, patch: Partial<ThreadItem>) =>
-  set((s) => ({ thread: s.thread.map((t) => (t.id === id ? ({ ...t, ...patch } as ThreadItem) : t)) }));
+  set((s) => ({
+    threads: {
+      ...s.threads,
+      [s.activeThreadId]: activeThread(s).map((t) => (t.id === id ? ({ ...t, ...patch } as ThreadItem) : t)),
+    },
+  }));
 
 export const dropThread = (id: string) =>
-  set((s) => ({ thread: s.thread.filter((t) => t.id !== id) }));
+  set((s) => ({
+    threads: { ...s.threads, [s.activeThreadId]: activeThread(s).filter((t) => t.id !== id) },
+  }));
 
-export const resetThread = () => { claimed.clear(); set({ thread: [] }); };
+export const resetThread = () =>
+  set((s) => { claimed.clear(); return { threads: { ...s.threads, [s.activeThreadId]: [] } }; });
 
 /* ------------------------------------------------------------------ */
 /* Run once, and mean it                                               */
@@ -359,7 +402,7 @@ export function claimOnce(key: string): boolean {
 /** Whether the thread is still empty, read live rather than from a
     captured render value — a mount effect that checks the rendered
     `thread` runs twice in development and opens the conversation twice. */
-export const threadIsEmpty = () => state.thread.length === 0;
+export const threadIsEmpty = () => activeThread(state).length === 0;
 
 /** The active plan, read live for the same reason as `threadIsEmpty`: a
     mount effect that trusts the rendered value can see the server
@@ -432,7 +475,166 @@ export const setLocale = (l: "en" | "ar") => {
   set({ locale: l });
 };
 
-export const connectStore = (which: "salla" | "zid" | "shopify" | "magento") => set({ connectedStore: which });
+/* ------------------------------------------------------------------ */
+/* Campaigns                                                           */
+/* ------------------------------------------------------------------ */
+
+/** Start a new conversation. It has no campaign yet — the campaign is
+    minted when the plan is built — but it has a thread of its own, so
+    building a second one never writes into the first one's transcript. */
+export const startConversation = (): string => {
+  const id = nextId("t");
+  claimed.clear();
+  set((s) => ({
+    threads: { ...s.threads, [id]: [] },
+    activeThreadId: id,
+    /* A new conversation is not about the campaign you were looking
+       at, so nothing from it should be on screen. */
+    activePlanId: null,
+    activeCampaignId: null,
+    panel: { view: "plan", open: false },
+  }));
+  return id;
+};
+
+export const openConversation = (threadId: string) =>
+  set((s) => {
+    claimed.clear();
+    const c = Object.values(s.campaigns).find((x) => x.threadId === threadId) ?? null;
+    return {
+      activeThreadId: threadId,
+      activeCampaignId: c?.id ?? null,
+      activePlanId: c?.planId ?? s.activePlanId,
+      panel: { view: "plan", open: false },
+    };
+  });
+
+/** Mint the campaign this conversation is building, or update it. The
+    plan is the thing that makes a campaign real — before there is one
+    there is only a read and a conversation about it. */
+export const putCampaign = (plan: Plan, url?: string) =>
+  set((s) => {
+    const existing = Object.values(s.campaigns).find((c) => c.threadId === s.activeThreadId);
+    if (existing) {
+      const next = { ...existing, planId: plan.id, readId: plan.readId, brandName: plan.brandName };
+      return { campaigns: { ...s.campaigns, [existing.id]: next }, activeCampaignId: existing.id };
+    }
+    const id = nextId("camp");
+    /* The FIRST campaign adopts the demo's running ladder and its ads,
+       so the dashboard has a phase in flight to show. Every one after
+       it starts where a real second campaign starts: phase 1 about to
+       run, nothing attributed, no drafts in yet. */
+    const first = s.campaignOrder.length === 0;
+    const camp: Campaign = {
+      id,
+      threadId: s.activeThreadId,
+      brandName: plan.brandName,
+      url: url ?? plan.brandName,
+      readId: plan.readId,
+      planId: plan.id,
+      phases: first ? PHASES : freshLadder(id, plan),
+      adIds: first ? ADS.map((a) => a.id) : [],
+      createdAt: Date.now(),
+      paid: false,
+      connectedStore: null,
+    };
+    return {
+      campaigns: { ...s.campaigns, [id]: camp },
+      campaignOrder: [...s.campaignOrder, id],
+      activeCampaignId: id,
+    };
+  });
+
+/** A campaign's own three rungs, taken from its plan's ladder. Nothing
+    has run yet, so every figure that measures running is zero. */
+function freshLadder(campId: string, plan: Plan): Phase[] {
+  return plan.ladder.value.map((r, i) => ({
+    id: `${campId}-p${r.phaseNo}`,
+    phaseNo: r.phaseNo,
+    status: i === 0 ? ("ready" as const) : ("locked" as const),
+    start: null,
+    end: null,
+    budget: r.budget,
+    guaranteedRoas: r.multiple,
+    rev: 0,
+    revTarget: i === 0 ? Math.round(r.budget * r.multiple) : null,
+    dayOfPhase: null,
+    plannedDays: 30,
+    creators: i === 0 ? plan.creators.value.length : null,
+  }));
+}
+
+
+/** Phase 1 is paid for. On a campaign with a fresh ladder that also
+    starts the first rung running. */
+export const markPaid = () =>
+  set((s) => {
+    const id = s.activeCampaignId;
+    const c = id ? s.campaigns[id] : null;
+    if (!id || !c) return {};
+    const phases = c.phases.map((p, i) =>
+      i === 0 && p.status === "ready"
+        ? { ...p, status: "live" as const, dayOfPhase: 1 }
+        : p
+    );
+    return { campaigns: { ...s.campaigns, [id]: { ...c, paid: true, phases } } };
+  });
+
+export const connectStore = (which: StorePlatform) =>
+  set((s) => (s.activeCampaignId ? patchCampaignIn(s, s.activeCampaignId, { connectedStore: which }) : {}));
+
+const patchCampaignIn = (s: State, id: string, patch: Partial<Campaign>) => ({
+  campaigns: { ...s.campaigns, [id]: { ...s.campaigns[id], ...patch } },
+});
+
+/** Switching campaign carries the conversation with it. The two
+    surfaces read the same campaign or they disagree: picking Luna on
+    the dashboard and then opening the chat would otherwise land you in
+    the thread that built Ounass. */
+export const setActiveCampaign = (id: string) =>
+  set((s) => {
+    const c = s.campaigns[id];
+    if (!c) return {};
+    claimed.clear();
+    return { activeCampaignId: id, activePlanId: c.planId ?? null, activeThreadId: c.threadId };
+  });
+
+/* Cached against the two fields it is built from.
+
+   `useSyncExternalStore` compares snapshots by identity, so a selector
+   that maps an array returns a new one every time it is called and the
+   store loops forever. This project has been bitten by exactly this
+   once before, in `adsWithState`, and the fix is the same: derive
+   once, hand back the same reference until an input actually changes. */
+let campCache: { order: State["campaignOrder"]; map: State["campaigns"]; value: Campaign[] } | null = null;
+function campaignList(s: State): Campaign[] {
+  if (campCache && campCache.order === s.campaignOrder && campCache.map === s.campaigns) return campCache.value;
+  const value = s.campaignOrder.map((id) => s.campaigns[id]).filter(Boolean);
+  campCache = { order: s.campaignOrder, map: s.campaigns, value };
+  return value;
+}
+export const useCampaigns = () => useStore(campaignList);
+export const useActiveCampaign = () => useStore((s) => (s.activeCampaignId ? s.campaigns[s.activeCampaignId] ?? null : null));
+export const useActiveThreadId = () => useStore((s) => s.activeThreadId);
+export const activeCampaignLive = () => (state.activeCampaignId ? state.campaigns[state.activeCampaignId] ?? null : null);
+
+/** This campaign's phases, and the one running. Everything on the
+    dashboard reads through these rather than through the module-level
+    fixture, which was one ladder for the whole app — correct while
+    there was one campaign, wrong the instant there were two. */
+const NO_PHASES: Phase[] = [];
+export const useCampaignPhases = () =>
+  useStore((s) => (s.activeCampaignId ? s.campaigns[s.activeCampaignId]?.phases ?? NO_PHASES : NO_PHASES));
+export const useLivePhase = () =>
+  useStore((s) => {
+    const c = s.activeCampaignId ? s.campaigns[s.activeCampaignId] : null;
+    return c?.phases.find((p) => p.status === "live") ?? null;
+  });
+export const useReadyPhase = () =>
+  useStore((s) => {
+    const c = s.activeCampaignId ? s.campaigns[s.activeCampaignId] : null;
+    return c?.phases.find((p) => p.status === "ready") ?? null;
+  });
 
 export const dismissInbox = (id: string) =>
   set((s) => ({ dismissedInbox: [...s.dismissedInbox, id] }));
@@ -477,12 +679,12 @@ export const useReadFocus = () => useStore((s) => s.readFocus);
 export const focusReadLayer = (k: string) => set({ panel: { view: "read", open: true }, readFocus: k });
 export const clearReadFocus = () => set({ readFocus: null });
 
-export const useConversations = () => useStore((s) => s.conversations);
-
-/** Has the brand started Phase 1? Everything that is held back before
-    payment — creator identities, the integration step — keys off this. */
+/** Has THIS campaign's Phase 1 been paid for? Everything held back
+    before payment — creator identities, the integration step — keys
+    off it, and it is per campaign: a second one is not paid for
+    because the first was. */
 export const usePaid = () =>
-  useStore((s) => Object.values(s.funding).some((f) => f.state === "confirmed"));
+  useStore((s) => (s.activeCampaignId ? s.campaigns[s.activeCampaignId]?.paid ?? false : false));
 export const useActivePlan = () => useStore((s) => (s.activePlanId ? s.plans[s.activePlanId] ?? null : null));
 export const useLocale = () => useStore((s) => s.locale);
 export const useAutonomy = () => useStore((s) => s.autonomy);

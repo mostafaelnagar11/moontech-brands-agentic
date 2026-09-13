@@ -38,9 +38,11 @@ import { AutonomyView } from "../components/dashboard/AutonomyView";
 import { DashboardSidebar, NAV } from "../components/dashboard/Sidebar";
 import { DashboardTopbar } from "../components/dashboard/Topbar";
 import { DashboardAssistant } from "../components/dashboard/Assistant";
-import { setDashboardView, useActivePlan, useAds, useDashboardView, usePaid } from "../lib/store";
+import {
+  setDashboardView, useActiveCampaign, useAds, useDashboardView, useLivePhase, usePaid,
+} from "../lib/store";
 import { SurfaceProvider } from "../lib/surface";
-import { livePhase, phaseTitle } from "../lib/mock/campaigns";
+import { phaseTitle } from "../lib/mock/campaigns";
 import type { DashboardView } from "../lib/agent/dashboard";
 
 export default function DashboardPage() {
@@ -53,11 +55,11 @@ export default function DashboardPage() {
   const stored = useDashboardView();
   const view: DashboardView = (NAV.some((v) => v.key === stored) ? stored : "campaign") as DashboardView;
 
-  const plan = useActivePlan();
+  const camp = useActiveCampaign();
   const paid = usePaid();
   const ads = useAds();
   const waiting = ads.filter((a) => a.state === "waiting").length;
-  const live = livePhase();
+  const live = useLivePhase();
 
   const [collapsed, setCollapsed] = useState(false);
   const [mobileNav, setMobileNav] = useState(false);
@@ -72,22 +74,22 @@ export default function DashboardPage() {
     if (typeof window !== "undefined" && window.innerWidth < 768) setAssistant(false);
   }, []);
 
-  if (!paid || !plan) {
+  if (!paid || !camp) {
     return (
       <div className="grid min-h-[100dvh] place-items-center bg-canvas px-6">
         <div className="max-w-[420px] text-center">
           <Image src="/logo.svg" alt="MoonTech" width={110} height={20} priority className="mx-auto h-[19px] w-auto" />
           <p className="mt-6 text-prose text-ink">
-            There is no campaign running yet. This is where one lives once Phase 1 is started and your store is
-            connected — what the creators earn you against the guarantee, the drafts waiting on you, and everything
-            the agents did on their own.
+            {camp
+              ? `${camp.brandName} is built but not started. Start Phase 1 and connect the store, and this is where it runs — what the creators earn you against the guarantee, the drafts waiting on you, and everything the agents did on their own.`
+              : "No campaign yet. Build one and this is where it runs — what the creators earn you against the guarantee, the drafts waiting on you, and everything the agents did on their own."}
           </p>
           <Link
             href="/c"
             className="mt-5 inline-flex items-center gap-2 rounded-control bg-brand px-4 py-2 text-body font-semibold text-white transition hover:bg-brand-hover"
           >
             <Sparkle size={14} weight="fill" aria-hidden />
-            Build one first
+            {camp ? "Open the conversation" : "Build one first"}
             <ArrowRight size={13} weight="bold" aria-hidden className="rtl:rotate-180" />
           </Link>
         </div>
@@ -113,7 +115,7 @@ export default function DashboardPage() {
         view={view}
         onView={setDashboardView}
         waiting={waiting}
-        brandName={plan.brandName}
+        brandName={camp.brandName}
         mobileOpen={mobileNav}
         onMobileClose={() => setMobileNav(false)}
       />

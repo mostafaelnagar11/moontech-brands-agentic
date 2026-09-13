@@ -25,8 +25,10 @@ import {
   Warning, YoutubeLogo,
 } from "@phosphor-icons/react";
 import type { AdRecord } from "../../lib/agent/types";
-import { REVIEW_WINDOW_DAYS, draftDaysLeft, fmtUSD, livePhase } from "../../lib/mock/campaigns";
-import { setAdState, useAds } from "../../lib/store";
+import { REVIEW_WINDOW_DAYS, draftDaysLeft, fmtUSD } from "../../lib/mock/campaigns";
+import {
+  setAdState, useAds, useLivePhase,
+} from "../../lib/store";
 import { LiveAdGrid } from "../AdCards";
 import { Claim } from "../Evidence";
 import { Avatar, Btn, Sheet } from "../ui";
@@ -70,7 +72,7 @@ export function AdsView() {
   const [shelf, setShelf] = useState<Shelf>("waiting");
   const [sel, setSel] = useState<string[]>([]);
   const ads = useAds();
-  const phase = livePhase();
+  const phase = useLivePhase();
 
   const mine = phase ? ads.filter((a) => a.campaignId === phase.id) : [];
   const waiting = mine.filter((a) => a.state === "waiting");

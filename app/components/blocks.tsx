@@ -889,7 +889,7 @@ export function LadderBlock({ plan, onStart, paid = false, compact = false }: {
 
 export function ChecklistBlock() {
   const paid = usePaid();
-  const connected = useStore((s) => s.connectedStore);
+  const connected = useStore((s) => (s.activeCampaignId ? s.campaigns[s.activeCampaignId]?.connectedStore ?? null : null));
   const steps = [
     { label: "Campaign proposed and approved", detail: "Three phases planned. Phase 1 is the warm-up, and the only one you start today.", done: true },
     {
@@ -997,7 +997,7 @@ const SYSTEMS = [
 ] as const;
 
 export function IntegrationBlock({ onConnect }: { onConnect: (k: StorePlatform) => void }) {
-  const connected = useStore((s) => s.connectedStore);
+  const connected = useStore((s) => (s.activeCampaignId ? s.campaigns[s.activeCampaignId]?.connectedStore ?? null : null));
   const [other, setOther] = useState(false);
   const [sent, setSent] = useState(false);
   const [auth, setAuth] = useState<{ key: StorePlatform; step: number } | null>(null);

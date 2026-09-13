@@ -28,9 +28,11 @@ import {
 } from "@phosphor-icons/react";
 import { ApprovalCard } from "../AdCards";
 import {
-  draftDaysLeft, fmtUSD, livePhase, pace, phaseTitle, readyPhase, UNLOCK_AT, withVat,
+  draftDaysLeft, fmtUSD, pace, phaseTitle, readyPhase, UNLOCK_AT, withVat,
 } from "../../lib/mock/campaigns";
-import { dismissInbox, useActivity, useAds, useStore, type PanelView } from "../../lib/store";
+import {
+  dismissInbox, type PanelView, useActivity, useAds, useLivePhase, useStore,
+} from "../../lib/store";
 import { useGo } from "../../lib/surface";
 import { DataRow, Detail, Section, Surface } from "./kit";
 
@@ -69,7 +71,7 @@ export function InboxView() {
   const activity = useActivity();
   const dismissed = useStore((s) => s.dismissedInbox);
 
-  const live = livePhase();
+  const live = useLivePhase();
   const ready = readyPhase();
   const p = live ? pace(live) : null;
   const waiting = ads.filter((a) => a.state === "waiting");

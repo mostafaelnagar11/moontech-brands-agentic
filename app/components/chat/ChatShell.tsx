@@ -18,14 +18,71 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { CaretLeft, X } from "@phosphor-icons/react";
-import { closePanel, setPanelView, useActivePlan, usePanel, useStore } from "../../lib/store";
+import { Plus } from "@phosphor-icons/react";
+import {
+  closePanel, openConversation, setPanelView, startConversation, useActiveThreadId,
+  useActivePlan, useCampaigns, usePanel, useStore,
+} from "../../lib/store";
 import type { PanelView } from "../../lib/store";
 
 export function ChatShell({ children, panel }: { children: ReactNode; panel: ReactNode }) {
   const { open } = usePanel();
+  const campaigns = useCampaigns();
+  const activeThreadId = useActiveThreadId();
+  /* The rail earns its place on the second campaign and not before.
+     One row is furniture — that was the argument for deleting it, and
+     it is the same argument for bringing it back exactly here. */
+  const railed = campaigns.length > 1;
 
   return (
     <div className="flex h-[100dvh] overflow-hidden bg-white">
+      {railed && (
+        <aside
+          className="hidden w-[212px] shrink-0 flex-col border-e border-hairline bg-rail md:flex"
+          aria-label="Your campaigns"
+        >
+          <div className="px-4 pb-3 pt-4">
+            <Image src="/logo.svg" alt="MoonTech" width={104} height={19} priority className="h-[18px] w-auto" />
+          </div>
+          <button
+            onClick={() => startConversation()}
+            className="mx-3 mb-3 inline-flex items-center justify-center gap-1.5 rounded-control bg-brand px-3 py-2 text-meta font-semibold text-white transition hover:bg-brand-hover"
+          >
+            <Plus size={12} weight="bold" aria-hidden /> New campaign
+          </button>
+          <p className="px-4 pb-1.5 text-[9px] font-medium uppercase tracking-widest text-ink-faint">Campaigns</p>
+          <nav className="min-h-0 flex-1 space-y-0.5 overflow-y-auto px-2 pb-3">
+            {campaigns.map((c) => {
+              const here = c.threadId === activeThreadId;
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => openConversation(c.threadId)}
+                  aria-current={here ? "page" : undefined}
+                  className={`flex w-full items-center gap-2 rounded-control px-2.5 py-2 text-start transition ${
+                    here ? "bg-white shadow-card" : "hover:bg-black/[0.04]"
+                  }`}
+                >
+                  <span
+                    aria-hidden
+                    className={`grid h-6 w-6 shrink-0 place-items-center rounded-lg text-[10px] font-bold ${
+                      here ? "bg-brand text-white" : "bg-white text-ink-faint"
+                    }`}
+                  >
+                    {c.brandName.slice(0, 1).toUpperCase()}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-meta font-semibold text-ink">{c.brandName}</span>
+                    <span className="block truncate text-[10px] text-ink-faint">
+                      {c.paid ? "Running" : "Proposed"}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </nav>
+        </aside>
+      )}
       {/* ── Conversation ───────────────────────────────────────────
           No rail. Onboarding creates one campaign, so there is no list
           to browse and nothing to switch between — a sidebar here would
@@ -41,13 +98,13 @@ export function ChatShell({ children, panel }: { children: ReactNode; panel: Rea
             new read. It fades the conversation out underneath rather
             than sitting on top of it. */}
         <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-gradient-to-b from-white from-40% to-transparent" />
-        <Link
+        {!railed && <Link
           href="/"
           aria-label="MoonTech — start a new campaign"
           className="pointer-events-auto absolute start-5 top-4 z-20 rounded transition hover:opacity-70"
         >
           <Image src="/logo.svg" alt="MoonTech" width={104} height={19} priority className="h-[18px] w-auto" />
-        </Link>
+        </Link>}
         {children}
       </main>
 

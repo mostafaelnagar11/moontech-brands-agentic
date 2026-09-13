@@ -22,7 +22,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import {
+  CaretDown,
+  Check,
   ClockCounterClockwise,
   House,
   Megaphone,
@@ -34,6 +37,7 @@ import {
   type Icon,
 } from "@phosphor-icons/react";
 import type { DashboardView } from "../../lib/agent/dashboard";
+import { setActiveCampaign, startConversation, useCampaigns, useStore } from "../../lib/store";
 
 export const NAV: { key: DashboardView; label: string; icon: Icon }[] = [
   { key: "campaign", label: "Campaign", icon: House },
@@ -54,6 +58,9 @@ interface Props {
 }
 
 function Content({ collapsed, view, onView, waiting, brandName, onMobileClose }: Props) {
+  const [switcher, setSwitcher] = useState(false);
+  const campaigns = useCampaigns();
+  const activeId = useStore((s) => s.activeCampaignId);
   return (
     <div className={`flex h-full flex-col overflow-y-auto bg-white py-5 ${collapsed ? "items-center px-2" : "px-3"}`}>
       <div className={`mb-4 flex items-center ${collapsed ? "justify-center" : "justify-between px-2"}`}>
@@ -78,9 +85,18 @@ function Content({ collapsed, view, onView, waiting, brandName, onMobileClose }:
         )}
       </div>
 
+      {/* A tile while there is one campaign, a switcher the moment
+          there are two. The same rule the chat's rail follows. */}
       {!collapsed && (
         <div className="relative mb-5 px-1">
-          <div className="flex w-full items-center gap-2.5 rounded-control border border-neutral-100 bg-neutral-50 px-3 py-2">
+          <button
+            onClick={() => campaigns.length > 1 && setSwitcher((o) => !o)}
+            aria-expanded={campaigns.length > 1 ? switcher : undefined}
+            disabled={campaigns.length <= 1}
+            className={`flex w-full items-center gap-2.5 rounded-control border border-neutral-100 bg-neutral-50 px-3 py-2 text-start transition ${
+              campaigns.length > 1 ? "hover:bg-neutral-100" : ""
+            }`}
+          >
             <span
               aria-hidden
               className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-brand text-[11px] font-semibold text-white"
@@ -88,7 +104,29 @@ function Content({ collapsed, view, onView, waiting, brandName, onMobileClose }:
               {brandName.slice(0, 1).toUpperCase()}
             </span>
             <span className="min-w-0 flex-1 truncate text-body font-semibold text-ink-soft">{brandName}</span>
-          </div>
+            {campaigns.length > 1 && (
+              <CaretDown size={11} weight="bold" aria-hidden className={`shrink-0 text-ink-faint transition ${switcher ? "rotate-180" : ""}`} />
+            )}
+          </button>
+          {switcher && campaigns.length > 1 && (
+            <div className="absolute inset-x-0 top-full z-50 mt-1 overflow-hidden rounded-control border border-neutral-100 bg-white shadow-float">
+              {campaigns.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => { setActiveCampaign(c.id); setSwitcher(false); onMobileClose?.(); }}
+                  className={`flex w-full items-center gap-2 px-3 py-2 text-start transition hover:bg-neutral-50 ${
+                    c.id === activeId ? "bg-brand/[0.06]" : ""
+                  }`}
+                >
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-meta font-semibold text-ink">{c.brandName}</span>
+                    <span className="block truncate text-[10px] text-ink-faint">{c.paid ? "Running" : "Not started"}</span>
+                  </span>
+                  {c.id === activeId && <Check size={11} weight="bold" aria-hidden className="shrink-0 text-brand" />}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -139,9 +177,13 @@ function Content({ collapsed, view, onView, waiting, brandName, onMobileClose }:
           nothing is worse than an absent one. */}
       <div className="mt-auto flex w-full flex-col gap-1">
         <div className={`flex w-full flex-col gap-1 ${collapsed ? "" : "border-t border-neutral-100 pt-3"}`}>
+          {/* A NEW campaign, not the old conversation. Going back to
+              the thread that built this one is the one thing this
+              button must not do. */}
           <Link
             href="/c"
-            title={collapsed ? "Build a campaign" : undefined}
+            onClick={() => startConversation()}
+            title={collapsed ? "Build another campaign" : undefined}
             className={`flex items-center rounded-control py-2.5 text-body font-medium text-ink-faint transition-all hover:bg-neutral-50 hover:text-ink-soft ${
               collapsed ? "justify-center px-0" : "gap-3 px-3"
             }`}

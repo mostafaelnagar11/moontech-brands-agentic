@@ -31,13 +31,9 @@ import {
   type DashboardView,
 } from "../../lib/agent/dashboard";
 import {
-  putApproval,
-  undoActivity,
-  useActivity,
-  useAds,
+  putApproval, undoActivity, useActivity, useAds, useLivePhase,
 } from "../../lib/store";
 import { useGo } from "../../lib/surface";
-import { livePhase } from "../../lib/mock/campaigns";
 import { tools } from "../../lib/agent/tools";
 import type { ApprovalRequest } from "../../lib/agent/types";
 import { ApprovalBlock } from "../blocks";
@@ -65,7 +61,7 @@ const nid = (p: string) => `${p}-${seq++}`;
 export function DashboardAssistant({ onClose }: { onClose?: () => void }) {
   const ads = useAds();
   const activity = useActivity();
-  const phase = livePhase() ?? null;
+  const phase = useLivePhase();
   const undoable = activity.find((a) => !a.undone && a.undoable) ?? null;
   /* Moves whichever surface this rail is mounted on, which is the
      dashboard — it must not reach across and repoint the chat. */
