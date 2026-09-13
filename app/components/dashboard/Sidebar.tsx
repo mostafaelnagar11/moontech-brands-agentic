@@ -33,6 +33,7 @@ import {
   ShieldCheck,
   SignOut,
   SquaresFour,
+  UsersThree,
   Sparkle,
   Tray,
   X,
@@ -44,6 +45,7 @@ import { campaignLabel, renameCampaign, setActiveCampaign, startConversation, us
 export const NAV: { key: DashboardView; label: string; icon: Icon }[] = [
   { key: "home", label: "Dashboard", icon: SquaresFour },
   { key: "campaign", label: "Campaigns", icon: House },
+  { key: "creators", label: "Creators", icon: UsersThree },
   { key: "inbox", label: "Needs you", icon: Tray },
   { key: "ads", label: "Ads", icon: Megaphone },
   { key: "activity", label: "Activity", icon: ClockCounterClockwise },

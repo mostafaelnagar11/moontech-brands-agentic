@@ -27,7 +27,7 @@ import type { AdRecord } from "./types";
 
 /** The five things the dashboard can show. Mirrors the panel keys so
     an intent can be handed straight to the view switcher. */
-export type DashboardView = "home" | "campaign" | "inbox" | "ads" | "activity" | "autonomy";
+export type DashboardView = "home" | "campaign" | "creators" | "inbox" | "ads" | "activity" | "autonomy";
 
 export type DashboardIntent =
   /** Open a view. The assistant answers in a sentence and the page moves. */
@@ -42,6 +42,11 @@ export type DashboardIntent =
   | { kind: "unknown"; say: string };
 
 const VIEW_WORDS: { view: DashboardView; re: RegExp; say: string }[] = [
+  {
+    view: "creators",
+    re: /\b(creators?|influencers?|talent|roster|who (are|is)|shortlist)\b/,
+    say: "Everyone MoonMatch AI has brought you, with why each one was matched. A like or a pass shapes the next batch; nobody is booked or told.",
+  },
   {
     view: "ads",
     re: /\b(ads?|drafts?|creatives?|approvals?|approval queue|what.s waiting|review)\b/,

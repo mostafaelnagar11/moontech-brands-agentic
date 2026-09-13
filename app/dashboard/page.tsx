@@ -31,6 +31,7 @@ import Link from "next/link";
 import { ArrowRight, Sparkle } from "@phosphor-icons/react";
 import { CampaignView } from "../components/dashboard/CampaignView";
 import { HomeView } from "../components/dashboard/HomeView";
+import { CreatorsView } from "../components/dashboard/CreatorsView";
 import { AdsView } from "../components/dashboard/AdsView";
 import { InboxView } from "../components/dashboard/InboxView";
 import { ActivityView } from "../components/dashboard/ActivityView";
@@ -127,6 +128,7 @@ export default function DashboardPage() {
   const TITLE: Record<DashboardView, string> = {
     home: "Dashboard",
     campaign: drilled,
+    creators: "Creators",
     inbox: "Needs you",
     ads: "Ads",
     activity: "What I did on my own",
@@ -175,10 +177,11 @@ export default function DashboardPage() {
             {!anyCampaign && <EmptyDashboard />}
             {anyCampaign && view === "home" && <HomeView />}
             {anyCampaign && view === "campaign" && <CampaignView />}
+            {anyCampaign && view === "creators" && <CreatorsView />}
             {/* Home and Campaigns read fine before payment — the list and
                 the ladder are about what EXISTS. The running views are the
                 ones that need a phase in flight. */}
-            {anyCampaign && view !== "home" && view !== "campaign" && !paid && (
+            {anyCampaign && view !== "home" && view !== "campaign" && view !== "creators" && !paid && (
               /* The running views need a phase in flight. Saying so
                  beats five empty frames. */
               <div className="rounded-card border border-hairline bg-white p-6 text-center shadow-card">

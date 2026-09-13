@@ -50,6 +50,7 @@ type Turn =
 const VIEW_LABEL: Record<DashboardView, string> = {
   home: "Dashboard",
   campaign: "Campaign",
+  creators: "Creators",
   inbox: "Needs you",
   ads: "Ads",
   activity: "Activity",

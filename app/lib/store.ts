@@ -188,7 +188,7 @@ export type PanelView =
   | "plan" | "read"
   /* The dashboard's own views. `home` is the overview the rail opens on;
      the rest are the running views. */
-  | "home" | "campaign" | "ads" | "inbox" | "activity" | "autonomy";
+  | "home" | "campaign" | "creators" | "ads" | "inbox" | "activity" | "autonomy";
 
 /* A campaign, and the conversation that built it.
 
@@ -223,6 +223,26 @@ export interface Campaign {
 
 export type StorePlatform = "salla" | "zid" | "shopify" | "magento";
 
+/** A brand's read on one creator. `passed` carries its reasons, because
+    a pass with no reason teaches the matcher nothing. */
+export interface CreatorSignal {
+  status: "waiting" | "liked" | "passed";
+  reasons?: string[];
+  note?: string;
+}
+
+/** Why a brand passed. The matcher reads these, so they are a fixed
+    vocabulary rather than free text — free text would make every pass
+    unique and therefore unlearnable. */
+export const PASS_REASONS: { id: string; label: string }[] = [
+  { id: "audience", label: "Wrong audience for us" },
+  { id: "style", label: "Not our style" },
+  { id: "competing", label: "Too close to a competitor" },
+  { id: "reach", label: "Not enough reach" },
+];
+export const passReasonLabel = (id: string) => PASS_REASONS.find((r) => r.id === id)?.label ?? id;
+export const NOTE_MAX = 280;
+
 export interface State {
   panel: { view: PanelView; open: boolean };
   /* The dashboard's own view, kept apart from the panel's. They used
@@ -256,6 +276,10 @@ export interface State {
   autonomy: AutonomyRule[];
   locale: "en" | "ar";
   dismissedInbox: string[];
+  /* What the brand thinks of each matched creator. A like or a pass is
+     a SIGNAL — it shapes who MoonMatch AI brings next — and never a
+     hire or a rejection, so nothing here books or cancels anyone. */
+  creatorSignals: Record<number, CreatorSignal>;
 }
 
 /** The thread a conversation starts on before it has a campaign. */
@@ -286,6 +310,8 @@ function initial(): State {
     autonomy: DEFAULT_AUTONOMY,
     locale: "en",
     dismissedInbox: [],
+    /* Nobody is pre-judged. Every matched creator starts waiting. */
+    creatorSignals: {},
     dashboardView: "home",
     readFocus: null,
     drill: { level: "list", phaseId: null },
@@ -641,6 +667,29 @@ export const renameCampaign = (id: string, name: string) =>
 export const campaignLabel = (c: Campaign) => c.label ?? c.brandName;
 
 export const useCampaigns = () => useStore(campaignList);
+
+/* ------------------------------------------------------------------ */
+/* Creator signals                                                     */
+/* ------------------------------------------------------------------ */
+
+const WAITING: CreatorSignal = { status: "waiting" };
+export const useCreatorSignals = () => useStore((st) => st.creatorSignals);
+export const signalFor = (m: Record<number, CreatorSignal>, id: number) => m[id] ?? WAITING;
+
+export const likeCreator = (id: number) =>
+  set((st) => ({ creatorSignals: { ...st.creatorSignals, [id]: { status: "liked" } } }));
+
+export const passCreator = (id: number, reasons: string[], note?: string) =>
+  set((st) => ({ creatorSignals: { ...st.creatorSignals, [id]: { status: "passed", reasons, note } } }));
+
+/** Back to undecided, and the reasons go with it — leaving them behind
+    would have the matcher still learning from a pass the brand undid. */
+export const clearCreatorSignal = (id: number) =>
+  set((st) => {
+    const next = { ...st.creatorSignals };
+    delete next[id];
+    return { creatorSignals: next };
+  });
 
 export const useDrill = () => useStore((s) => s.drill);
 export const showCampaignList = () => set({ drill: { level: "list", phaseId: null } });
