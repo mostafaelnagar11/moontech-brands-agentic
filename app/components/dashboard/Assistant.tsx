@@ -48,6 +48,7 @@ type Turn =
   | { id: string; role: "approval"; req: ApprovalRequest };
 
 const VIEW_LABEL: Record<DashboardView, string> = {
+  home: "Dashboard",
   campaign: "Campaign",
   inbox: "Needs you",
   ads: "Ads",

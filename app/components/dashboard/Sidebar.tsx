@@ -32,6 +32,7 @@ import {
   Megaphone,
   ShieldCheck,
   SignOut,
+  SquaresFour,
   Sparkle,
   Tray,
   X,
@@ -41,7 +42,8 @@ import type { DashboardView } from "../../lib/agent/dashboard";
 import { campaignLabel, renameCampaign, setActiveCampaign, startConversation, useCampaigns, useStore } from "../../lib/store";
 
 export const NAV: { key: DashboardView; label: string; icon: Icon }[] = [
-  { key: "campaign", label: "Campaign", icon: House },
+  { key: "home", label: "Dashboard", icon: SquaresFour },
+  { key: "campaign", label: "Campaigns", icon: House },
   { key: "inbox", label: "Needs you", icon: Tray },
   { key: "ads", label: "Ads", icon: Megaphone },
   { key: "activity", label: "Activity", icon: ClockCounterClockwise },

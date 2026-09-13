@@ -27,7 +27,7 @@ import type { AdRecord } from "./types";
 
 /** The five things the dashboard can show. Mirrors the panel keys so
     an intent can be handed straight to the view switcher. */
-export type DashboardView = "campaign" | "inbox" | "ads" | "activity" | "autonomy";
+export type DashboardView = "home" | "campaign" | "inbox" | "ads" | "activity" | "autonomy";
 
 export type DashboardIntent =
   /** Open a view. The assistant answers in a sentence and the page moves. */

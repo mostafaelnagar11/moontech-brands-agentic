@@ -184,7 +184,11 @@ export const SEED_ACTIVITY: ActivityEntry[] = [
 /* one, and that is the whole navigation model.                        */
 /* ------------------------------------------------------------------ */
 
-export type PanelView = "plan" | "read" | "campaign" | "ads" | "inbox" | "activity" | "autonomy";
+export type PanelView =
+  | "plan" | "read"
+  /* The dashboard's own views. `home` is the overview the rail opens on;
+     the rest are the running views. */
+  | "home" | "campaign" | "ads" | "inbox" | "activity" | "autonomy";
 
 /* A campaign, and the conversation that built it.
 
@@ -282,7 +286,7 @@ function initial(): State {
     autonomy: DEFAULT_AUTONOMY,
     locale: "en",
     dismissedInbox: [],
-    dashboardView: "campaign",
+    dashboardView: "home",
     readFocus: null,
     drill: { level: "list", phaseId: null },
   };
