@@ -266,7 +266,7 @@ export const STRATEGY_META: Record<StrategyKey, {
     multiple: 8, crew: 6, lines: 2, pick: "value",
     blurb: "Everything the warm-up has, pointed at your two bestsellers. Highest ceiling, thinnest margin for error.",
     costLine: "Same $1,000 as the other two, with none of it spent on breadth — all of it goes behind two products.",
-    downside: "There is no third product to carry the phase. If both bestsellers stall in-market this misses, and we pay the difference — but you lose the month.",
+    downside: "There is no third product to carry the phase. If both bestsellers stall in-market this misses, and you lose the month.",
   },
 };
 
@@ -1001,9 +1001,9 @@ function request_funding(i: { plan: Plan; phaseNo: number }): FundingRequest {
       /* The multiple on THIS phase, not the plan's. `guaranteedRoas` is
          the blended average across all three, and quoting it here put
          two different numbers in one sentence — "a 5× guarantee on this
-         phase, under $1,000 and we pay the difference" — on the one
+         phase, and that figure is guaranteed" — on the one
          screen where a brand is agreeing to hand over money. */
-      `${fmtUSD(plan.price.revenueTarget.value)} of revenue guaranteed on ${phaseTitle(phaseNo).toLowerCase()}, at ${PHASE1_ROAS}× — your ${fmtUSD(plan.budget.value)} back. Close under it and we pay you the difference.`,
+      `${fmtUSD(plan.price.revenueTarget.value)} of revenue guaranteed on ${phaseTitle(phaseNo).toLowerCase()}, at ${PHASE1_ROAS}× — your ${fmtUSD(plan.budget.value)} back, written into the phase.`,
       `Keeping your tracking codes live and honoured for the whole phase — attribution runs entirely through them.`,
       `Nothing publishes without you. Every draft waits on your approval.`,
       `Next, and last: you connect your store, so every order a creator brings in can be attributed to this phase. That is what the guarantee is measured against.`,

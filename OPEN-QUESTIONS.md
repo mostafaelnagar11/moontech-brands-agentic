@@ -180,7 +180,7 @@ agent will not build: there is no *Build it anyway* chip under the 4,000 line,
 and asking in words gets a refusal and the two ways out. The old calculator
 coloured a bar red and let you carry on regardless, which made the confidence
 score decoration. Here it is a gate, because the guarantee is the product and
-we pay the difference when a phase misses.
+it is what the brand is buying.
 
 Nothing about phases or the $1,000 is said at this stage. Those describe a plan
 that does not exist yet.

@@ -17,25 +17,18 @@
  * assistant beside the page, where asking is the whole point.
  */
 
-import { ArrowRight, CaretRight, Lightning, Warning } from "@phosphor-icons/react";
+import { CaretRight, Lightning, Warning } from "@phosphor-icons/react";
 import { fmtUSD, pace, phaseTitle, UNLOCK_AT, type Phase } from "../../lib/mock/campaigns";
 import {
-  campaignLabel, openCampaign, openPhase, showCampaignList, useActiveCampaign, useActivity, useAds,
+  campaignLabel, openCampaign, openPhase, showCampaignList, useActiveCampaign, useAds,
   useCampaignPhases, useDrill, useLivePhase, type Campaign,
 } from "../../lib/store";
 import { useGo } from "../../lib/surface";
 import { CampaignsList } from "./CampaignsList";
 import { PhaseDetail } from "./PhaseDetail";
 import { RevenueChart } from "./RevenueChart";
-import { ActionBar, DataRow, Detail, Section, Surface, Tile } from "./kit";
+import { ActionBar, Section, Surface, Tile } from "./kit";
 
-const ago = (ts: number) => {
-  const m = Math.round((Date.now() - ts) / 60000);
-  if (m < 1) return "just now";
-  if (m < 60) return `${m}m ago`;
-  const h = Math.round(m / 60);
-  return h < 24 ? `${h}h ago` : `${Math.round(h / 24)}d ago`;
-};
 
 /* Three levels behind one nav item: every campaign, one campaign with
    its phases, one phase. Pressing Campaign in the rail always returns
@@ -81,13 +74,11 @@ function Crumbs({ campaign, phase }: { campaign: Campaign; phase: Phase | null }
 
 function OneCampaign() {
   const go = useGo();
-  const activity = useActivity();
   const phase = useLivePhase();
   const phases = useCampaignPhases();
   const ads = useAds().filter((a) => !phase || a.campaignId === phase.id);
   const waiting = ads.filter((a) => a.state === "waiting");
   const held = waiting.filter((a) => a.compliance.verdict === "hold").length;
-  const last = activity.filter((a) => !a.undone)[0];
 
   if (!phase) {
     return (
@@ -158,23 +149,26 @@ function OneCampaign() {
         />
       </div>
 
-      <Section
-        title="Revenue against target"
-        aside={
-          <span className={`inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-[11px] font-semibold ${
-            crossed ? "bg-good/10 text-good-deep" : "bg-brand/10 text-brand"
-          }`}>
-            {crossed ? <Lightning size={11} weight="fill" aria-hidden /> : <Warning size={11} weight="fill" aria-hidden />}
-            {crossed ? "Next phase unlocked" : `${p?.daysToUnlock ?? 0} days to the unlock line`}
-          </span>
-        }
-      >
-        <Surface className="p-4">
-          <RevenueChart phase={phase} />
-        </Surface>
-      </Section>
+      {/* The chart and the ladder read together: the line is this
+          phase, the rows are the phases around it. Side by side you can
+          see which rung the line belongs to without scrolling. */}
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
+        <Section
+          title="Revenue against target"
+          aside={
+            <span className={`inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-[11px] font-semibold ${
+              crossed ? "bg-good/10 text-good-deep" : "bg-brand/10 text-brand"
+            }`}>
+              {crossed ? <Lightning size={11} weight="fill" aria-hidden /> : <Warning size={11} weight="fill" aria-hidden />}
+              {crossed ? "Next phase unlocked" : `${p?.daysToUnlock ?? 0} days to the unlock line`}
+            </span>
+          }
+        >
+          <Surface className="p-4">
+            <RevenueChart phase={phase} />
+          </Surface>
+        </Section>
 
-      <div className="grid gap-6 xl:grid-cols-2">
         <Section title="The phases">
           <Surface>
             <ul className="divide-y divide-hairline">
@@ -212,56 +206,9 @@ function OneCampaign() {
             </ul>
           </Surface>
         </Section>
-
-        <Section
-          title="Done without asking"
-          aside={
-            <button onClick={() => go("activity")} className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand hover:underline">
-              All of it <ArrowRight size={11} weight="bold" aria-hidden className="rtl:rotate-180" />
-            </button>
-          }
-        >
-          <Surface>
-            {last ? (
-              <div className="px-4 py-3">
-                <div className="flex items-start gap-3">
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-body font-medium text-ink">{last.title}</span>
-                    <span className="block text-[11px] text-ink-faint">{ago(last.at)}</span>
-                  </span>
-                  <button
-                    onClick={() => go("activity")}
-                    className="shrink-0 text-[11px] font-semibold text-brand hover:underline"
-                  >
-                    Undo
-                  </button>
-                </div>
-                <div className="mt-2">
-                  <Detail summary="Why">{last.because}</Detail>
-                </div>
-              </div>
-            ) : (
-              <DataRow label="Nothing on my own since you last looked" value="" />
-            )}
-            <div className="border-t border-hairline px-4 py-3">
-              <DataRowStat label="Money moved without asking" value="Never" />
-              <DataRowStat label="Ads published without asking" value="Never" />
-            </div>
-          </Surface>
-        </Section>
       </div>
+
     </div>
   );
 }
 
-/** A locked fact, stated once. These two never change, and the whole
-    product rests on them, so they are on the page rather than in a
-    settings screen nobody opens. */
-function DataRowStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center gap-3 py-1">
-      <span className="min-w-0 flex-1 truncate text-[11px] text-ink-faint">{label}</span>
-      <span className="shrink-0 text-[11px] font-semibold text-good-deep">{value}</span>
-    </div>
-  );
-}

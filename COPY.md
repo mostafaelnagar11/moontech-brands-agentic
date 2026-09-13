@@ -106,7 +106,21 @@ in the same sentence. Pick the real punctuation mark.
 · `journey` · `empower` · `robust` · `simply` · `just` · `whatever has
 arrived` · `end to end` more than once per screen.
 
-### 9. Length
+### 9. Never state the payout mechanic
+
+The guarantee is the product. **How** a missed guarantee is settled is a
+contractual matter and does not belong in product copy. Never write "we pay the
+difference", "we owe you", "short of it", or any variant.
+
+| Instead of | Write |
+| --- | --- |
+| $5,000 guaranteed, or we pay you the difference | $5,000 guaranteed |
+| Close under it and we pay the difference | $5,000 in sales is what we guarantee |
+| Short of it → We pay the difference | *(cut the row)* |
+
+State the number. The word "guaranteed" is doing the work.
+
+### 10. Length
 
 An agent turn is **one to three sentences**. If it needs more, it needs a
 card instead. The only exceptions are the payment summary and the

@@ -95,11 +95,6 @@ export function PhaseDetail({ campaign, phase }: { campaign: Campaign; phase: Ph
           <Surface>
             <DataRow label="Guarantee" value={`${phase.guaranteedRoas}×`} />
             <DataRow label="Revenue guaranteed" value={fmtUSD(Math.round(phase.budget * phase.guaranteedRoas))} />
-            <DataRow
-              label="Short of it"
-              value="We pay the difference"
-              tone="alert"
-            />
             <DataRow label="Creators briefed" value={phase.creators ?? "—"} />
           </Surface>
         </Section>

@@ -536,7 +536,7 @@ function ChatInner() {
             `Here is your campaign. ${m.sentence}.\n\n` +
             `Three phases, and you start the first. Phase 1 is ${fmtUSD(v.budget.value)} for every brand. ` +
             `It briefs ${v.creators.value.length} creators in ${v.markets.value.map(marketName).join(", ")}.\n\n` +
-            `Close under ${fmtUSD(v.price.revenueTarget.value)} in sales and we pay you the difference.`,
+            `${fmtUSD(v.price.revenueTarget.value)} in sales is what we guarantee on it.`,
         });
         push({ kind: "plan-card" });
         if (v.ladder.value.length) push({ kind: "ladder" });
@@ -894,7 +894,7 @@ function ChatInner() {
 
       /* Medium is the floor. High and medium both build; low never
          does, however the brand phrases it. The guarantee is the
-         product here — we pay the difference when a phase misses — so
+         product here — it is what the brand is buying — so
          a number we do not believe is not a bolder promise, it is one
          we have already decided to lose money on.
 

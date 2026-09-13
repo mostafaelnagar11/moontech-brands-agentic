@@ -210,7 +210,7 @@ export function ConfidenceMeter({ plan, className = "" }: { plan: Plan; classNam
         <p className="min-w-0 flex-1 text-meta leading-5 text-ink-soft">
           {ratio >= 1
             ? `We expect this crew to return about ${implied.toFixed(1)}× in these markets. We are guaranteeing ${g}×, which leaves ${room}% of room above the guarantee.`
-            : `We expect this crew to return about ${implied.toFixed(1)}× in these markets, and the guarantee is ${g}×. There is no room above it — as it stands we would expect to pay you the difference, so we will not quote this until the budget or the crew changes.`}
+            : `We expect this crew to return about ${implied.toFixed(1)}× in these markets, and the guarantee is ${g}×. There is no room above it, so we will not quote this until the budget or the crew changes.`}
         </p>
       </div>
     </div>

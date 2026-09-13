@@ -113,14 +113,14 @@ export const STR: Dict = {
   "plan.youPay": { en: "You pay today", ar: "تدفع اليوم" },
   "plan.youPayNote": { en: "your spend on Phase 1", ar: "إنفاقك على المرحلة ١" },
   "plan.backGuaranteed": { en: "Guaranteed back in sales", ar: "مبيعات مضمونة" },
-  "plan.backGuaranteedNote": { en: "or we pay you the difference", ar: "أو ندفع لك الفرق" },
+  "plan.backGuaranteedNote": { en: "written into the phase", ar: "مكتوب في المرحلة" },
   "plan.expectedNote": { en: "from this crew, in these markets", ar: "من هذا الفريق، في هذه الأسواق" },
   /* Upside reads as a note under the guarantee, never as a second
      figure beside it. Two big numbers are two promises. */
   "plan.upsideLead": { en: "We expect this crew to do", ar: "نتوقع من هذا الفريق تحقيق" },
   "plan.upsideTail": {
-    en: "That is what we think happens. The number above is what we owe you if it does not.",
-    ar: "هذا ما نتوقع حدوثه. الرقم أعلاه هو ما ندين لك به إذا لم يحدث.",
+    en: "That is what we think happens. The number above is what we guarantee.",
+    ar: "هذا ما نتوقع حدوثه. الرقم أعلاه هو ما نضمنه.",
   },
   "plan.markets": { en: "Markets", ar: "الأسواق" },
   "plan.audience": { en: "Audience", ar: "الجمهور" },
