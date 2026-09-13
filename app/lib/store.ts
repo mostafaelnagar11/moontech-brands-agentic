@@ -675,6 +675,19 @@ export const setDashboardView = (view: PanelView) => set({ dashboardView: view }
 /* Open the read panel on one layer. Tapping a finding in the thread is
    the fastest correction path there is: the brand is already looking
    at the thing that is wrong. */
+/** Is there a live payment request for this plan's Phase 1 — one the
+    brand is looking at right now, or has already confirmed? The ladder
+    uses it to stand its own "Start Phase 1" button down: two buttons
+    for the same payment, one of them above the card that is asking for
+    it, is one button too many. */
+export const usePhaseRequested = (planId: string | undefined, phaseNo: number) =>
+  useStore((s) =>
+    !!planId &&
+    Object.values(s.funding).some(
+      (f) => f.planId === planId && f.phaseNo === phaseNo && f.state !== "cancelled"
+    )
+  );
+
 export const useReadFocus = () => useStore((s) => s.readFocus);
 export const focusReadLayer = (k: string) => set({ panel: { view: "read", open: true }, readFocus: k });
 export const clearReadFocus = () => set({ readFocus: null });

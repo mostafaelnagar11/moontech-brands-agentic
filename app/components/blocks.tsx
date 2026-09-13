@@ -15,7 +15,7 @@ import {
 } from "@phosphor-icons/react";
 import type { ApprovalRequest, BrandRead, FundingRequest, Plan, PlanChange, ReadLayerKey, Report } from "../lib/agent/types";
 import { fmtUSD, phaseTitle } from "../lib/mock/campaigns";
-import { confirmFunding, cancelFunding, focusReadLayer, openPanel, setAdState, setApprovalState, useAds, usePaid, useStore } from "../lib/store";
+import { confirmFunding, cancelFunding, focusReadLayer, openPanel, usePhaseRequested, setAdState, setApprovalState, useAds, usePaid, useStore } from "../lib/store";
 import { Btn, Card, Eyebrow, Pill } from "./ui";
 import { Claim, EvidenceRow, Figure } from "./Evidence";
 import { READ_ORDER, ReadValue, srcFor } from "./ReadValue";
@@ -729,6 +729,9 @@ export function RejectedBlock({ read }: { read: BrandRead }) {
 /* serves the thread and, in `compact`, the plan pane beside it.         */
 /* ------------------------------------------------------------------ */
 
+/** The rung the ladder's own start button pays for: the first one. */
+const rungs0PhaseNo = (p: Plan) => p.ladder.value[0]?.phaseNo ?? 1;
+
 export function LadderBlock({ plan, onStart, paid = false, compact = false }: {
   plan: Plan;
   onStart?: () => void;
@@ -736,6 +739,7 @@ export function LadderBlock({ plan, onStart, paid = false, compact = false }: {
   compact?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const requested = usePhaseRequested(plan.id, rungs0PhaseNo(plan));
   const rungs = plan.ladder.value;
   const totalBudget = rungs.reduce((n, r) => n + r.budget, 0);
   const totalRevenue = rungs.reduce((n, r) => n + r.budget * r.multiple, 0);
@@ -864,7 +868,11 @@ export function LadderBlock({ plan, onStart, paid = false, compact = false }: {
         </Claim>
       </div>
 
-      {onStart && !paid && (
+      {/* Stood down once the payment card is on screen below. The
+          brand reached it by pressing this, so leaving it live offers
+          the same action twice — and the one further up the thread is
+          the stale one. */}
+      {onStart && !paid && !requested && (
         <div className={`border-t border-hairline ${compact ? "p-3" : "p-4"}`}>
           <Btn className="w-full sm:w-auto" onClick={onStart}>
             Start Phase 1 — {fmtUSD(plan.price.total.value)}

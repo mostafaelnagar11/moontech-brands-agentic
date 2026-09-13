@@ -43,7 +43,7 @@ import { useStream } from "../lib/agent/useStream";
 import {
   activePlanLive, activeThread, claimOnce, connectStore, correctRead, markPaid, openPanel,
   push, putApproval, putCampaign, putFunding, putPlan, putRead, threadIsEmpty,
-  useActivePlan, useAds, useCampaigns, useActiveThreadId, usePaid, useStore, type PanelView,
+  useActivePlan, useAds, useCampaigns, useActiveThreadId, usePaid, usePhaseRequested, useStore, type PanelView,
 } from "../lib/store";
 import { fmtUSD, livePhase } from "../lib/mock/campaigns";
 import { getRead, readIdFor } from "../lib/agent/registry";
@@ -163,6 +163,16 @@ function ChatInner() {
   const paid = usePaid();
 
   const campaignCount = useCampaigns().length;
+  /* Whether Phase 1's payment card is already in the thread. Used to
+     drop the "Start Phase 1" chip, for the same reason the ladder
+     drops its button: the card below is the live one. */
+  const requested = usePhaseRequested(plan?.id, 1);
+  /* "Start Phase 1" comes out of the chip row the moment the card
+     asking for it is on screen. Filtered HERE, at render, not where
+     each list is written: `setAsking` stores a snapshot, so a list
+     filtered when it was asked keeps the chip that was correct then
+     and is wrong now. */
+  const liveChips = (opts: string[]) => (requested ? opts.filter((o) => o !== "Start Phase 1") : opts);
   const [text, setText] = useState("");
   const [changes, setChanges] = useState<Record<string, PlanChange[]>>({});
   const [reports, setReports] = useState<Record<string, Report>>({});
@@ -418,6 +428,13 @@ function ChatInner() {
   const openFunding = () => {
     if (!plan) return;
     if (paid) { say(ALREADY_PAID); setAsking({ q: "", options: postChips }); return; }
+    /* The card is already open further down. Pushing a second one is
+       two identical requests in the thread and two buttons that move
+       the same money. */
+    if (requested) {
+      say("The payment is already open below — confirm it there, or say “not yet” and nothing happens.");
+      return;
+    }
     const req = tools.request_funding({ plan, phaseNo: 1 });
     putFunding(req);
     say(
@@ -1394,7 +1411,7 @@ function ChatInner() {
         value={text}
         onChange={setText}
         onSend={send}
-        chips={isTyping ? [] : asking?.options ?? defaultChips}
+        chips={isTyping ? [] : liveChips(asking?.options ?? defaultChips)}
         onChip={sendText}
         placeholder={t("thread.placeholder")}
         note={NOTE}
