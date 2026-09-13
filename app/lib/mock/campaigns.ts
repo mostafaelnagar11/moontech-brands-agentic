@@ -22,6 +22,7 @@
    itself — and every autonomous action is logged, in `store.ts`, with
    the agent that took it, a reason and an undo. */
 
+import { rng } from "../agent/rng";
 import type { AdRecord, Evidence, Sourced } from "../agent/types";
 import { creatorById } from "./creators";
 
@@ -107,13 +108,12 @@ export const PHASES: Phase[] = [
     budget: 6_000, guaranteedRoas: 5, rev: 0, revTarget: null,
     dayOfPhase: null, plannedDays: 30, creators: null,
   },
-  {
-    id: "phase-4", phaseNo: 4, status: "locked",
-    start: null, end: null,
-    budget: 10_000, guaranteedRoas: 5, rev: 0, revTarget: null,
-    dayOfPhase: null, plannedDays: 30, creators: null,
-  },
 ];
+
+/* There was a phase 4 in here. The product is three phases — every
+   screen, every sentence and the whole ladder say so — and it only
+   went unnoticed because nothing rendered the list in full. The
+   dashboard does, which is the argument for dashboards. */
 
 export const phaseById = (id: string) => PHASES.find((p) => p.id === id);
 export const livePhase = () => PHASES.find((p) => p.status === "live");
@@ -343,4 +343,43 @@ export function draftDaysLeft(submitted: string): number | null {
   if (/yesterday/i.test(submitted)) return REVIEW_WINDOW_DAYS - 1;
   const d = submitted.match(/^\s*(\d+)\s*d\b/i);
   return d ? Math.max(REVIEW_WINDOW_DAYS - Number(d[1]), 0) : null;
+}
+
+/* ------------------------------------------------------------------ */
+/* The revenue curve                                                   */
+/*                                                                     */
+/* A phase carries one total, and a dashboard needs a shape. This       */
+/* derives the daily accrual behind that total: deterministic from the  */
+/* phase id, weighted so early days are slower than late ones (creators */
+/* post over the window rather than all at once), and normalised so the */
+/* series sums to EXACTLY `rev`. The number on the tile and the last    */
+/* point of the line are the same figure, never two roundings of it.    */
+/* ------------------------------------------------------------------ */
+
+export interface RevenuePoint {
+  day: number;
+  /** Cumulative attributed revenue at the close of this day. */
+  rev: number;
+  /** Where a straight line to target would be on this day. */
+  pace: number;
+}
+
+export function revenueSeries(p: Phase): RevenuePoint[] {
+  const days = p.dayOfPhase ?? 0;
+  const window = p.plannedDays ?? days;
+  if (!days || !window || !p.revTarget) return [];
+  const r = rng(`rev:${p.id}`);
+  /* A ramp, not a flat line: weight grows with the day, jittered. */
+  const weights = Array.from({ length: days }, (_, i) => (0.55 + (i / window) * 0.9) * (0.75 + r() * 0.5));
+  const sum = weights.reduce((n, w) => n + w, 0);
+  let acc = 0;
+  return weights.map((w, i) => {
+    acc += (w / sum) * p.rev;
+    return {
+      day: i + 1,
+      /* The final point is the phase total to the dollar. */
+      rev: i === days - 1 ? p.rev : Math.round(acc),
+      pace: Math.round((p.revTarget! / window) * (i + 1)),
+    };
+  });
 }

@@ -30,11 +30,11 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Sparkle } from "@phosphor-icons/react";
-import { CampaignPanel } from "../components/panels/CampaignPanel";
-import { AdsPanel } from "../components/panels/AdsPanel";
-import { InboxPanel } from "../components/panels/InboxPanel";
-import { ActivityPanel } from "../components/panels/ActivityPanel";
-import { AutonomyPanel } from "../components/panels/AutonomyPanel";
+import { CampaignView } from "../components/dashboard/CampaignView";
+import { AdsView } from "../components/dashboard/AdsView";
+import { InboxView } from "../components/dashboard/InboxView";
+import { ActivityView } from "../components/dashboard/ActivityView";
+import { AutonomyView } from "../components/dashboard/AutonomyView";
 import { DashboardSidebar, NAV } from "../components/dashboard/Sidebar";
 import { DashboardTopbar } from "../components/dashboard/Topbar";
 import { DashboardAssistant } from "../components/dashboard/Assistant";
@@ -142,11 +142,11 @@ export default function DashboardPage() {
               assistant ? "hidden md:block" : "block"
             }`}
           >
-            {view === "campaign" && <CampaignPanel />}
-            {view === "inbox" && <InboxPanel />}
-            {view === "ads" && <AdsPanel />}
-            {view === "activity" && <ActivityPanel />}
-            {view === "autonomy" && <AutonomyPanel />}
+            {view === "campaign" && <CampaignView />}
+            {view === "inbox" && <InboxView />}
+            {view === "ads" && <AdsView />}
+            {view === "activity" && <ActivityView />}
+            {view === "autonomy" && <AutonomyView />}
           </main>
 
           {/* A column, not an overlay. It sits in the row beside the
