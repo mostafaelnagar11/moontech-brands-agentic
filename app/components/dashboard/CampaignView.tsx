@@ -86,7 +86,6 @@ function OneCampaign() {
   const phases = useCampaignPhases();
   const ads = useAds().filter((a) => !phase || a.campaignId === phase.id);
   const waiting = ads.filter((a) => a.state === "waiting");
-  const live = ads.filter((a) => a.state === "live");
   const held = waiting.filter((a) => a.compliance.verdict === "hold").length;
   const last = activity.filter((a) => !a.undone)[0];
 
@@ -100,6 +99,10 @@ function OneCampaign() {
 
   const p = pace(phase);
   const target = phase.revTarget ?? 0;
+  /* The same two sums the card in the list shows, computed the same
+     way, so the page you land on carries the number you clicked. */
+  const earned = phases.reduce((n, ph) => n + ph.rev, 0);
+  const promised = phases.reduce((n, ph) => n + (ph.revTarget ?? 0), 0);
   const pct = target ? Math.round((phase.rev / target) * 100) : 0;
   const crossed = p ? p.pctNow >= UNLOCK_AT * 100 : false;
 
@@ -114,14 +117,22 @@ function OneCampaign() {
         onCta={() => go("ads")}
       />
 
-      {/* Four figures, ranked. The hero is the question the page is
-          for; the rest qualify it. */}
+      {/* Four figures, ranked — and every one of them LABELLED with
+          what it counts.
+
+          Three screens show revenue for the same campaign and they
+          count different things: the card in the list sums every phase,
+          this view is about the phase running now, and the phase page
+          is about one rung. All three were right and none of them said
+          so, which reads as three screens disagreeing. The campaign
+          total now sits beside the phase figure here, so the number on
+          the card you clicked is on the page you land on. */}
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <Tile
           tone="hero"
-          label="Attributed"
+          label={`${phaseTitle(phase.phaseNo)} attributed`}
           value={fmtUSD(phase.rev)}
-          sub={`${pct}% of ${fmtUSD(target)}`}
+          sub={`${pct}% of ${fmtUSD(target)} on this phase`}
           foot={
             <div className="h-1 w-full overflow-hidden rounded-pill bg-white/25">
               <div className="h-full rounded-pill bg-white" style={{ width: `${Math.min(100, pct)}%` }} />
@@ -129,15 +140,15 @@ function OneCampaign() {
           }
         />
         <Tile
-          tone={p && p.onPace ? "good" : "plain"}
-          label="Forecast at close"
-          value={p ? fmtUSD(Math.round(p.atEnd)) : "—"}
-          sub={p ? `${Math.round(p.pctForecast)}% of target` : undefined}
+          label="Campaign to date"
+          value={fmtUSD(earned)}
+          sub={promised ? `of ${fmtUSD(promised)} guaranteed, all phases` : "across every phase"}
         />
         <Tile
-          label="Ads live"
-          value={live.length}
-          sub={`${fmtUSD(Math.round(p?.perDay ?? 0))} a day`}
+          tone={p && p.onPace ? "good" : "plain"}
+          label="This phase at close"
+          value={p ? fmtUSD(Math.round(p.atEnd)) : "—"}
+          sub={p ? `${Math.round(p.pctForecast)}% of this phase's target` : undefined}
         />
         <Tile
           tone={waiting.length ? "alert" : "plain"}

@@ -1,3 +1,4 @@
+import type { Phase } from "../mock/campaigns";
 /* ══════════════════════════════════════════════════════════════════
    THE AGENT BOUNDARY
    ══════════════════════════════════════════════════════════════════
@@ -419,7 +420,10 @@ export interface AgentTools {
 
   /** Answer a question about a running campaign, with every figure
       carrying the card it came from. */
-  get_report(i: { campaignId: string; question?: string }, ctx: RunContext): ToolStream<Report>;
+  /** Takes the PHASE, not an id. Resolving an id against the module
+      fixture returned another campaign's numbers the moment there was
+      more than one campaign. */
+  get_report(i: { phase: Phase; question?: string }, ctx: RunContext): ToolStream<Report>;
 
   list_ads(i: { campaignId: string; filter?: AdFilter }): AdRecord[];
 

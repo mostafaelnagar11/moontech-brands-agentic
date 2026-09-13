@@ -25,8 +25,7 @@ import { CREATORS, creatorById, viewThrough, type CreatorSeed } from "../mock/cr
 import { fixtureFor } from "../mock/reads";
 import { getRead, readIdFor, rememberRead } from "./registry";
 import {
-  ADS, UNLOCK_AT, VAT_RATE, fmtCount, fmtUSD, livePhase, pace,
-  phaseById, phaseTitle, vatOn,
+  ADS, UNLOCK_AT, VAT_RATE, fmtCount, fmtUSD, pace, phaseTitle, vatOn, type Phase,
 } from "../mock/campaigns";
 import {
   PLAN_BUDGET_MAX, PLAN_BUDGET_MIN, budgetForHigh, getConfidence, roasForHigh,
@@ -1036,8 +1035,8 @@ function list_ads(i: { campaignId: string; filter?: AdFilter }): AdRecord[] {
   return ADS.filter((a) => a.campaignId === i.campaignId && (f === "all" || a.state === f));
 }
 
-async function* get_report(i: { campaignId: string; question?: string }, ctx: RunContext): ToolStream<Report> {
-  const ph = phaseById(i.campaignId) ?? livePhase()!;
+async function* get_report(i: { phase: Phase; question?: string }, ctx: RunContext): ToolStream<Report> {
+  const ph = i.phase;
   const pc = pace(ph)!;
   const ads = ADS.filter((a) => a.campaignId === ph.id);
   const live = ads.filter((a) => a.state === "live");

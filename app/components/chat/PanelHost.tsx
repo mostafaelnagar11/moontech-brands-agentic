@@ -13,15 +13,15 @@ import { ArrowRight } from "@phosphor-icons/react";
 import { PanelFrame } from "./ChatShell";
 import { PlanPanel } from "../panels/PlanPanel";
 import { ReadPanel } from "../panels/ReadPanel";
-import { useActivePlan, usePaid, usePanel, useStore } from "../../lib/store";
-import { phaseTitle, livePhase } from "../../lib/mock/campaigns";
+import { useActivePlan, useLivePhase, usePaid, usePanel, useStore } from "../../lib/store";
+import { phaseTitle } from "../../lib/mock/campaigns";
 
 export function PanelHost() {
   const { view } = usePanel();
   const plan = useActivePlan();
   const paid = usePaid();
   const url = useStore((s) => Object.values(s.reads)[0]?.url ?? "your store");
-  const live = livePhase();
+  const live = useLivePhase();
 
   switch (view) {
     case "plan":

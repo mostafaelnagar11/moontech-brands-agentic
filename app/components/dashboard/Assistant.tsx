@@ -72,10 +72,15 @@ export function DashboardAssistant({ onClose }: { onClose?: () => void }) {
     {
       id: nid("t"),
       role: "agent",
-      text:
-        "I am watching this phase while it runs. Ask me how it is doing, tell me to pull up the drafts waiting on " +
-        "you, or have me prepare an approval for all of them. I can undo anything I did on my own.\n\n" +
-        "I cannot publish, move money or sign. Those stay yours.",
+      text: phase
+        ? "I am watching this phase while it runs. Ask me how it is doing, tell me to pull up the drafts waiting on " +
+          "you, or have me prepare an approval for all of them. I can undo anything I did on my own.\n\n" +
+          "I cannot publish, move money or sign. Those stay yours."
+        /* Nothing is running, so there is nothing to watch. Saying
+           otherwise is the assistant's first sentence being false. */
+        : "Nothing is running yet. Once a phase is live I watch it: how it is doing against the guarantee, what is " +
+          "waiting on you, and anything I did on my own.\n\n" +
+          "I cannot publish, move money or sign. Those stay yours.",
       typed: true,
     },
   ]);

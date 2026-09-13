@@ -43,9 +43,10 @@ import { useStream } from "../lib/agent/useStream";
 import {
   activePlanLive, activeThread, claimOnce, connectStore, correctRead, markPaid, openPanel,
   push, putApproval, putCampaign, putFunding, putPlan, putRead, threadIsEmpty,
-  useActivePlan, useAds, useCampaigns, useActiveThreadId, usePaid, usePhaseRequested, useStore, type PanelView,
+  useActivePlan, useAds, useCampaigns, useActiveThreadId, useLivePhase, usePaid, usePhaseRequested,
+  useStore, type PanelView,
 } from "../lib/store";
-import { fmtUSD, livePhase } from "../lib/mock/campaigns";
+import { fmtUSD } from "../lib/mock/campaigns";
 import { getRead, readIdFor } from "../lib/agent/registry";
 import { normaliseUrl } from "../lib/mock/reads";
 import { useT } from "../lib/i18n";
@@ -154,6 +155,11 @@ function ChatInner() {
   const plan = useActivePlan();
   const thread = useStore(activeThread);
   const threadId = useActiveThreadId();
+  /* The phase this conversation's campaign is running, if any. Read
+     from the store rather than from the module fixture, which is one
+     ladder for the whole app and returned another campaign's numbers
+     the moment there were two. */
+  const livePhase = useLivePhase();
   const funding = useStore((s) => s.funding);
   const approvals = useStore((s) => s.approvals);
   const connected = useStore((s) => (s.activeCampaignId ? s.campaigns[s.activeCampaignId]?.connectedStore ?? null : null));
@@ -659,11 +665,11 @@ function ChatInner() {
   };
 
   const runReport = () => {
-    const ph = livePhase();
+    const ph = livePhase;
     if (!ph) { say("Nothing is running yet, so there is nothing to report on."); return; }
     report.reset();
     report.start(
-      (ctx) => tools.get_report({ campaignId: ph.id }, ctx),
+      (ctx) => tools.get_report({ phase: ph }, ctx),
       (v, cancelled) => {
         if (!v) return;
         /* A cancelled report is already on screen — the running block

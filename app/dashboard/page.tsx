@@ -27,7 +27,6 @@
  */
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Sparkle } from "@phosphor-icons/react";
 import { CampaignView } from "../components/dashboard/CampaignView";
@@ -47,6 +46,29 @@ import { SurfaceProvider } from "../lib/surface";
 import { phaseTitle } from "../lib/mock/campaigns";
 import type { DashboardView } from "../lib/agent/dashboard";
 
+/** Nothing built yet, said inside the dashboard rather than instead of
+    it. The rail and the top bar stay, so a brand can see what this page
+    will hold before they have anything to put in it. */
+function EmptyDashboard() {
+  return (
+    <div className="rounded-card border border-dashed border-black/[0.12] bg-white p-10 text-center">
+      <p className="text-[15px] font-semibold text-ink">No campaign yet</p>
+      <p className="mx-auto mt-1.5 max-w-[420px] text-body leading-6 text-ink-soft">
+        Build one and this fills in: what your creators earn you against the guarantee, the drafts waiting on your
+        approval, and everything the agents did on their own.
+      </p>
+      <Link
+        href="/c"
+        className="mt-5 inline-flex items-center gap-2 rounded-control bg-brand px-4 py-2 text-body font-semibold text-white transition hover:bg-brand-hover"
+      >
+        <Sparkle size={14} weight="fill" aria-hidden />
+        Build a campaign
+        <ArrowRight size={13} weight="bold" aria-hidden className="rtl:rotate-180" />
+      </Link>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   /* The dashboard's own view. It used to share `panel.view` with the
      conversation, which meant moving around here silently repointed
@@ -62,7 +84,9 @@ export default function DashboardPage() {
   const drill = useDrill();
   const paid = usePaid();
   const ads = useAds();
-  const waiting = ads.filter((a) => a.state === "waiting").length;
+  /* Scoped to the campaign on screen. Counting every ad in the store
+     put a "6" on the rail of an account with no campaign at all. */
+  const waiting = ads.filter((a) => a.state === "waiting" && camp?.adIds.includes(a.id)).length;
 
   const [collapsed, setCollapsed] = useState(false);
   const [mobileNav, setMobileNav] = useState(false);
@@ -77,31 +101,14 @@ export default function DashboardPage() {
     if (typeof window !== "undefined" && window.innerWidth < 768) setAssistant(false);
   }, []);
 
-  /* The gate is "is there a campaign at all", not "is this one paid".
-     An unpaid campaign still belongs in the list and still has phases
-     worth reading; it is the RUNNING views that need a live phase, and
-     they say so themselves below. */
-  if (!anyCampaign) {
-    return (
-      <div className="grid min-h-[100dvh] place-items-center bg-canvas px-6">
-        <div className="max-w-[420px] text-center">
-          <Image src="/logo.svg" alt="MoonTech" width={110} height={20} priority className="mx-auto h-[19px] w-auto" />
-          <p className="mt-6 text-prose text-ink">
-            No campaign yet. Build one and this is where it runs — what the creators earn you against the guarantee,
-            the drafts waiting on you, and everything the agents did on their own.
-          </p>
-          <Link
-            href="/c"
-            className="mt-5 inline-flex items-center gap-2 rounded-control bg-brand px-4 py-2 text-body font-semibold text-white transition hover:bg-brand-hover"
-          >
-            <Sparkle size={14} weight="fill" aria-hidden />
-            Build one first
-            <ArrowRight size={13} weight="bold" aria-hidden className="rtl:rotate-180" />
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  /* No early return for an empty account.
+
+     It used to bail out to a centred splash with the logo on it, which
+     is a different SCREEN: the rail vanished, the top bar vanished, and
+     a brand arriving at their dashboard for the first time could not
+     see what the dashboard even was. An empty state belongs INSIDE the
+     thing it is empty of. The shell always renders; the main column
+     says there is nothing yet. */
 
   /* The Campaign heading follows the drill: the list, then the
      campaign, then the phase. A page titled "Phase 2 · Scale" while
@@ -165,12 +172,13 @@ export default function DashboardPage() {
               assistant ? "hidden md:block" : "block"
             }`}
           >
-            {view === "home" && <HomeView />}
-            {view === "campaign" && <CampaignView />}
+            {!anyCampaign && <EmptyDashboard />}
+            {anyCampaign && view === "home" && <HomeView />}
+            {anyCampaign && view === "campaign" && <CampaignView />}
             {/* Home and Campaigns read fine before payment — the list and
                 the ladder are about what EXISTS. The running views are the
                 ones that need a phase in flight. */}
-            {view !== "home" && view !== "campaign" && !paid && (
+            {anyCampaign && view !== "home" && view !== "campaign" && !paid && (
               /* The running views need a phase in flight. Saying so
                  beats five empty frames. */
               <div className="rounded-card border border-hairline bg-white p-6 text-center shadow-card">
@@ -180,10 +188,10 @@ export default function DashboardPage() {
                 </p>
               </div>
             )}
-            {view === "inbox" && paid && <InboxView />}
-            {view === "ads" && paid && <AdsView />}
-            {view === "activity" && paid && <ActivityView />}
-            {view === "autonomy" && paid && <AutonomyView />}
+            {anyCampaign && view === "inbox" && paid && <InboxView />}
+            {anyCampaign && view === "ads" && paid && <AdsView />}
+            {anyCampaign && view === "activity" && paid && <ActivityView />}
+            {anyCampaign && view === "autonomy" && paid && <AutonomyView />}
           </main>
 
           {/* A column, not an overlay. It sits in the row beside the
