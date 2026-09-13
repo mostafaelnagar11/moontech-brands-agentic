@@ -223,6 +223,9 @@ function ChatInner() {
   const buildFor = qs.get("build");
   const readUrl = qs.get("read") ? normaliseUrl(qs.get("read")!) : null;
   const build = useStream<Plan>();
+  /* The build roster waits for the sentence introducing it. Declared
+     after the stream handle, not beside `visible`, which runs first. */
+  const rosterReady = build.status === "running" && !isTyping;
   const readRun = useStream<BrandRead>();
   const reads = useStore((s) => s.reads);
   const scroller = useRef<HTMLDivElement>(null);
@@ -461,10 +464,9 @@ function ChatInner() {
     setShapeSettled(true);
     const conf = getConfidence(chosen.planBudget, chosen.roas);
     say(
-      `Settled: ${fmtUSD(chosen.planBudget)} across the three phases at ${chosen.roas}× guaranteed, which is ${conf.label.toLowerCase()}.\n\n` +
-      `Building it now. MoonMatch AI finds the creators whose audience is in your markets, MoonSearch AI vets every one of them for brand and fraud risk, ` +
-      `MoonScore AI works out how many of them the ${fmtUSD(PHASE1_BUDGET)} warm-up briefs, and MoonWriter AI drafts the brief from your own product copy. ` +
-      `Nothing is charged while I do this.`
+      `${fmtUSD(chosen.planBudget)} at ${chosen.roas}×, ${conf.label.toLowerCase()}. Building it now.\n\n` +
+      `MoonMatch AI finds your creators, MoonSearch AI vets them, MoonScore AI sizes the warm-up crew, ` +
+      `MoonWriter AI writes the brief. Nothing is charged while I work.`
     );
     setPendingRead(null);
     startBuild(r, chosen);
@@ -1316,13 +1318,22 @@ function ChatInner() {
             </div>
           ))}
 
-          {(readRun.status === "running" || build.status === "running") && !isTyping && <Thinking />}
+          {/* The dots are for the gap between "I will do that" and the
+              first thing appearing. Once the roster is up they are a
+              second spinner beside a real one. */}
+          {(readRun.status === "running" || build.status === "running") && !isTyping && !rosterReady && <Thinking />}
 
           {/* The build, as named agents with tasks that tick — the same
               shape as the read, because "the agentic piece" must not be
               the one stream that looks like a page loading. How many
-              agents is read off BUILD_TASKS, never typed. */}
-          {build.status === "running" && (
+              agents is read off BUILD_TASKS, never typed.
+
+              Gated on the sentence above having finished typing. The
+              thread's own blocks are already held back that way — the
+              slice in `visible` does it — but this one renders outside
+              the thread, so it had nothing holding it and landed under
+              a half-written paragraph. */}
+          {rosterReady && (
             <BlockRow>
               <TaskRoster
                 tasks={BUILD_TASKS}
