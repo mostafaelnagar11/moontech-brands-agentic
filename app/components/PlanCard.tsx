@@ -10,15 +10,34 @@
 import { useEffect, useRef, useState } from "react";
 import { CaretRight, Lightning, PencilSimple } from "@phosphor-icons/react";
 import type { Plan } from "../lib/agent/types";
-import { fmtUSD } from "../lib/mock/campaigns";
-import { PHASE1_ROAS, marketName } from "../lib/agent/tools";
+import { UNLOCK_AT, fmtUSD } from "../lib/mock/campaigns";
+import { STRATEGY_META, marketName } from "../lib/agent/tools";
+import { getRead } from "../lib/agent/registry";
 import { roundBudget } from "../lib/agent/model";
 import { T } from "../lib/tokens";
-import { Card, Eyebrow, Pill } from "./ui";
+import { Card, Pill } from "./ui";
 import { Figure, Claim } from "./Evidence";
 import { RevenueRuler } from "./Ruler";
 import { useT } from "../lib/i18n";
 import { usePaid } from "../lib/store";
+
+/* The expected range, as the card is allowed to show it.
+
+   The model works the range out from the crew's real reach, so its low
+   end can land under the guaranteed figure — and a range that starts
+   below the floor tells the brand it might end the phase with less than
+   HeyMoon owes it, which is never true. If sales land under the floor,
+   HeyMoon pays the difference and the brand still banks the guaranteed
+   figure, so the floor IS the low end. Clamped here, at the point of
+   display, and only here: `ConfidenceMeter` reasons about the gap
+   between the raw model and the guarantee, and clamping that gap shut
+   would make every plan look safe. */
+function shownExpected(plan: Plan) {
+  const raw = plan.price.expected.value;
+  const floor = plan.price.revenueTarget.value;
+  const low = Math.max(raw.low, floor);
+  return { low, high: Math.max(raw.high, low) };
+}
 
 function Row({ label, children, onEdit, editLabel }: { label: string; children: React.ReactNode; onEdit?: () => void; editLabel?: string }) {
   return (
@@ -50,71 +69,75 @@ export function PlanCard({
   const paid = usePaid();
   const a = plan.audience.value;
   const target = plan.price.revenueTarget.value;
-  const exp = plan.price.expected.value;
+  const expected = shownExpected(plan);
   const genderWord = t(`aud.${a.gender}`);
+  /* The multiple is divided out of the two figures beside it rather than
+     read from `guaranteedRoas`, which is the blended average across all
+     three phases. Taken from the pair on screen it can never disagree
+     with them. */
+  const budget = plan.budget.value;
+  const multiple = budget > 0 ? Math.round((target / budget) * 10) / 10 : 0;
   /* Two different counts, and the row used to show the wrong one. The
      crew is who the fixed warm-up budget pays for; the pool is everyone
-     MoonMatch AI matched and MoonSearch AI cleared, which is what the
-     rest of the ladder draws on. */
+     matched and cleared, which is what the rest of the ladder draws on. */
   const crew = plan.creators.value.length;
   const pool = plan.pool.value || crew;
+  /* The products the campaign is actually pointed at: the bestsellers
+     the brief was written around, cut to the number of lines this
+     strategy concentrates on. Read back through the plan's own readId,
+     so the row can never name a product the brief does not cover. */
+  const bestsellers = getRead(plan.readId).bestsellers;
+  const products = (bestsellers?.value ?? []).slice(0, STRATEGY_META[plan.strategy.value].lines);
 
   return (
     <Card className={dense ? "p-4" : "p-5"}>
       <div className="flex flex-wrap items-center gap-2">
-        {/* A proposal until Phase 1 is paid for, and the eyebrow says so.
-            The review call asked for the word "proposed" to be on screen,
-            not only in the chat. */}
-        <Eyebrow>{t(paid ? "plan.phase1" : "plan.phase1Proposed")}</Eyebrow>
-        {/* Two different multiples, and confusing them is the easiest
-            mistake on this card, so both are on it. The muted pill is
-            what THIS phase is metered at — 1×, your money back. The
-            brand pill is what the campaign is sold on, the blended
-            average across all three phases, which the ladder breaks
-            down rung by rung. */}
-        <Pill tone="muted">{PHASE1_ROAS}× on the warm-up</Pill>
-        <Pill tone="brand">{plan.guaranteedRoas.value}× ROAS guaranteed</Pill>
+        <p className="text-body font-semibold text-ink">{t("plan.phase1")}</p>
+        {/* A draft until Phase 1 is paid for, and the pill says so. The
+            review call asked for the unpaid state to be on screen, not
+            only in the chat. */}
+        <Pill tone={paid ? "good" : "muted"}>{paid ? "Started · paid" : "Draft · nothing charged"}</Pill>
         <span className="ms-auto text-meta text-ink-faint">{plan.brandName}</span>
       </div>
 
-      {/* Two figures, not three.
- 
-          It used to be three cells of equal weight: what you pay, what
-          is guaranteed, and what we expect. Alex read it off the screen
-          on the review call and said the design was telling him the
-          expected range was the target — when the guarantee is the
-          product and the range is upside. Three equal cells cannot say
-          which one is the promise, so they all read as the promise.
- 
-          Now the guarantee is the big number and the range is a line
-          underneath it saying you may do better. The spend sits beside
-          it, smaller, because it is a cost and not an outcome. */}
+      {/* Three cells, and the guarantee carries the weight.
+
+          What you pay is a cost, so it is the smallest. The guaranteed
+          figure is the product, so it is the largest, with the multiple
+          under it as a note rather than as a second promise. Expected
+          sales sit last and small: they are what tends to happen, not
+          what is owed, and the card must never let the range read as
+          the number HeyMoon is standing behind. */}
       <div className="mt-3.5 overflow-hidden rounded-control border border-hairline">
-        <div className="flex flex-wrap items-end gap-x-8 gap-y-3 p-3.5">
+        <div className="grid gap-x-8 gap-y-3.5 p-3.5 sm:grid-cols-3">
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.09em] text-ink-faint">
-              {t("plan.backGuaranteed")}
-            </p>
+            <p className="text-[11px] font-medium text-ink-faint">You pay</p>
+            <div className="mt-1">
+              <Figure src={plan.budget} render={fmtUSD(budget)} size="md" />
+            </div>
+            <p className="mt-1 text-[11px] leading-4 text-ink-faint">Phase 1 only.</p>
+          </div>
+          <div className="min-w-0">
+            <p className="text-[11px] font-medium text-ink-faint">Guaranteed sales</p>
             <div className="mt-1">
               <Figure src={plan.price.revenueTarget} render={fmtUSD(target)} size="lg" />
             </div>
-            <p className="mt-1 text-[11px] leading-4 text-ink-faint">{t("plan.backGuaranteedNote")}</p>
+            <p className="mt-1 text-[11px] leading-4 tabular-nums text-ink-faint">{multiple}x</p>
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.09em] text-ink-faint">{t("plan.youPay")}</p>
+            <p className="text-[11px] font-medium text-ink-faint">Expected sales</p>
             <div className="mt-1">
-              <Figure src={plan.budget} render={fmtUSD(plan.budget.value)} size="md" />
+              <Figure
+                src={plan.price.expected}
+                render={`${fmtUSD(expected.low)} to ${fmtUSD(expected.high)}`}
+                size="sm"
+              />
             </div>
-            <p className="mt-1 text-[11px] leading-4 text-ink-faint">{t("plan.youPayNote")}</p>
+            <p className="mt-1 text-[11px] leading-4 text-ink-faint">From this crew, in these markets.</p>
           </div>
         </div>
-        {/* Upside, as a note. Never a figure of its own — a second big
-            number beside the guarantee is a second promise. */}
         <p className="border-t border-hairline bg-neutral-50 px-3.5 py-2 text-[11px] leading-4 text-ink-soft">
-          <Claim src={plan.price.expected}>
-            {t("plan.upsideLead")} <span className="font-semibold text-ink">{fmtUSD(exp.low)} – {fmtUSD(exp.high)}</span>.{" "}
-            {t("plan.upsideTail")}
-          </Claim>
+          Sell more than the guarantee and it is all yours. Sell less and HeyMoon pays you the difference.
         </p>
       </div>
 
@@ -122,7 +145,8 @@ export function PlanCard({
         <RevenueRuler pct={0} srLabel="Phase not started." />
         <p className="mt-1.5 flex items-start gap-1.5 text-[11px] leading-4 text-ink-faint">
           <Lightning size={11} weight="fill" className="mt-0.5 shrink-0 text-brand" aria-hidden />
-          {t("plan.unlock")} {fmtUSD(plan.price.unlockAt.value)} {t("plan.unlockTail")}
+          Phase 2 is offered at {fmtUSD(plan.price.unlockAt.value)}, which is {Math.round(UNLOCK_AT * 100)}% of this
+          phase&apos;s target.
         </p>
       </div>
 
@@ -132,7 +156,7 @@ export function PlanCard({
         </Row>
         <Row label={t("plan.audience")} onEdit={onEdit && (() => onEdit("audience"))}>
           <Claim src={plan.audience}>
-            {`${genderWord}, ${a.ageLow}–${a.ageHigh}`}
+            {`${genderWord}, ${a.ageLow} to ${a.ageHigh}`}
           </Claim>
         </Row>
         <Row label={t("plan.creators")} onEdit={onEdit && (() => onEdit("creators"))}>
@@ -153,17 +177,24 @@ export function PlanCard({
                 <img key={c.id} src={c.avatar} alt="" loading="lazy" className="h-6 w-6 rounded-full bg-brand-100 object-cover ring-2 ring-white" />
               ))}
             </span>
-            {/* "Matched" is the pool MoonMatch AI found, not the crew the
-                warm-up pays for — the row said "matched" and showed the
-                crew, which read as though the whole match were three
-                people. The crew follows it as the subset it is, so the
-                two numbers can never be confused for each other. */}
+            {/* "Matched" is the whole pool, not the crew the warm-up pays
+                for. The row used to say "matched" and show the crew,
+                which read as though the whole match were three people.
+                The crew follows it as the subset it is, so the two
+                numbers can never be confused for each other. */}
             <span className="text-body text-ink-soft">
               <Figure src={plan.pool} render={`${pool} ${t("plan.matched")}`} size="sm" />
               {pool > crew ? <span className="text-ink-faint"> · {crew} in the warm-up</span> : null}
             </span>
             {onOpenCreators && <CaretRight size={12} className="text-ink-faint" aria-hidden />}
           </button>
+        </Row>
+        <Row label="Products">
+          {bestsellers && products.length > 0 ? (
+            <Claim src={bestsellers}>{products.map((p) => p.name).join(", ")}</Claim>
+          ) : (
+            <p className="text-body text-ink-soft">Your whole catalogue.</p>
+          )}
         </Row>
         <Row label={t("plan.brief")} onEdit={onEdit && (() => onEdit("brief"))}>
           <Claim src={plan.brief.value.headline}>{plan.brief.value.headline.value}</Claim>
@@ -209,8 +240,8 @@ export function ConfidenceMeter({ plan, className = "" }: { plan: Plan; classNam
         <p className={`shrink-0 text-body font-semibold ${tone.text}`} role="status">{tone.word}</p>
         <p className="min-w-0 flex-1 text-meta leading-5 text-ink-soft">
           {ratio >= 1
-            ? `We expect this crew to return about ${implied.toFixed(1)}× in these markets. We are guaranteeing ${g}×, which leaves ${room}% of room above the guarantee.`
-            : `We expect this crew to return about ${implied.toFixed(1)}× in these markets, and the guarantee is ${g}×. There is no room above it, so we will not quote this until the budget or the crew changes.`}
+            ? `HeyMoon expects this crew to bring about ${implied.toFixed(1)}x in sales in these markets. The guarantee is ${g}x, which leaves ${room}% of room above it.`
+            : `HeyMoon expects this crew to bring about ${implied.toFixed(1)}x in sales in these markets, and the guarantee is ${g}x. There is no room above it, so HeyMoon will not quote this until the budget or the crew changes.`}
         </p>
       </div>
     </div>
@@ -331,7 +362,7 @@ export function BudgetDial({
             onKeyUp={commit}
             onBlur={commit}
             aria-label="Phase 1 budget in dollars"
-            aria-valuetext={local === suggested ? `${fmtUSD(local)}, our suggestion` : fmtUSD(local)}
+            aria-valuetext={local === suggested ? `${fmtUSD(local)}, the HeyMoon suggestion` : fmtUSD(local)}
             className="relative z-10 block h-2 w-full cursor-pointer appearance-none rounded-pill"
             style={{ background: `linear-gradient(to ${dir === "rtl" ? "left" : "right"}, ${T.brand} ${pct}%, ${T.track} ${pct}%)` }}
           />
@@ -349,10 +380,10 @@ export function BudgetDial({
       </div>
 
       <p className="mt-2.5 text-meta leading-5 text-ink-soft">
-        At {fmtUSD(local)}, the Phase 1 revenue target is{" "}
-        <span className="font-semibold tabular-nums text-ink">{fmtUSD(local * guarantee)}</span> — the {guarantee}× we guarantee.
-        Creator fees for the whole crew come to {fmtUSD(crewCost)}, which is {crewShare}% of it; the rest is matching, tracking and
-        the reserve that pays out if the guarantee misses.
+        At {fmtUSD(local)}, Phase 1 guarantees{" "}
+        <span className="font-semibold tabular-nums text-ink">{fmtUSD(local * guarantee)}</span> in sales, which is the{" "}
+        {guarantee}x HeyMoon stands behind. Creator fees for the whole crew come to {fmtUSD(crewCost)}, which is{" "}
+        {crewShare}% of it. The rest is matching, tracking and the reserve that pays out if the guarantee misses.
       </p>
       {ladder.length > 1 && (
         <p className="mt-1.5 text-meta leading-5 text-ink-soft">
@@ -372,7 +403,7 @@ export function BudgetDial({
           onClick={backToSuggested}
           className="mt-2 text-meta font-semibold text-brand hover:underline"
         >
-          Back to our suggestion, {fmtUSD(suggested)}
+          Use the HeyMoon suggestion, {fmtUSD(suggested)}
         </button>
       )}
     </div>

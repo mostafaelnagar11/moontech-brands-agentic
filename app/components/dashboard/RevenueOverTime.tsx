@@ -93,7 +93,7 @@ export function RevenueOverTime() {
           const rx = Math.min(r, bH / 2);
           return (
             <g key={d.month}>
-              <title>{`${d.month} — $${d.rev.toLocaleString()} revenue · ${d.orders.toLocaleString()} orders`}</title>
+              <title>{`${d.month}. $${d.rev.toLocaleString()} in sales · ${d.orders.toLocaleString()} orders`}</title>
               <rect
                 x={cx(i) - r} y={y} width={barW} height={bH} rx={rx} ry={rx}
                 className={i === peak ? "fill-brand" : "fill-brand-100"}
@@ -114,7 +114,7 @@ export function RevenueOverTime() {
         <path d={line} fill="none" strokeWidth="2" strokeLinecap="round" className="stroke-brand-300" />
         {dots.map((p, i) => (
           <g key={REV_TIME[i].month}>
-            <title>{`${REV_TIME[i].month} — ${REV_TIME[i].orders.toLocaleString()} orders`}</title>
+            <title>{`${REV_TIME[i].month}. ${REV_TIME[i].orders.toLocaleString()} orders`}</title>
             <circle cx={p.x} cy={p.y} r="2.5" className="fill-brand-300" />
           </g>
         ))}
@@ -134,7 +134,7 @@ export function RevenueOverTime() {
       <div className="mt-2 flex items-center gap-5 text-meta text-ink-faint">
         <span className="flex items-center gap-2">
           <span className="h-2.5 w-2.5 rounded-[3px] border border-[#ddd4f5] bg-brand-100" />
-          Revenue
+          Sales
         </span>
         <span className="flex items-center gap-2">
           <svg width="20" height="10" viewBox="0 0 20 10" aria-hidden>

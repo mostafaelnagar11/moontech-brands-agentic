@@ -82,26 +82,26 @@ export interface AutonomyRule {
   locked?: boolean;
 }
 
-/* Every row names the agent it governs, because "the agent did it" is
-   not an answer a brand can argue with and "MoonScore AI moved $340
-   between two live ads" is. The three locked rows name an agent too —
-   there, to say plainly which one is being held back. */
+/* Every row says what it governs in the brand's terms, because "the
+   agent did it" is not an answer anyone can argue with and "HeyMoon
+   moved $340 between two live ads" is. The three locked rows are
+   written the same way, to say plainly what is being held back. */
 export const DEFAULT_AUTONOMY: AutonomyRule[] = [
-  { key: "move-money", label: "Move money", detail: "Start a phase, take a payment, or change your card. No agent does this. MoonScore AI can only move budget you have already paid, inside the phase you paid it for.", level: "never", locked: true },
-  { key: "publish", label: "Publish an ad", detail: "Put a creator's draft live on a platform. MoonLive AI is what publishes an ad, and it only ever publishes one you have approved.", level: "never", locked: true },
-  { key: "contract", label: "Sign anything on your behalf", detail: "Agree terms with a creator or a platform. MoonMatch AI matches a creator and MoonSearch AI vets them, but neither can commit you to anything.", level: "never", locked: true },
-  { key: "rebalance", label: "Shift budget between live creators", detail: "Move spend towards ads that are converting, inside the phase budget you already paid for. This is MoonScore AI, whose whole job is re-allocating budget to what converts.", level: "alone" },
-  { key: "brief-tweak", label: "Tighten the brief mid-phase", detail: "Add a rule to the brief when drafts keep missing the same thing. MoonWriter AI wrote the brief, so it is the one that edits it.", level: "alone" },
-  { key: "reorder", label: "Re-order the review queue", detail: "Put the drafts that matter most in front of you first. MoonSearch AI pushes anything that looks like a risk to the top; MoonScore AI pushes anything that looks like revenue.", level: "alone" },
-  { key: "learn", label: "Learn from a finished phase", detail: "Feed what a phase actually sold back into how creators are matched, how the brief is written and where budget goes. This is MoonLearning AI, and it is why each phase starts better informed than the one before it.", level: "alone" },
-  { key: "swap-creator", label: "Swap a creator who drops out", detail: "Replace a creator who cannot deliver with the next best match, inside the same phase budget. MoonMatch AI picks the replacement and MoonSearch AI vets them before they are offered to you.", level: "ask" },
-  { key: "pause-ad", label: "Pause a live ad that is underperforming", detail: "Stop spend behind an ad, without unpublishing it. MoonScore AI asks for this when an ad is spending without converting.", level: "ask" },
-  { key: "extend", label: "Extend the phase window", detail: "Give the phase more days to reach its target. MoonScore AI asks when the pace says the window was short rather than the work was wrong.", level: "ask" },
-  { key: "email-creator", label: "Message a creator directly", detail: "Ask for a re-cut, or chase a late draft. MoonWriter AI writes the note, and you read it before it goes.", level: "ask" },
+  { key: "move-money", label: "Move money", detail: "Start a phase, take a payment, or change your card. HeyMoon never does this. It can only move budget you have already paid, inside the phase you paid it for.", level: "never", locked: true },
+  { key: "publish", label: "Publish an ad", detail: "Put a creator's draft live on a platform. HeyMoon is what publishes an ad, and it only ever publishes one you have approved.", level: "never", locked: true },
+  { key: "contract", label: "Sign anything on your behalf", detail: "Agree terms with a creator or a platform. HeyMoon matches a creator and HeyMoon vets them, but neither can commit you to anything.", level: "never", locked: true },
+  { key: "rebalance", label: "Shift budget between live creators", detail: "Move spend towards ads that are converting, inside the phase budget you already paid for. This is HeyMoon, whose whole job is re-allocating budget to what converts.", level: "alone" },
+  { key: "brief-tweak", label: "Tighten the brief mid-phase", detail: "Add a rule to the brief when drafts keep missing the same thing. HeyMoon wrote the brief, so it is the one that edits it.", level: "alone" },
+  { key: "reorder", label: "Re-order the review queue", detail: "Put the drafts that matter most in front of you first. HeyMoon pushes anything that looks like a risk to the top, then anything that looks like a sale.", level: "alone" },
+  { key: "learn", label: "Learn from a finished phase", detail: "Feed what a phase actually sold back into how creators are matched, how the brief is written and where budget goes. This is HeyMoon, and it is why each phase starts better informed than the one before it.", level: "alone" },
+  { key: "swap-creator", label: "Swap a creator who drops out", detail: "Replace a creator who cannot deliver with the next best match, inside the same phase budget. HeyMoon picks the replacement and HeyMoon vets them before they are offered to you.", level: "ask" },
+  { key: "pause-ad", label: "Pause a live ad that is underperforming", detail: "Stop spend behind an ad, without unpublishing it. HeyMoon asks for this when an ad is spending without converting.", level: "ask" },
+  { key: "extend", label: "Extend the phase window", detail: "Give the phase more days to reach its target. HeyMoon asks when the pace says the window was short rather than the work was wrong.", level: "ask" },
+  { key: "email-creator", label: "Message a creator directly", detail: "Ask for a re-cut, or chase a late draft. HeyMoon writes the note, and you read it before it goes.", level: "ask" },
 ];
 
 /* ------------------------------------------------------------------ */
-/* Activity — what the agent did on its own                            */
+/* Activity — what HeyMoon did on its own                              */
 /* ------------------------------------------------------------------ */
 
 export interface ActivityEntry {
@@ -109,9 +109,6 @@ export interface ActivityEntry {
   at: number;
   /** The autonomy rule that permitted it. */
   ruleKey: string;
-  /** Which of the seven agents did it. An autonomous action nobody owns
-      is an action a brand cannot question, so every entry is signed. */
-  agent: string;
   title: string;
   /** Why it did this, in one sentence. */
   because: string;
@@ -130,45 +127,44 @@ const mins = (n: number) => now - n * 60_000;
 
 export const SEED_ACTIVITY: ActivityEntry[] = [
   {
-    id: "act-1", at: mins(41), ruleKey: "rebalance", agent: "MoonScore AI",
+    id: "act-1", at: mins(41), ruleKey: "rebalance",
     title: "Moved $340 behind Noon Reviews' haul video",
-    because: "Re-allocating budget to whatever is converting is MoonScore AI's entire job, and this was the clearest case in the phase: the haul was converting at 2.4× the phase median and still had budget left to spend, while two Story placements had spent 60% of theirs for a fifth of the revenue.",
+    because: "Re-allocating budget to whatever is converting is HeyMoon's entire job, and this was the clearest case in the phase: the haul was converting at 2.4x the phase median and still had budget left to spend, while two Story placements had spent 60% of theirs for a fifth of the sales.",
     effect: "Phase 2 spend: −$180 from two Story placements, +$340 to the TikTok haul. Total phase budget unchanged.",
     undone: false, undoable: true,
   },
   {
-    id: "act-2", at: mins(96), ruleKey: "reorder", agent: "MoonScore AI",
+    id: "act-2", at: mins(96), ruleKey: "reorder",
     title: "Put Mais Mustafa's trench draft at the top of your queue",
-    because: "MoonWriter AI is holding that draft against the brief it wrote: it is the only one in the queue I would not approve, and it is also the oldest. What it is short of is the discount code, and the code is what attributes every order on this phase — so MoonScore AI moved it to the front on revenue rather than on tidiness, and deciding it now leaves room for a re-cut while the review window is still open.",
+    because: "HeyMoon is holding that draft against the brief it wrote: it is the only one in the queue I would not approve, and it is also the oldest. What it is short of is the discount code, and the code is what attributes every order on this phase, so HeyMoon moved it to the front on sales rather than on tidiness, and deciding it now leaves room for a re-cut while the review window is still open.",
     effect: "Review queue order only. No decision was made on your behalf.",
     undone: false, undoable: true,
   },
   {
-    id: "act-3", at: mins(210), ruleKey: "brief-tweak", agent: "MoonWriter AI",
+    id: "act-3", at: mins(210), ruleKey: "brief-tweak",
     title: "Added a code-visibility rule to the Phase 2 brief",
-    because: "MoonWriter AI wrote this brief and reads every draft back against it. Three of the last nine drafts held the discount code on screen for under three seconds. Attribution runs entirely through that code, so a short hold is lost revenue.",
+    because: "HeyMoon wrote this brief and reads every draft back against it. Three of the last nine drafts held the discount code on screen for under three seconds. Attribution runs entirely through that code, so a short hold is lost revenue.",
     effect: "Brief now reads “hold the code on screen for at least five seconds”. Applies to drafts submitted from now on.",
     undone: false, undoable: true,
   },
   {
-    id: "act-4", at: mins(1_450), ruleKey: "rebalance", agent: "MoonScore AI",
+    id: "act-4", at: mins(1_450), ruleKey: "rebalance",
     title: "Held back $600 of Phase 2 budget",
-    because: "Four of the eight creators on this phase had not submitted a draft yet, and MoonScore AI will not spend a creator's share before the work it pays for exists — doing so would have flattered the early numbers.",
+    because: "Four of the eight creators on this phase had not submitted a draft yet, and HeyMoon will not spend a creator's share before the work it pays for exists. Doing so would have flattered the early numbers.",
     effect: "$600 reserved, released as drafts arrive. $410 of it has since been deployed.",
     undone: false, undoable: false,
     undoNote: "Not reversible from here: $410 of what was held has already gone out behind live ads. Ask me in the conversation and I will lay out what pulling the rest back would cost you.",
   },
   {
-    /* The continuous learning loop, doing something a brand can see.
-       MoonLearning AI is the only agent whose output is other agents:
-       it reads a finished phase and changes how MoonMatch matches,
-       how MoonWriter writes and where MoonScore puts money. */
-    id: "act-5", at: mins(2_880), ruleKey: "learn", agent: "MoonLearning AI",
-    title: "Stopped MoonMatch AI ranking your creators on follower count",
-    because: "Phase 1 and the first weeks of Phase 2 say the same thing about your brand: the drafts that talk through sizing and fabric out-earn the ones that only style the piece, and audience size predicts almost none of it. Feeding a finished result back into the other agents is what MoonLearning AI is for, so the ranking now weights what actually converted on your store.",
-    effect: "MoonMatch AI now ranks your matches on view-through and attributed orders rather than following, and MoonWriter AI's brief asks for sizing on camera by name — the ribbed-knit draft in your queue is the first one written to it. Nothing already live changed.",
+    /* The continuous learning loop, doing something a brand can see:
+       it reads a finished phase and changes how creators are matched,
+       how the brief is written and where budget goes. */
+    id: "act-5", at: mins(2_880), ruleKey: "learn",
+    title: "Stopped HeyMoon ranking your creators on follower count",
+    because: "Phase 1 and the first weeks of Phase 2 say the same thing about your brand: the drafts that talk through sizing and fabric out-earn the ones that only style the piece, and audience size predicts almost none of it. Feeding a finished result back into the next campaign is what HeyMoon is for, so the ranking now weights what actually converted on your store.",
+    effect: "HeyMoon now ranks your matches on view-through and attributed orders rather than following, and HeyMoon's brief asks for sizing on camera by name. The ribbed-knit draft in your queue is the first one written to it. Nothing already live changed.",
     undone: false, undoable: false,
-    undoNote: "Not reversible: this is something the other agents have learned, not a setting they hold. Setting “Learn from a finished phase” to Never stops the next update; it does not unlearn this one.",
+    undoNote: "Not reversible: this is something HeyMoon has learned, not a setting it holds. Setting “Learn from a finished phase” to Never stops the next update; it does not unlearn this one.",
   },
 ];
 
@@ -277,7 +273,7 @@ export interface State {
   locale: "en" | "ar";
   dismissedInbox: string[];
   /* What the brand thinks of each matched creator. A like or a pass is
-     a SIGNAL — it shapes who MoonMatch AI brings next — and never a
+     a SIGNAL — it shapes who HeyMoon brings next — and never a
      hire or a rejection, so nothing here books or cancels anyone. */
   creatorSignals: Record<number, CreatorSignal>;
 }

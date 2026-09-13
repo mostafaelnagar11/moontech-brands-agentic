@@ -52,7 +52,7 @@ export function RevenueChart({ phase }: { phase: Phase }) {
         viewBox={`0 0 ${W} ${H}`}
         className="block w-full"
         role="img"
-        aria-label={`Attributed revenue by day. ${fmtUSD(phase.rev)} of a ${fmtUSD(target)} target after ${pts.length} days.`}
+        aria-label={`Attributed sales by day. ${fmtUSD(phase.rev)} of a ${fmtUSD(target)} target after ${pts.length} days.`}
         onMouseLeave={() => setAt(null)}
         onMouseMove={(e) => {
           const box = e.currentTarget.getBoundingClientRect();

@@ -26,13 +26,12 @@ import { useT } from "../../lib/i18n";
 import { clearReadFocus, correctRead, useReadFocus, useStore } from "../../lib/store";
 import { EvidenceRow } from "../Evidence";
 import { READ_ORDER, ReadValue, srcFor } from "../ReadValue";
-import { RejectedBlock, TaskRoster , rosterTitle } from "../blocks";
+import { RejectedBlock, TaskRoster } from "../blocks";
 import { Btn, Card } from "../ui";
 
 /* Which agent found a layer. The evidence is attributed to the agent
    that gathered it, so the panel reads as work that was done rather
    than as a list of citations. */
-const agentFor = (k: ReadLayerKey) => READ_TASKS.find((t) => t.key === k)?.agent ?? "An agent";
 
 export function ReadPanel() {
   const read = useStore((s) => Object.values(s.reads)[0]);
@@ -40,7 +39,7 @@ export function ReadPanel() {
   if (!read) {
     return (
       <p className="text-body leading-6 text-ink-soft">
-        Paste your store link in the conversation and the agents will read the store; everything they find lands here.
+        Paste your store link in the conversation. HeyMoon reads your store, and everything it finds lands here.
       </p>
     );
   }
@@ -66,10 +65,9 @@ export function ReadPanel() {
         </div>
       </Card>
 
-      {/* Who did the work. Kept after the read finishes, because the
-          record of six named agents on your store is the thing that
-          makes this a read rather than a lookup. */}
-      <TaskRoster tasks={READ_TASKS} done={read.done} live={false} title={rosterTitle(READ_TASKS, "read your store")} />
+      {/* What was done, kept after it finishes. The record of the work
+          is what makes this your store details rather than a lookup. */}
+      <TaskRoster tasks={READ_TASKS} done={read.done} live={false} title="Read your store" />
 
       {read.eligibility && <EligibilityRow read={read} />}
 
@@ -118,7 +116,7 @@ function Layer({ readId, k, read }: { readId: string; k: ReadLayerKey; read: Bra
     const was =
       k === "category" ? String(read.category?.value ?? "")
       : k === "voice" ? read.voice?.value.register ?? ""
-      : "the agent's reading";
+      : "what HeyMoon found";
     record("value", was, draft.trim(), (r) => {
       if (k === "category" && r.category) {
         return { ...r, category: { ...r.category, value: draft.trim(), setBy: "brand", why: "You corrected this." } };
@@ -213,7 +211,7 @@ function Layer({ readId, k, read }: { readId: string; k: ReadLayerKey; read: Bra
       {openEv && src && (
         <div className="mt-2 rounded-control border border-brand/15 bg-brand/[0.03] p-2.5">
           <p className="text-[11px] font-semibold text-ink">
-            {agentFor(k)} read this off {src.evidence[0]?.label ?? "the store"}:
+            Read off {src.evidence[0]?.label ?? "your store"}:
           </p>
           <p className="mt-0.5 text-meta leading-5 text-ink-soft">{src.why}</p>
           <ul className="mt-1 divide-y divide-hairline">

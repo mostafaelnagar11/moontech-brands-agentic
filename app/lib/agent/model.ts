@@ -8,7 +8,7 @@
 
    The chain, end to end:
 
-     orders per view   ← MoonTech benchmark, by category
+     orders per view   ← HeyMoon benchmark, by category
      average order     ← the brand's own median price, converted
      revenue per view  = the two multiplied
      market fit        ← the share of a creator's audience inside the
@@ -33,7 +33,7 @@ export const AED_USD = 3.6725;
     tracking, and the reserve that pays out when a guarantee misses. */
 export const CREATOR_SHARE = 0.65;
 
-/** Orders per view, by category. MoonTech's own platform benchmark
+/** Orders per view, by category. HeyMoon's own platform benchmark
     across comparable brands — the only figure here that is not derived
     from the brand's own data, and it is labelled as a benchmark
     everywhere it appears. */
@@ -76,7 +76,7 @@ export function marketFit(c: CreatorSeed, markets: string[]): number {
    behind a guarantee is a favour, not a campaign, and a brand cannot
    tell whether a crew of three is a careful match or all we had. The
    ceiling is the other half of the same argument — past thirteen a
-   shortlist stops being a shortlist, and MoonSearch AI is vouching for
+   shortlist stops being a shortlist, and HeyMoon is vouching for
    people nobody looked at twice.
 
    Only the ceiling is enforced. POOL_MIN is a target the ROSTER has to
@@ -133,7 +133,7 @@ export function confidenceFrom(implied: number, multiple: number) {
    ══════════════════════════════════════════════════════════════════
 
    Ported unchanged from the current app's campaign calculator, because
-   it is MoonTech's own underwriting rule and not something a prototype
+   it is HeyMoon's own underwriting rule and not something a prototype
    should quietly reinvent:
 
        ratio = plan budget ÷ the multiple you are asking us to guarantee
@@ -178,8 +178,8 @@ export function getConfidence(budget: number, roas: number): Confidence {
     return {
       level: "high", label: "High confidence", pct: 85, ratio,
       desc: roas <= 2
-        ? "We can commit to this plan without reservation."
-        : "A good combination of budget and target return. We can commit to it.",
+        ? "HeyMoon can commit to this plan without reservation."
+        : "A good combination of budget and target multiple. HeyMoon can commit to it.",
     };
   }
   if (ratio >= CONFIDENCE_MEDIUM_RATIO) {
@@ -190,7 +190,7 @@ export function getConfidence(budget: number, roas: number): Confidence {
   }
   return {
     level: "low", label: "Low confidence", pct: 20, ratio,
-    desc: "Too much return asked of too little budget. Lower the target, or raise the plan.",
+    desc: "Too big a multiple asked of too little budget. Lower it, or raise the plan.",
   };
 }
 

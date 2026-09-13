@@ -79,7 +79,7 @@ export function ReturnRuler({
     <div className={className}>
       <div
         role="img"
-        aria-label={`${fmt(achieved)} times return so far, against a guaranteed ${guarantee} times. The next phase unlocks at ${fmt(unlock)} times.`}
+        aria-label={`${fmt(achieved)} times the budget in sales so far, against a guaranteed ${guarantee} times. The next phase unlocks at ${fmt(unlock)} times.`}
         className="relative h-2.5 rounded-pill bg-[#F1EFF7]"
       >
         {ticks.map((m) => (
@@ -100,7 +100,7 @@ export function ReturnRuler({
           className="absolute whitespace-nowrap text-micro font-semibold text-ink-faint"
           style={{ insetInlineStart: `${(unlock / max) * 100}%`, transform: "translateX(-50%)" }}
         >
-          {fmt(unlock)}× {label ?? "unlock line"}
+          {fmt(unlock)}x {label ?? "unlock line"}
         </span>
       </div>
     </div>

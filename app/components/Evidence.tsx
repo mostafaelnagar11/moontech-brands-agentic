@@ -21,7 +21,7 @@ const KIND_LABEL: Record<Evidence["kind"], string> = {
   product: "From the catalogue",
   social: "Public profile",
   orders: "Your order data",
-  platform: "MoonTech records",
+  platform: "HeyMoon records",
   benchmark: "Benchmark",
   creator: "Creator profile",
   policy: "How this works",
@@ -75,7 +75,7 @@ export function Why({ src, open, onClose }: { src: Sourced<unknown>; open: boole
         </ul>
       )}
       <p className="mt-2 text-[10px] uppercase tracking-wide text-ink-faint">
-        {src.setBy === "brand" ? "Set by you" : "Proposed by the agent"}
+        {src.setBy === "brand" ? "Set by you" : "Proposed by HeyMoon"}
       </p>
     </div>
   );
@@ -99,7 +99,7 @@ export function Figure({
     /* The guard. A figure with nothing behind it is a bug, and it looks
        like one rather than looking like data. */
     return (
-      <span className="rounded bg-danger/[0.12] px-1.5 py-0.5 text-meta font-semibold text-danger" title="No source — this must not ship">
+      <span className="rounded bg-danger/[0.12] px-1.5 py-0.5 text-meta font-semibold text-danger" title="No source. This must not ship.">
         unsourced
       </span>
     );

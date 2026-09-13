@@ -74,7 +74,7 @@ export function DashboardTopbar({
           }`}
         >
           <Sparkle size={13} weight="fill" aria-hidden />
-          <span className="hidden sm:inline">Ask MoonTech</span>
+          <span className="hidden sm:inline">Ask HeyMoon</span>
         </button>
 
         <span

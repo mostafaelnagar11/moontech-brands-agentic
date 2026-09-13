@@ -57,14 +57,14 @@ const metered = (rows: Phase[]) => rows.filter((p) => phasePct(p) !== null);
 /** This phase's multiple: what it earned against what it cost. Per
     phase, never run-cumulative, and never shown for a rung nobody has
     paid for — a $0 ÷ $6,000 reads like a failure rather than a blank. */
-const roasOf = (p: Phase) => (p.budget ? `${(p.rev / p.budget).toFixed(1)}×` : "—");
+const roasOf = (p: Phase) => (p.budget ? `${(p.rev / p.budget).toFixed(1)}x` : "—");
 
 /** How a phase's window reads. A phase with no start has not been
     funded, so it has no window to state — what it says instead depends
     on whether it is payable. */
 const phaseWindow = (p: Phase) => {
   if (!p.start) return p.status === "ready" ? "Starts when funded" : "Not scheduled";
-  return p.end ? `${p.start} – ${p.end}` : `Started ${p.start}`;
+  return p.end ? `${p.start} to ${p.end}` : `Started ${p.start}`;
 };
 
 const UNLOCK_PCT = Math.round(UNLOCK_AT * 100);
@@ -146,16 +146,16 @@ function CurrentPhaseCard({ phase, phases, onOpen }: { phase: Phase; phases: Pha
         green: true,
         text: next
           ? next.status === "ready"
-            ? `${UNLOCK_PCT}% unlock line crossed — ${phaseTitle(next.phaseNo)} is ready to fund`
-            : `${UNLOCK_PCT}% unlock line crossed — ${phaseTitle(next.phaseNo)} unlocks next`
+            ? `${UNLOCK_PCT}% unlock line crossed. ${phaseTitle(next.phaseNo)} is ready to fund`
+            : `${UNLOCK_PCT}% unlock line crossed. ${phaseTitle(next.phaseNo)} is offered next`
           : `${UNLOCK_PCT}% unlock line crossed`,
       }
     : p
       ? {
           green: false,
-          text: `${p.onPace ? "On pace" : "Behind pace"} — ${UNLOCK_PCT}% unlock line about ${p.daysToUnlock} days away`,
+          text: `${p.onPace ? "On pace" : "Behind pace"}. The ${UNLOCK_PCT}% unlock line is about ${p.daysToUnlock} days away`,
         }
-      : { green: false, text: "Deploying to matched creators — first results in a few days" };
+      : { green: false, text: "Deploying to matched creators. First results in a few days" };
 
   const metrics = [
     {
@@ -165,7 +165,7 @@ function CurrentPhaseCard({ phase, phases, onOpen }: { phase: Phase; phases: Pha
       note: ads.length ? `${Math.round((adsLive / ads.length) * 100)}% of drafts in` : "deploying",
     },
     { label: "Creators", value: String(phase.creators ?? 0), suffix: "", note: "on this phase" },
-    { label: "ROAS", value: roasOf(phase), suffix: "", note: `${phase.guaranteedRoas}× guaranteed` },
+    { label: "Multiple", value: roasOf(phase), suffix: "", note: `${phase.guaranteedRoas}x guaranteed` },
   ];
 
   return (
@@ -261,7 +261,7 @@ function NoPhaseRunningCard({ ready, onFund }: { ready: Phase | null; onFund: ()
           className="mt-5 inline-flex w-fit items-center gap-2 rounded-pill bg-brand/[0.08] px-4 py-2 text-meta font-semibold text-brand transition-colors hover:bg-brand/[0.14]"
         >
           <Lightning size={13} weight="fill" aria-hidden />
-          Fund Phase {ready.phaseNo} — {fmtUSD(ready.budget)}
+          Fund Phase {ready.phaseNo}, {fmtUSD(ready.budget)}
         </button>
       )}
     </Surface>
@@ -282,7 +282,7 @@ function LadderAverages({ funded }: { funded: Phase[] }) {
 
   const items = [
     {
-      label: "Revenue per funded phase",
+      label: "Sales per funded phase",
       value: funded.length ? fmtUSD(revPer) : "—",
       brand: true,
       desc: "What one rung has brought back, on average.",
@@ -336,22 +336,22 @@ function HowYouCompare({ funded }: { funded: Phase[] }) {
 
   const comparisons = [
     {
-      label: "Blended ROAS",
-      value: spend ? `${(revenue / spend).toFixed(1)}×` : "—",
-      ours: spend ? revenue / spend : null, cat: 4.1, catLabel: "vs 4.1× category avg",
+      label: "Sales per $1 spent",
+      value: spend ? `${(revenue / spend).toFixed(1)}x` : "—",
+      ours: spend ? revenue / spend : null, cat: 4.1, catLabel: "vs 4.1x category avg",
       good: "Ahead of comparable brands", bad: "Behind comparable brands",
     },
     {
       label: `Phases past the ${UNLOCK_PCT}% line`,
       value: rows.length ? `${Math.round((crossed / rows.length) * 100)}%` : "—",
       ours: rows.length ? (crossed / rows.length) * 100 : null, cat: 84, catLabel: "vs 84% category avg",
-      good: "Unlocking the next rung reliably", bad: "Opportunity — unlock pace",
+      good: "Unlocking the next rung reliably", bad: "Unlock pace is behind",
     },
     {
-      label: "Revenue per funded phase",
+      label: "Sales per funded phase",
       value: funded.length ? fmtUSD(Math.round(revenue / funded.length)) : "—",
       ours: funded.length ? revenue / funded.length : null, cat: 3200, catLabel: "vs $3,200 category avg",
-      good: "Bigger return per rung", bad: "Opportunity — return per rung",
+      good: "More sales per rung", bad: "Sales per rung is behind",
     },
   ];
 
@@ -364,7 +364,7 @@ function HowYouCompare({ funded }: { funded: Phase[] }) {
         </span>
       </div>
       <p className="mt-1 text-meta text-ink-faint">
-        Benchmarked against anonymised MoonTech brands at a similar point on their own ladder
+        Benchmarked against anonymised HeyMoon brands at a similar point on their own ladder
       </p>
       {/* One per row. In half a row three columns squeezed a 26px figure
           and its caption into ~200px; stacked, each comparison gets its
@@ -412,13 +412,13 @@ function PhaseLadder({ phases, label, onOpen }: { phases: Phase[]; label: string
       <div className="p-6 pb-0">
         <h3 className="text-[15px] font-semibold text-ink">Phase ladder</h3>
         <p className="mt-1 text-meta text-ink-faint">
-          Every phase {label} has run or has queued, in order — one runs at a time
+          Every phase {label} has run or has queued, in order. One runs at a time
         </p>
       </div>
 
       {phases.length === 0 ? (
         <p className="px-6 py-6 text-body text-ink-faint">
-          This campaign has no phases yet. MoonTech builds the ladder, so the first rung appears here once it is matched.
+          This campaign has no phases yet. HeyMoon builds the ladder, so the first rung appears here once it is matched.
         </p>
       ) : (
         /* The scroll lives inside the card rather than on it, so the
@@ -427,7 +427,7 @@ function PhaseLadder({ phases, label, onOpen }: { phases: Phase[]; label: string
           <table className="w-full min-w-[640px] text-body">
             <thead>
               <tr className="border-b border-hairline">
-                {["Phase", "Status", "Budget", "Revenue", "ROAS", ""].map((h, i) => (
+                {["Phase", "Status", "Budget", "Sales", "Multiple", ""].map((h, i) => (
                   <th key={h || i} className="pb-3 text-start text-meta font-medium text-ink-faint">{h}</th>
                 ))}
               </tr>
@@ -473,7 +473,7 @@ function PhaseLadder({ phases, label, onOpen }: { phases: Phase[]; label: string
                       {funded ? (
                         <>
                           <p className="font-semibold tabular-nums text-brand">{roasOf(p)}</p>
-                          <p className="mt-0.5 text-[11px] text-ink-faint">{p.guaranteedRoas}× guaranteed</p>
+                          <p className="mt-0.5 text-[11px] text-ink-faint">{p.guaranteedRoas}x guaranteed</p>
                         </>
                       ) : (
                         <span className="text-ink-faint/60">—</span>
@@ -544,12 +544,12 @@ export function HomeView() {
 
   const stats: { label: string; value: string; sub: string; hero?: boolean }[] = [
     {
-      label: "Revenue to date", value: fmtUSD(revenue), hero: true,
+      label: "Sales to date", value: fmtUSD(revenue), hero: true,
       sub: `Every funded phase, across ${campaigns.length} campaign${campaigns.length === 1 ? "" : "s"}`,
     },
     {
-      label: "Blended ROAS",
-      value: spend ? `${(revenue / spend).toFixed(1)}×` : "—",
+      label: "Sales per $1 spent",
+      value: spend ? `${(revenue / spend).toFixed(1)}x` : "—",
       sub: spend ? `${fmtUSD(revenue)} back on ${fmtUSD(spend)} funded` : "Nothing funded yet",
     },
     {
@@ -687,7 +687,7 @@ export function HomeView() {
       {/* Performance overview */}
       <div className="pt-2">
         <h2 className="text-[16px] font-semibold tracking-tight text-ink">Performance overview</h2>
-        <p className="mt-0.5 text-body text-ink-faint">Revenue over time, and how this ladder compares</p>
+        <p className="mt-0.5 text-body text-ink-faint">Sales over time, and how this ladder compares</p>
       </div>
 
       {/* Two cards, one row. The chart is viewBox-scaled, so at full
@@ -696,8 +696,8 @@ export function HomeView() {
           beside it than stacked under it. */}
       <div className="grid gap-5 xl:grid-cols-2">
         <Surface className="flex h-full flex-col p-5">
-          <h3 className="text-[15px] font-semibold text-ink">Revenue over time</h3>
-          <p className="mb-4 mt-1 text-meta text-ink-faint">Monthly revenue and orders for {label}</p>
+          <h3 className="text-[15px] font-semibold text-ink">Sales over time</h3>
+          <p className="mb-4 mt-1 text-meta text-ink-faint">Monthly sales and orders for {label}</p>
           <div className="flex-1">
             <RevenueOverTime />
           </div>

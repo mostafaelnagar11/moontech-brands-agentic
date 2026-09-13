@@ -185,7 +185,7 @@ export function LiveAdGrid({ ads }: { ads: AdRecord[] }) {
           <article key={a.id} className="overflow-hidden rounded-card border border-hairline bg-white shadow-card">
             <div className="relative aspect-[9/13] bg-neutral-200">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={a.img} alt={`${a.creatorName} — ${a.product}`} className="h-full w-full object-cover object-top" loading="lazy" />
+              <img src={a.img} alt={`${a.creatorName}, ${a.product}`} className="h-full w-full object-cover object-top" loading="lazy" />
               <span className="absolute start-2 top-2 rounded bg-black/55 px-1.5 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
                 {a.format}
               </span>

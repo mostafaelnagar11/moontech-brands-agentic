@@ -4,8 +4,9 @@ import "./globals.css";
 import { DirSync } from "./components/DirSync";
 
 export const metadata: Metadata = {
-  title: "MoonTech — agentic",
-  description: "Paste your store link. The agent reads it, builds the campaign and guarantees the return.",
+  title: "HeyMoon.AI",
+  description:
+    "Paste your store link. HeyMoon builds a complete creator campaign around what you sell, and guarantees the sales.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -85,10 +85,10 @@ export function phasesFor(planBudget: number): [number, number, number] {
    THE WARM-UP GUARANTEES YOUR MONEY BACK, AND THEN IT CLIMBS
    ══════════════════════════════════════════════════════════════════
 
-   Phase 1 is guaranteed at 1×. A thousand dollars in, a thousand
+   Phase 1 is guaranteed at 1x. A thousand dollars in, a thousand
    dollars of revenue out — no profit, and that is the point. The
    warm-up exists to prove the crew on real orders at no risk, not to
-   make the case; Alex said it plainly in the review call, that 1× on
+   make the case; Alex said it plainly in the review call, that 1x on
    1K is no return, which is exactly why a brand has to see all three
    phases before they can judge any of them.
 
@@ -97,7 +97,7 @@ export function phasesFor(planBudget: number): [number, number, number] {
    Phase 2 sits midway between the warm-up and that peak, and the three
    together blend to the target.
 
-       1 × b1  +  r2 × b2  +  r3 × b3   =   target × plan budget
+       1 x b1  +  r2 x b2  +  r3 x b3   =   target x plan budget
        r2 = (1 + r3) / 2
 
    Rounded to one decimal for display, and every total on screen is the
@@ -130,7 +130,7 @@ export function ladderTotals(planBudget: number, targetRoas: number) {
 /** What the agent proposes before the brand touches anything: the
     strategy's multiple, and the smallest plan that makes it a promise
     we can commit to. When the cap makes high confidence impossible at
-    that multiple — it does at 8× — it proposes the largest plan we
+    that multiple — it does at 8x — it proposes the largest plan we
     would stand behind and says so. */
 export function suggestPlanShape(multiple: number): { planBudget: number; roas: number } {
   const high = budgetForHigh(multiple);
@@ -153,46 +153,36 @@ export function suggestPlanShape(multiple: number): { planBudget: number; roas: 
    lands last. */
 export interface ReadTask {
   key: ReadLayerKey;
-  /** Who is doing it. Named, because "analysing…" is not a status. */
-  agent: string;
-  /** What that agent is for, in four words. */
-  role: string;
-  /** What it is doing right now. */
+  /** What it is doing right now. A verb, because "analysing…" is not a
+      status and a name is not one either. */
   note: string;
   /** What it will have produced. */
   produces: string;
   weight: number;
 }
 
-/* MoonTech runs seven specialised agents as one pipeline. These are
-   those agents, doing the jobs the product says they do — not names
-   invented for a loading state.
-
-     MoonShot AI     Intake        reads the brief, sets campaign goals
-     MoonMatch AI    Matching      finds the right creators, instantly
-     MoonSearch AI   Safety        vets creators for brand and fraud risk
-     MoonWriter AI   Creative      generates briefs and ad copy
-     MoonLive AI     Activation    launches campaigns across channels
-     MoonScore AI    Optimization  re-allocates budget to what converts
-     MoonLearning AI Learning      feeds results back into every agent
-
-   On a store read there is no brief to intake, so the store IS the
-   brief and MoonShot does most of the reading. The three others that
-   appear here are reading the specific thing they will need later:
-   MoonMatch wants your audience because it is about to match creators
-   to it, MoonWriter wants your register because it is about to write in
-   it, and MoonScore wants your traffic because it decides what can be
-   guaranteed. */
+/* The work of reading a store, as the steps it is actually made of.
+ 
+   HeyMoon runs this as a pipeline of specialised parts, and none of
+   them is named here or anywhere a brand can see. A column of internal
+   names is a fact about our architecture; what a brand is owed is what
+   is being done and what it will produce. Each row therefore carries a
+   verb and an output, and nothing else.
+ 
+   The rows are ordered the way the work runs: the homepage first
+   because everything else is reached from it, then the shallow pages,
+   then the ones that need many samples. Eligibility lands last because
+   it needs the traffic panel. */
 export const READ_TASKS: ReadTask[] = [
-  { key: "identity", agent: "MoonShot AI", role: "Intake", note: "Reading the homepage", produces: "Name and positioning", weight: 1 },
-  { key: "category", agent: "MoonShot AI", role: "Intake", note: "Walking the navigation and the designer index", produces: "What you actually sell", weight: 3 },
-  { key: "socials", agent: "MoonMatch AI", role: "Matching", note: "Following the footer links to live profiles", produces: "Your own channels and their reach", weight: 2 },
-  { key: "priceBand", agent: "MoonShot AI", role: "Intake", note: "Sampling 60 product pages", produces: "Price band and median order value", weight: 5 },
-  { key: "voice", agent: "MoonWriter AI", role: "Creative", note: "Counting the words your store repeats", produces: "The register a creator has to match", weight: 4 },
-  { key: "markets", agent: "MoonShot AI", role: "Intake", note: "Checking delivery promises and currencies", produces: "Markets, ranked by how you serve them", weight: 2 },
-  { key: "bestsellers", agent: "MoonShot AI", role: "Intake", note: "Ranking by shelf position and restocks", produces: "The products worth putting behind creators", weight: 5 },
-  { key: "seasonality", agent: "MoonShot AI", role: "Intake", note: "Reading last year's campaign pages", produces: "When your demand peaks", weight: 3 },
-  { key: "eligibility", agent: "MoonScore AI", role: "Optimization", note: "Checking traffic against the guarantee floor", produces: "Whether we can promise a return", weight: 2 },
+  { key: "identity", note: "Reading the homepage", produces: "Name and positioning", weight: 1 },
+  { key: "category", note: "Walking the navigation and the designer index", produces: "What you actually sell", weight: 3 },
+  { key: "socials", note: "Following the footer links to live profiles", produces: "Your own channels and their reach", weight: 2 },
+  { key: "priceBand", note: "Sampling 60 product pages", produces: "Price band and median order value", weight: 5 },
+  { key: "voice", note: "Counting the words your store repeats", produces: "The register a creator has to match", weight: 4 },
+  { key: "markets", note: "Checking delivery promises and currencies", produces: "Markets, ranked by how you serve them", weight: 2 },
+  { key: "bestsellers", note: "Ranking by shelf position and restocks", produces: "The products worth putting behind creators", weight: 5 },
+  { key: "seasonality", note: "Reading last year's campaign pages", produces: "When your demand peaks", weight: 3 },
+  { key: "eligibility", note: "Checking traffic against the guarantee floor", produces: "Whether HeyMoon can guarantee sales", weight: 2 },
 ];
 
 const LAYER_WORK = READ_TASKS;
@@ -207,7 +197,7 @@ async function* read_site(i: { url: string }, ctx: RunContext): ToolStream<Brand
       finds more — the progress line is a count of work, not a clock. */
   let total = 4;
   let done = 0;
-  yield chunk({ ...acc }, `${LAYER_WORK[0].agent} · Opening ${full.url}`, done, total);
+  yield chunk({ ...acc }, `Opening ${full.url}`, done, total);
 
   for (let n = 0; n < LAYER_WORK.length; n++) {
     const unit = LAYER_WORK[n];
@@ -218,7 +208,7 @@ async function* read_site(i: { url: string }, ctx: RunContext): ToolStream<Brand
       (full as unknown as Record<string, unknown>)[unit.key];
     acc.done = [...acc.done, unit.key];
     done += 1;
-    yield chunk({ ...acc }, `${unit.agent} · ${unit.note}`, done, total);
+    yield chunk({ ...acc }, unit.note, done, total);
   }
   return acc;
 }
@@ -233,7 +223,7 @@ async function* read_site(i: { url: string }, ctx: RunContext): ToolStream<Brand
    warm-up points at, and therefore how much return we are willing to
    guarantee on it. Spread across your whole range we learn the most
    and promise the least; concentrated on two bestsellers the same
-   thousand dollars can carry an 8×, because repetition converts and
+   thousand dollars can carry an 8x, because repetition converts and
    nothing is being spent on finding out.
 
    `pick` is how the crew is chosen: "score" balances value for money
@@ -246,15 +236,15 @@ export const STRATEGY_META: Record<StrategyKey, {
 }> = {
   steady: {
     name: "The wide, safe plan",
-    sentence: "your whole bestselling range, spread across the warm-up crew, with a 3× return guaranteed",
+    sentence: "your whole bestselling range, spread across the warm-up crew, with 3x guaranteed",
     multiple: 3, crew: 8, lines: 8, pick: "score",
     blurb: "The warm-up crew across your whole bestselling range. The widest read on what your audience actually buys.",
     costLine: "Same $1,000 as the other two. You are spending it on breadth, which is why the promise on it is the smallest.",
-    downside: "Spread across eight product lines, no single one gets enough repetition to break out. You learn the most and you win slowly — and a 3× floor on this much spend is a small promise.",
+    downside: "Spread across eight product lines, no single one gets enough repetition to break out. You learn the most and you win slowly. A 3x floor on this much spend is a small promise.",
   },
   balanced: {
     name: "The balanced plan",
-    sentence: "your four strongest products, with a 5× return guaranteed",
+    sentence: "your four strongest products, with 5x guaranteed",
     multiple: 5, crew: 7, lines: 4, pick: "score",
     blurb: "The warm-up crew on your four strongest products. The default, and the one most brands start with.",
     costLine: "Same $1,000 as the other two, pointed at the four products most likely to carry it.",
@@ -262,10 +252,10 @@ export const STRATEGY_META: Record<StrategyKey, {
   },
   aggressive: {
     name: "The concentrated plan",
-    sentence: "your two bestsellers and nothing else, with an 8× return guaranteed",
+    sentence: "your two bestsellers and nothing else, with 8x guaranteed",
     multiple: 8, crew: 6, lines: 2, pick: "value",
     blurb: "Everything the warm-up has, pointed at your two bestsellers. Highest ceiling, thinnest margin for error.",
-    costLine: "Same $1,000 as the other two, with none of it spent on breadth — all of it goes behind two products.",
+    costLine: "Same $1,000 as the other two, with none of it spent on breadth. All of it goes behind two products.",
     downside: "There is no third product to carry the phase. If both bestsellers stall in-market this misses, and you lose the month.",
   },
 };
@@ -291,8 +281,8 @@ function defaultMarkets(read: BrandRead): string[] {
 }
 
 /** Everyone who could work on this brand: right markets, right niche,
-    and not publishing for a competitor. This is what MoonMatch AI finds
-    and MoonSearch AI vets, before any budget is applied. */
+    and not publishing for a competitor. This is what HeyMoon finds
+    and HeyMoon vets, before any budget is applied. */
 function matchedPool(read: BrandRead, markets: string[], pick: "score" | "value" = "score"): CreatorSeed[] {
   const { rpv, family } = economicsOf(read);
   const wantNiche =
@@ -347,7 +337,7 @@ function reasonsFor(c: CreatorSeed, read: BrandRead, markets: string[], rpv: num
   ));
 
   out.push(S(
-    `${Math.round(vt * 100)}% of her following actually watches — ${fmtCount(c.avgViews)} views on ${fmtCount(c.followers)} followers`,
+    `${Math.round(vt * 100)}% of her following actually watches. ${fmtCount(c.avgViews)} views on ${fmtCount(c.followers)} followers`,
     "Followers are a vanity number and appear here only as a denominator. This is the share of an audience that turns up.",
     [ev(`vt-${c.id}`, "creator", "her last 5 posts", `${c.posts.map((p) => fmtCount(p.views)).join(", ")} views.`)],
     "average views ÷ followers"
@@ -364,16 +354,16 @@ function reasonsFor(c: CreatorSeed, read: BrandRead, markets: string[], rpv: num
   ));
 
   const exp = c.avgViews * rpv * fit;
-  /* Value, never price. What a creator is paid is MoonTech's business
+  /* Value, never price. What a creator is paid is HeyMoon's business
      and showing it beside her name is against the premise of the
      product. What she is worth to the brand is the brand's business. */
   out.push(S(
-    `Worth about ${fmtUSD(exp)} in revenue to this phase`,
+    `Worth about ${fmtUSD(exp)} in sales to this phase`,
     "Her average views, multiplied by what a view is worth for your price band, and cut to the share of her audience in your markets.",
     [
-      ev(`ec-${c.id}`, "benchmark", "MoonTech category benchmark", `${(revenuePerView(read.priceBand?.value.median ?? 300, familyOf(cat)) * 1000).toFixed(0)} dollars per thousand views for this category and price band.`),
+      ev(`ec-${c.id}`, "benchmark", "HeyMoon category benchmark", `${(revenuePerView(read.priceBand?.value.median ?? 300, familyOf(cat)) * 1000).toFixed(0)} dollars of sales per thousand views for this category and price band.`),
     ],
-    "average views × revenue per view × market fit"
+    "average views x sales per view x market fit"
   ));
 
   return out;
@@ -397,23 +387,25 @@ function toMatch(c: CreatorSeed, read: BrandRead, markets: string[], rpv: number
 function briefFor(read: BrandRead, lines: number): BriefDraft {
   const voice = read.voice?.value;
   const best = (read.bestsellers?.value ?? []).slice(0, lines === 2 ? 2 : lines === 4 ? 4 : 8);
-  const name = read.identity?.name.value ?? "the brand";
   return {
+    /* The line says how the products are shown, not which products.
+       Which ones is the Products row directly above it (C17), and the
+       card used to print the same two names twice. */
     headline: S(
-      `${name} — ${best.map((b) => b.name).slice(0, 2).join(" and ")}, shown in real use`,
-      "Your two strongest lines, framed the way your own product copy frames them.",
-      read.bestsellers?.evidence.slice(0, 2) ?? []
+      `Shown in real use, in your voice.`,
+      "Framed the way your own product copy frames it. The products it covers are the row above.",
+      read.voice?.evidence.slice(0, 2) ?? read.bestsellers?.evidence.slice(0, 2) ?? []
     ),
     mustSay: S(
       [
         `Name the product in the first three seconds`,
         `Hold the discount code on screen for at least five seconds`,
         ...(best.length ? [`Cover one of: ${best.map((b) => b.name).join(", ")}`] : []),
-        `Say the price honestly — ${read.priceBand ? `${read.priceBand.value.median} ${read.priceBand.value.currency}` : "as listed"} is the median here`,
+        `Say the price honestly. ${read.priceBand ? `${read.priceBand.value.median} ${read.priceBand.value.currency}` : "as listed"} is the median here`,
       ],
       "Attribution on a guaranteed phase runs entirely through the code, so the code rule is not stylistic. The rest comes from what your store already says.",
       [
-        ev("br-code", "policy", "how attribution works", "One tracking code per creator. A code that is not readable is revenue that cannot be attributed."),
+        ev("br-code", "policy", "how attribution works", "One tracking code per creator. A code that is not readable is a sale that cannot be attributed."),
         ...(read.priceBand?.evidence.slice(0, 1) ?? []),
       ]
     ),
@@ -421,7 +413,7 @@ function briefFor(read: BrandRead, lines: number): BriefDraft {
       [
         "No competing retailer in frame",
         "No claim about delivery times outside the markets on this plan",
-        ...(voice ? [`Avoid exclamation marks — your own copy has none across ${read.voice?.evidence[0]?.detail.split(";")[0] ?? "the pages we read"}`] : []),
+        ...(voice ? [`Avoid exclamation marks. Your own copy has none across ${read.voice?.evidence[0]?.detail.split(";")[0] ?? "the pages I read"}`] : []),
       ],
       "Two are standard. The third is yours: your store writes in a register that this would break.",
       read.voice?.evidence.slice(0, 1) ?? []
@@ -452,15 +444,15 @@ function ladderFor(planBudget: number, multiple: number): LadderRung[] {
   return [
     {
       phaseNo: 1, budget: PHASE1_BUDGET, multiple: m1, state: "proposed",
-      note: "The warm-up is always $1,000, and it is guaranteed at 1× — you get your thousand back. No profit, on purpose: this phase exists to prove the crew on your real orders at no risk to you, and it is the only phase you pay for today.",
+      note: "The warm-up is $1,000 for every brand, guaranteed at 1x. You get your thousand back. It proves the crew on your real orders, and it is the only phase due today.",
     },
     {
       phaseNo: 2, budget: p2, multiple: m2, state: "locked",
-      note: `Phase 2 is where the return starts: ${fmtUSD(p2)} at ${m2}×, with the creators the warm-up could not afford. It is offered once Phase 1 reaches ${unlockPct}% of its revenue target. I build it for you from Phase 1's results, and you decide then whether to start it.`,
+      note: `${fmtUSD(p2)} at ${m2}x, with the creators the warm-up could not afford. Offered once Phase 1 reaches ${unlockPct}% of its sales target, and built from what Phase 1 did.`,
     },
     {
       phaseNo: 3, budget: p3, multiple: m3, state: "locked",
-      note: `Phase 3 is the peak, at ${m3}×, with the whole matched pool behind it. It is the last phase of this plan, priced for real once Phase 2 closes, on the results you have by then.`,
+      note: `${fmtUSD(p3)} at ${m3}x, with the whole matched pool behind it. Priced for real once Phase 2 closes, on the results you have by then.`,
     },
   ];
 }
@@ -476,12 +468,12 @@ function ladderSourced(planBudget: number, multiple: number): Sourced<LadderRung
   const blended = totalBudget > 0 ? totalGuaranteed / totalBudget : 0;
   return S(
     rungs,
-    `The warm-up returns your ${fmtUSD(PHASE1_BUDGET)} and no more — it is there to prove the crew, not to pay you. The return climbs after it: ${rungs[1].multiple}× on Phase 2 and ${rungs[2].multiple}× on Phase 3, which is how ${fmtUSD(totalBudget)} across the three carries ${fmtUSD(totalGuaranteed)} of guaranteed revenue and averages ${blended.toFixed(1)}× overall. Each phase is offered only when the one before it reaches 80% of its own target.`,
+    `The warm-up gives your ${fmtUSD(PHASE1_BUDGET)} back and no more. It is there to prove the crew, not to pay you. The guarantee climbs after it: ${rungs[1].multiple}x on Phase 2 and ${rungs[2].multiple}x on Phase 3, which is how ${fmtUSD(totalBudget)} across the three carries ${fmtUSD(totalGuaranteed)} of guaranteed sales and averages ${blended.toFixed(1)}x overall. Each phase is offered only when the one before it reaches 80% of its own target.`,
     [
       ev("p-lad", "policy", "the three phases", "Three phases, run one at a time. You start Phase 1 only, and you decide on each next phase when it unlocks. Stopping after Phase 1 is allowed."),
-      ev("p-lad-total", "platform", "the whole campaign", `${rungs.map((r) => `Phase ${r.phaseNo} ${fmtUSD(r.budget)} at ${r.multiple}× = ${fmtUSD(Math.round(r.budget * r.multiple))}`).join(" · ")}. Total ${fmtUSD(totalGuaranteed)} on ${fmtUSD(totalBudget)}.`),
+      ev("p-lad-total", "platform", "the whole campaign", `${rungs.map((r) => `Phase ${r.phaseNo} ${fmtUSD(r.budget)} at ${r.multiple}x = ${fmtUSD(Math.round(r.budget * r.multiple))}`).join(" · ")}. Total ${fmtUSD(totalGuaranteed)} on ${fmtUSD(totalBudget)}.`),
     ],
-    "Σ (phase budget × that phase's multiple)"
+    "Σ (phase budget x that phase's multiple)"
   );
 }
 
@@ -508,7 +500,7 @@ function priceOf(read: BrandRead, markets: string[], budget: number, multiple: n
   const focus = FOCUS_MULTIPLIER[lines] ?? 1;
   const expected = crew.reduce((n, c) => n + expectedFor(c, rpv, markets, focus), 0);
   const vat = vatOn(budget);
-  /* Phase 1 is metered at 1×, not at the plan's multiple. It is
+  /* Phase 1 is metered at 1x, not at the plan's multiple. It is
      guaranteed to return the thousand dollars it cost, and nothing
      more; the return lives in the two phases it unlocks. */
   const target = budget * PHASE1_ROAS;
@@ -519,23 +511,23 @@ function priceOf(read: BrandRead, markets: string[], budget: number, multiple: n
      never as a fee beside a person. */
   const crewEv = ev("q-crew", "platform", `${crew.length} creator fees, in total`, `${fmtUSD(crewCost)} across the crew for one phase deliverable each.`);
   const shareEv = ev("q-share", "policy", "budget split", `${Math.round(CREATOR_SHARE * 100)}% creator fees, ${Math.round((1 - CREATOR_SHARE) * 100)}% platform and guarantee reserve.`);
-  const benchEv = ev("q-bench", "benchmark", "MoonTech category benchmark", `$${(rpv * 1000).toFixed(0)} of revenue per thousand views at your price band.`);
+  const benchEv = ev("q-bench", "benchmark", "HeyMoon category benchmark", `$${(rpv * 1000).toFixed(0)} of sales per thousand views at your price band.`);
 
   return {
-    budget: S(budget, `Phase 1 is ${fmtUSD(PHASE1_BUDGET)} for every brand. It is not sized from your store or negotiated — it is the fixed price of the warm-up, and what it buys is ${fmtUSD(crewCost)} of creator fees plus the tracking and the reserve that pays you if the guarantee misses.`, [crewEv, shareEv]),
-    crewCost: S(crewCost, "What the whole crew is paid for one deliverable each, as one number. It is never split out per person — a price beside a creator is against the premise of the product.", [crewEv, shareEv], "Σ creator fees"),
-    vat: S(vat, "VAT at 5%, on the budget only.", [ev("q-vat", "policy", "UAE VAT", `${Math.round(VAT_RATE * 100)}% standard rate.`)], "budget × 5%"),
+    budget: S(budget, `Phase 1 is ${fmtUSD(PHASE1_BUDGET)} for every brand. It is not sized from your store or negotiated. It is the fixed price of the warm-up, and what it buys is ${fmtUSD(crewCost)} of creator fees plus the tracking and the reserve that pays you if the guarantee misses.`, [crewEv, shareEv]),
+    crewCost: S(crewCost, "What the whole crew is paid for one deliverable each, as one number. It is never split out per person. A price beside a creator is against the premise of the product.", [crewEv, shareEv], "Σ creator fees"),
+    vat: S(vat, "VAT at 5%, on the budget only.", [ev("q-vat", "policy", "UAE VAT", `${Math.round(VAT_RATE * 100)}% standard rate.`)], "budget x 5%"),
     total: S(budget + vat, "Budget plus VAT. This is the figure you would be charged.", [ev("q-total", "policy", "what you pay", "One payment, for this phase only.")], "budget + VAT"),
-    revenueTarget: S(target, `What the warm-up is metered against. Phase 1 is guaranteed at ${PHASE1_ROAS}× — ${fmtUSD(budget)} in, ${fmtUSD(target)} of revenue out. No profit on this phase, deliberately: it is here to prove the crew on your real orders at no risk, and the ${multiple}× you asked for is the average across all three phases, carried by the two it unlocks.`, [ev("q-tgt", "policy", "the guarantee", `If the warm-up closes under ${fmtUSD(target)}, MoonTech pays the difference.`), ev("q-blend", "policy", "where the return is", `Phase 1 is ${PHASE1_ROAS}×; Phases 2 and 3 climb so the whole plan averages ${multiple}×.`)], `${fmtUSD(budget)} × ${PHASE1_ROAS}`),
-    unlockAt: S(target * UNLOCK_AT, `The next phase unlocks here — ${Math.round(UNLOCK_AT * 100)}% of this phase's target.`, [ev("q-unlock", "policy", "the 80% line", "One phase runs at a time. Crossing 80% of its own target unlocks the next, which you then start.")], `target × ${UNLOCK_AT}`),
+    revenueTarget: S(target, `What the warm-up is metered against. Phase 1 is guaranteed at ${PHASE1_ROAS}x. ${fmtUSD(budget)} in, ${fmtUSD(target)} of sales out. No profit on this phase, deliberately: it is here to prove the crew on your real orders at no risk, and the ${multiple}x you asked for is the average across all three phases, carried by the two it unlocks.`, [ev("q-tgt", "policy", "the guarantee", `${fmtUSD(target)} is what HeyMoon guarantees on the warm-up.`), ev("q-blend", "policy", "where the guarantee climbs", `Phase 1 is ${PHASE1_ROAS}x; Phases 2 and 3 climb so the whole plan averages ${multiple}x.`)], `${fmtUSD(budget)} x ${PHASE1_ROAS}`),
+    unlockAt: S(target * UNLOCK_AT, `The next phase is offered here, at ${Math.round(UNLOCK_AT * 100)}% of this phase's target.`, [ev("q-unlock", "policy", "the 80% line", "One phase runs at a time. Crossing 80% of its own target unlocks the next, which you then start.")], `target x ${UNLOCK_AT}`),
     expected: S(
       { low: Math.round(expected * 0.72), high: Math.round(expected * 1.18) },
-      "What we actually expect, as a range, from this crew's real reach in your markets. The guarantee is the floor of what you are owed; this is the middle of what tends to happen.",
+      "What HeyMoon actually expects, as a range, from this crew's real reach in your markets. The guarantee is the floor of what you are owed; this is the middle of what tends to happen.",
       [crewEv, benchEv, ev("q-range", "benchmark", "why a range", "Across comparable phases, outcomes land within −28% / +18% of the modelled figure four times in five.")],
-      "Σ (creator views × revenue per view × market fit) × focus"
+      "Σ (creator views x sales per view x market fit) x focus"
     ),
     downside: S(
-      `If this phase closes under ${fmtUSD(target)}, MoonTech pays you the difference. You are never out more than the ${fmtUSD(budget + vat)} you put in, and nothing beyond Phase 1 is committed.`,
+      `${fmtUSD(target)} in sales is guaranteed on this phase. You are never out more than the ${fmtUSD(budget + vat)} you put in, and nothing beyond Phase 1 is committed.`,
       "The guarantee, stated as the worst case rather than as a promise.",
       [ev("q-down", "policy", "the guarantee, in reverse", "The reserve inside the budget is what pays for this.")]
     ),
@@ -552,30 +544,24 @@ function priceOf(read: BrandRead, markets: string[], budget: number, multiple: n
    independently. */
 export interface BuildTask {
   key: string;
-  /** Who is doing it. Named, because "building…" is not a status. */
-  agent: string;
-  /** What that agent is for, in a few words. */
-  role: string;
   /** What it is doing right now. */
   note: string;
   /** What it will have produced. */
   produces: string;
 }
 
-/* Building the campaign is where the pipeline earns its name. Five of
-   the seven agents run here, each doing its own job: MoonShot sets the
-   goals, MoonMatch finds the creators, MoonSearch vets them, MoonScore
-   prices the phases and MoonWriter drafts the brief. MoonLive and
-   MoonLearning come later — one when an approved ad goes out, the other
-   when the results come back. */
+/* Building the campaign, as the steps it is made of. Same rule as the
+   read above: a verb and an output per row, no names. Activation and
+   learning are not here because neither has happened yet — one waits
+   on an approved ad going out, the other on results coming back. */
 export const BUILD_TASKS: BuildTask[] = [
-  { key: "markets", agent: "MoonShot AI", role: "Intake", note: "Setting the campaign goals and the markets to run in", produces: "The markets Phase 1 runs in" },
-  { key: "audience", agent: "MoonMatch AI", role: "Matching", note: "Reading your audience off your own channels", produces: "Who the creators will be talking to" },
-  { key: "creators", agent: "MoonMatch AI", role: "Matching", note: "Matching creators whose audience is in your markets", produces: "The creators who fit your brand" },
-  { key: "safety", agent: "MoonSearch AI", role: "Safety", note: "Vetting every match for brand and fraud risk", produces: "Competitors excluded, overlaps declared" },
-  { key: "pricing", agent: "MoonScore AI", role: "Optimization", note: "Sizing the warm-up crew against the $1,000 Phase 1 budget", produces: "Who the warm-up briefs, and the return we guarantee" },
-  { key: "brief", agent: "MoonWriter AI", role: "Creative", note: "Drafting the brief from your own product copy", produces: "What every creator must say, and must not say" },
-  { key: "ladder", agent: "MoonScore AI", role: "Optimization", note: "Laying out Phases 2 and 3 behind the warm-up", produces: "The whole campaign: three phases, one at a time" },
+  { key: "markets", note: "Setting the campaign goals and the markets to run in", produces: "The markets Phase 1 runs in" },
+  { key: "audience", note: "Reading your audience off your own channels", produces: "Who the creators will be talking to" },
+  { key: "creators", note: "Matching creators whose audience is in your markets", produces: "The creators who fit your brand" },
+  { key: "safety", note: "Vetting every match for brand and fraud risk", produces: "Competitors excluded, overlaps declared" },
+  { key: "pricing", note: "Sizing the warm-up crew against the $1,000 Phase 1 budget", produces: "Who the warm-up briefs, and the sales HeyMoon guarantees" },
+  { key: "brief", note: "Drafting the brief from your own product copy", produces: "What every creator must say, and must not say" },
+  { key: "ladder", note: "Laying out Phases 2 and 3 behind the warm-up", produces: "The whole campaign: three phases, one at a time" },
 ];
 
 const buildTask = (key: string) => BUILD_TASKS.find((t) => t.key === key)!;
@@ -599,7 +585,7 @@ function planBuild(read: BrandRead, strategy?: StrategyKey) {
 
   /* The strategy is always said as its name AND its sentence. "Balanced"
      on its own tells a store owner nothing. */
-  const strategyWhy = `${meta.name} — ${meta.sentence}. ${
+  const strategyWhy = `${meta.name}. ${meta.sentence}. ${
     key === "balanced"
       ? "It is the middle of the three, and the one most brands at your size and category start with."
       : meta.costLine
@@ -607,7 +593,7 @@ function planBuild(read: BrandRead, strategy?: StrategyKey) {
 
   const base: Plan = {
     id, readId: read.id, brandName: read.identity?.name.value ?? read.url,
-    strategy: S(key, strategyWhy, [ev("p-str", "benchmark", "comparable brands", "Of brands in your category and traffic band, most start with a 5× guarantee.")]),
+    strategy: S(key, strategyWhy, [ev("p-str", "benchmark", "comparable brands", "Of brands in your category and traffic band, most start with a 5x guarantee.")]),
     markets: S([], "", []),
     audience: S({ gender: "all", ageLow: 18, ageHigh: 44, interests: [] }, "", []),
     budget: S(0, "", []),
@@ -637,10 +623,10 @@ function planBuild(read: BrandRead, strategy?: StrategyKey) {
         const big = socials.slice().sort((a, b) => b.followers - a.followers)[0];
         p.audience = S(
           { gender: "female", ageLow: 24, ageHigh: 38, interests: (read.voice?.value.words ?? []).slice(0, 3) },
-          `Your buyers skew female and 24–38. That comes from the audiences of the creators who already convert in your category, not from an assumption about who buys ${(read.category?.value ?? "this").toLowerCase()}.`,
+          `Your buyers skew female and 24 to 38. That comes from the audiences of the creators who already convert in your category, not from an assumption about who buys ${(read.category?.value ?? "this").toLowerCase()}.`,
           [
             ...(big ? [ev("p-aud1", "social", `${big.handle}`, `${fmtCount(big.followers)} followers, your largest own channel.`)] : []),
-            ev("p-aud2", "creator", "matched creator audiences", `Across the shortlist, the median audience is ${Math.round(crewSeeds.reduce((n, c) => n + c.femaleShare, 0) / crewSeeds.length)}% female, ages ${Math.min(...crewSeeds.map((c) => c.audienceAge[0]))}–${Math.max(...crewSeeds.map((c) => c.audienceAge[1]))}.`),
+            ev("p-aud2", "creator", "matched creator audiences", `Across the shortlist, the median audience is ${Math.round(crewSeeds.reduce((n, c) => n + c.femaleShare, 0) / crewSeeds.length)}% female, ages ${Math.min(...crewSeeds.map((c) => c.audienceAge[0]))} to ${Math.max(...crewSeeds.map((c) => c.audienceAge[1]))}.`),
           ]
         );
       },
@@ -648,8 +634,8 @@ function planBuild(read: BrandRead, strategy?: StrategyKey) {
     {
       task: buildTask("creators"), weight: 6,
       apply: (p) => {
-        /* Two counts, two fields. The pool is everyone MoonMatch AI
-           matched and MoonSearch AI cleared; the crew is the subset the
+        /* Two counts, two fields. The pool is everyone HeyMoon
+           matched and HeyMoon cleared; the crew is the subset the
            fixed warm-up budget pays for. They used to be one field with
            the pool spelled out inside its sentence, which meant every
            edit that rewrote the sentence silently dropped the pool and
@@ -657,11 +643,11 @@ function planBuild(read: BrandRead, strategy?: StrategyKey) {
         const poolSize = matchedPool(read, markets, meta.pick).length;
         p.pool = S(
           poolSize,
-          `MoonMatch AI matched ${poolSize} creators to your brand and your markets, and MoonSearch AI cleared every one of them. The warm-up briefs the ${crewSeeds.length} best value of those, because ${fmtUSD(PHASE1_BUDGET)} buys ${crewSeeds.length}. The rest are what Phases 2 and 3 are for.`,
+          `HeyMoon matched ${poolSize} creators to your brand and your markets, and HeyMoon cleared every one of them. The warm-up briefs the ${crewSeeds.length} best value of those, because ${fmtUSD(PHASE1_BUDGET)} buys ${crewSeeds.length}. The rest are what Phases 2 and 3 are for.`,
           [
             ev("p-pool", "platform", "the matched pool", `${CREATORS.filter((c) => !c.competing).length} creators available in your category; ${CREATORS.filter((c) => c.competing).length} excluded for publishing for a competitor.`),
             ev("p-cut", "policy", "the cut", `A creator with under ${Math.round(MIN_MARKET_FIT * 100)}% of their audience in your markets is not shortlisted.`),
-            ev("p-cap", "policy", "the cap", `A phase shortlist holds at most ${POOL_MAX}. Past that MoonSearch AI is vouching for people nobody looked at twice.`),
+            ev("p-cap", "policy", "the cap", `A phase shortlist holds at most ${POOL_MAX}. Past that HeyMoon is vouching for people nobody looked at twice.`),
           ]
         );
         p.creators = S(
@@ -680,17 +666,17 @@ function planBuild(read: BrandRead, strategy?: StrategyKey) {
         const conf = getConfidence(planBudget, meta.multiple);
         const [, p2, p3] = phasesFor(planBudget);
         p.planBudget = S(planBudget,
-          `${fmtUSD(planBudget)} across all three phases is the smallest plan on which I can call a ${meta.multiple}× guarantee ${conf.label.toLowerCase()}. ` +
-          `Confidence is the plan budget divided by the multiple you are asking us to guarantee: ${fmtUSD(planBudget)} ÷ ${meta.multiple} is ${Math.round(conf.ratio).toLocaleString("en-US")}, and anything from 12,000 up we can commit to. ` +
+          `${fmtUSD(planBudget)} across all three phases is the smallest plan on which I can call a ${meta.multiple}x guarantee ${conf.label.toLowerCase()}. ` +
+          `Confidence is the plan budget divided by the multiple you are asking HeyMoon to guarantee: ${fmtUSD(planBudget)} ÷ ${meta.multiple} is ${Math.round(conf.ratio).toLocaleString("en-US")}, and anything from 12,000 up we can commit to. ` +
           `Only ${fmtUSD(PHASE1_BUDGET)} of it is due today.`,
           [
-            ev("p-conf", "policy", "how confidence is set", "Plan budget ÷ guaranteed multiple. 12,000 and above is high, 4,000 and above is medium, below that we will not commit."),
-            ev("p-split", "policy", "how the plan splits", `${fmtUSD(PHASE1_BUDGET)} warm-up, then ${fmtUSD(p2)} and ${fmtUSD(p3)} — each offered only when the phase before it reaches 80% of its target.`),
+            ev("p-conf", "policy", "how confidence is set", "Plan budget ÷ guaranteed multiple. 12,000 and above is high, 4,000 and above is medium, below that HeyMoon will not commit."),
+            ev("p-split", "policy", "how the plan splits", `${fmtUSD(PHASE1_BUDGET)} warm-up, then ${fmtUSD(p2)} and ${fmtUSD(p3)}. Each is offered only when the phase before it reaches 80% of its target.`),
           ],
           "plan budget ÷ guaranteed multiple");
         p.guaranteedRoas = S(meta.multiple,
-          `${meta.multiple}× is what we will guarantee on this crew and this budget. Our own model puts the likely return higher; the guarantee is the floor, not the forecast.`,
-          [ev("p-g", "policy", "what a guarantee is", `Close under ${fmtUSD(budget * meta.multiple)} and MoonTech pays the difference.`)]);
+          `${meta.multiple}x is what HeyMoon will guarantee on this crew and this budget. HeyMoon's own model puts the likely sales higher; the guarantee is the floor, not the forecast.`,
+          [ev("p-g", "policy", "what a guarantee is", `${fmtUSD(budget * meta.multiple)} in sales, guaranteed.`)]);
       },
     },
     {
@@ -725,14 +711,14 @@ async function* propose_plan(i: { read: BrandRead; strategy?: StrategyKey }, ctx
   let done = 0;
   const total = steps.length;
   const acc = { ...base };
-  yield chunk({ ...acc }, `${steps[0].task.agent} · Starting from your read`, 0, total);
+  yield chunk({ ...acc }, "Starting from your store details", 0, total);
 
   for (const st of steps) {
     if (ctx.signal.aborted) throw new Cancelled();
     await settle(costOf(`${id}:${st.task.key}`, st.weight), ctx.signal);
     st.apply(acc);
     done += 1;
-    yield chunk({ ...acc }, `${st.task.agent} · ${st.task.note}`, done, total);
+    yield chunk({ ...acc }, st.task.note, done, total);
   }
   return acc;
 }
@@ -749,12 +735,12 @@ async function* match_creators(i: { plan: Plan; limit?: number }, ctx: RunContex
   const crew = shortlist(read, markets, CREW_BUDGET, meta.pick);
 
   const out: CreatorMatch[] = [];
-  yield chunk([], `MoonMatch AI · Scanning ${CREATORS.length} creators against your markets`, 0, crew.length);
+  yield chunk([], `Scanning ${CREATORS.length} creators against your markets`, 0, crew.length);
   for (const c of crew) {
     if (ctx.signal.aborted) throw new Cancelled();
     await settle(costOf(`m:${i.plan.id}:${c.id}`, 2), ctx.signal);
     out.push(toMatch(c, read, markets, rpv));
-    yield chunk([...out], `MoonMatch AI · Matched ${out.length} of ${crew.length}`, out.length, crew.length);
+    yield chunk([...out], `Matched ${out.length} of ${crew.length}`, out.length, crew.length);
   }
   return out;
 }
@@ -765,7 +751,7 @@ async function* match_creators(i: { plan: Plan; limit?: number }, ctx: RunContex
 
 const fmtMarkets = (ms: string[]) => (ms.length ? ms.map(marketName).join(", ") : "none");
 const fmtAud = (a: Plan["audience"]["value"]) =>
-  `${a.gender === "all" ? "All genders" : a.gender === "female" ? "Women" : "Men"}, ${a.ageLow}–${a.ageHigh}`;
+  `${a.gender === "all" ? "All genders" : a.gender === "female" ? "Women" : "Men"}, ${a.ageLow} to ${a.ageHigh}`;
 
 function edit_plan(i: { plan: Plan; patch: PlanPatch; because: string; by: "agent" | "brand" }): { plan: Plan; changes: PlanChange[] } {
   const { plan, patch, because, by } = i;
@@ -791,7 +777,7 @@ function edit_plan(i: { plan: Plan; patch: PlanPatch; because: string; by: "agen
     mk("strategy", "strategy", STRATEGY_META[strategyKey].name, STRATEGY_META[patch.strategy].name);
     strategyKey = patch.strategy;
     multiple = STRATEGY_META[strategyKey].multiple;
-    next.strategy = { ...plan.strategy, value: strategyKey, setBy: by, why: `You chose ${STRATEGY_META[strategyKey].name.toLowerCase()} — ${STRATEGY_META[strategyKey].sentence}.` };
+    next.strategy = { ...plan.strategy, value: strategyKey, setBy: by, why: `You chose ${STRATEGY_META[strategyKey].name.toLowerCase()}. ${STRATEGY_META[strategyKey].sentence}.` };
   }
   if (patch.markets) {
     mk("markets", "markets", fmtMarkets(markets), fmtMarkets(patch.markets));
@@ -814,7 +800,7 @@ function edit_plan(i: { plan: Plan; patch: PlanPatch; because: string; by: "agen
     planBudget = patch.planBudget;
   }
   if (patch.guaranteedRoas && patch.guaranteedRoas !== multiple) {
-    mk("guaranteedRoas", "guaranteed return", `${multiple}×`, `${patch.guaranteedRoas}×`);
+    mk("guaranteedRoas", "guaranteed multiple", `${multiple}x`, `${patch.guaranteedRoas}x`);
     multiple = patch.guaranteedRoas;
   }
 
@@ -833,7 +819,7 @@ function edit_plan(i: { plan: Plan; patch: PlanPatch; because: string; by: "agen
   }
   if (patch.dropCreatorIds?.length) crewIds = crewIds.filter((id) => !patch.dropCreatorIds!.includes(id));
   /* Named additions are checked against the pool, not just appended.
-     The pool is what MoonMatch AI matched and MoonSearch AI cleared, so
+     The pool is what HeyMoon matched and HeyMoon cleared, so
      anything outside it is either publishing for a competitor or has
      too little of its audience in these markets — and a brand naming
      one by hand used to walk both of those checks. The card's claim
@@ -898,7 +884,7 @@ function edit_plan(i: { plan: Plan; patch: PlanPatch; because: string; by: "agen
       "creators", "creators not matched",
       refused.length === 1 ? "1 asked for" : `${refused.length} asked for`,
       "not in the matched pool",
-      `${refused.join(", ")} — either publishing for a competitor, or too little of their audience in ${fmtMarkets(markets)}.`
+      `${refused.join(", ")}. Either publishing for a competitor, or too little of their audience in ${fmtMarkets(markets)}.`
     );
   }
   if (overBudget.length) {
@@ -906,7 +892,7 @@ function edit_plan(i: { plan: Plan; patch: PlanPatch; because: string; by: "agen
       "creators", "creators over the fee pot",
       overBudget.length === 1 ? "1 asked for" : `${overBudget.length} asked for`,
       `past the ${fmtUSD(CREW_BUDGET)} the warm-up pays`,
-      `${overBudget.join(", ")} — the warm-up's fee pot is ${fmtUSD(CREW_BUDGET)}, and Phase 1 is ${fmtUSD(PHASE1_BUDGET)} for every brand. Phases 2 and 3 are what they are for.`
+      `${overBudget.join(", ")}. The warm-up's fee pot is ${fmtUSD(CREW_BUDGET)}, and Phase 1 is ${fmtUSD(PHASE1_BUDGET)} for every brand. Phases 2 and 3 are what they are for.`
     );
   }
   /* The pool is recomputed here too. It used to live inside the crew's
@@ -922,7 +908,7 @@ function edit_plan(i: { plan: Plan; patch: PlanPatch; because: string; by: "agen
        change how many creators fit them, and attributing the recount
        to them read as though they had picked the number. */
     setBy: "agent",
-    why: `MoonMatch AI matched ${poolSize} creators inside ${fmtMarkets(markets)}, and MoonSearch AI cleared every one of them. The warm-up briefs the ${crewSeeds.length} best value of those.`,
+    why: `HeyMoon matched ${poolSize} creators inside ${fmtMarkets(markets)}, and HeyMoon cleared every one of them. The warm-up briefs the ${crewSeeds.length} best value of those.`,
   };
   next.creators = {
     ...plan.creators,
@@ -945,7 +931,7 @@ function edit_plan(i: { plan: Plan; patch: PlanPatch; because: string; by: "agen
     : next.price.budget;
   next.guaranteedRoas = {
     ...plan.guaranteedRoas, value: multiple, setBy: patch.guaranteedRoas ? "brand" : plan.guaranteedRoas.setBy,
-    why: `${multiple}× is what we guarantee on this crew and this budget. Close under ${fmtUSD(budget * multiple)} and MoonTech pays the difference.`,
+    why: `${multiple}x is what HeyMoon guarantees on this crew and this budget, which is ${fmtUSD(budget * multiple)} in sales.`,
   };
   next.ladder = ladderSourced(planBudget, multiple);
   {
@@ -955,10 +941,10 @@ function edit_plan(i: { plan: Plan; patch: PlanPatch; because: string; by: "agen
       value: planBudget, setBy: patch.planBudget ? "brand" : (plan.planBudget?.setBy ?? "agent"),
       computedFrom: "plan budget ÷ guaranteed multiple",
       why:
-        `${fmtUSD(planBudget)} across all three phases, against a ${multiple}× guarantee. That is a ratio of ` +
+        `${fmtUSD(planBudget)} across all three phases, against a ${multiple}x guarantee. That is a ratio of ` +
         `${Math.round(conf.ratio).toLocaleString("en-US")}, which is ${conf.label.toLowerCase()}. ${conf.desc} Only ${fmtUSD(PHASE1_BUDGET)} of it is due today.`,
       evidence: [
-        ev("p-conf", "policy", "how confidence is set", "Plan budget ÷ guaranteed multiple. 12,000 and above is high, 4,000 and above is medium, below that we will not commit."),
+        ev("p-conf", "policy", "how confidence is set", "Plan budget ÷ guaranteed multiple. 12,000 and above is high, 4,000 and above is medium, below that HeyMoon will not commit."),
         ev("p-split", "policy", "how the plan splits", `${fmtUSD(PHASE1_BUDGET)} warm-up, then ${fmtUSD(p2)} and ${fmtUSD(p3)}.`),
       ],
     };
@@ -974,7 +960,7 @@ function edit_plan(i: { plan: Plan; patch: PlanPatch; because: string; by: "agen
       ...(patch.brief.formats ? { formats: { ...b.formats, value: patch.brief.formats, setBy: "brand", why: "You set these." } } : {}),
       ...(patch.brief.tone ? { tone: { ...b.tone, value: patch.brief.tone, setBy: "brand", why: "You wrote this." } } : {}),
     };
-    mk("brief", "brief", "agent draft", "edited by you");
+    mk("brief", "brief", "HeyMoon's draft", "edited by you");
     next.brief = { ...plan.brief, value: nb, setBy: "brand" };
   }
 
@@ -1000,11 +986,11 @@ function request_funding(i: { plan: Plan; phaseNo: number }): FundingRequest {
       `${fmtUSD(plan.price.total.value)} today, for ${phaseTitle(phaseNo)} only. Nothing after it is committed.`,
       /* The multiple on THIS phase, not the plan's. `guaranteedRoas` is
          the blended average across all three, and quoting it here put
-         two different numbers in one sentence — "a 5× guarantee on this
+         two different numbers in one sentence — "a 5x guarantee on this
          phase, and that figure is guaranteed" — on the one
          screen where a brand is agreeing to hand over money. */
-      `${fmtUSD(plan.price.revenueTarget.value)} of revenue guaranteed on ${phaseTitle(phaseNo).toLowerCase()}, at ${PHASE1_ROAS}× — your ${fmtUSD(plan.budget.value)} back, written into the phase.`,
-      `Keeping your tracking codes live and honoured for the whole phase — attribution runs entirely through them.`,
+      `${fmtUSD(plan.price.revenueTarget.value)} in sales guaranteed on ${phaseTitle(phaseNo).toLowerCase()}, at ${PHASE1_ROAS}x. Your ${fmtUSD(plan.budget.value)} back, written into the phase.`,
+      `Keeping your tracking codes live and honoured for the whole phase. Attribution runs entirely through them.`,
       `Nothing publishes without you. Every draft waits on your approval.`,
       `Next, and last: you connect your store, so every order a creator brings in can be attributed to this phase. That is what the guarantee is measured against.`,
     ],
@@ -1019,7 +1005,7 @@ function request_approval(i: { adIds: string[] }): ApprovalRequest {
     adIds: i.adIds,
     summary: ads.map((a) => ({
       adId: a.id,
-      line: `${a.creatorName} — ${a.product}`,
+      line: `${a.creatorName}, ${a.product}`,
       verdict: a.compliance.verdict,
     })),
     state: "pending",
@@ -1054,20 +1040,20 @@ async function* get_report(i: { phase: Phase; question?: string }, ctx: RunConte
 
   const units: { note: string; weight: number; apply: () => void }[] = [
     {
-      note: "Pulling revenue against this phase's target", weight: 3,
+      note: "Pulling sales against this phase's target", weight: 3,
       apply: () => {
         acc.figures.push({
-          key: "revenue", label: "Revenue this phase", cardRef: "card-revenue",
-          value: S(fmtUSD(ph.rev), `Orders attributed to this phase's tracking codes since ${ph.start}. This phase only — nothing pooled from Phase 1.`, [
+          key: "revenue", label: "Sales this phase", cardRef: "card-revenue",
+          value: S(fmtUSD(ph.rev), `Orders attributed to this phase's tracking codes since ${ph.start}. This phase only. Nothing pooled from Phase 1.`, [
             ev("rp-1", "orders", "your connected store", `${fmtUSD(ph.rev)} attributed across ${live.length} live ads.`),
-            ev("rp-2", "policy", "per phase, always", "Revenue and return are measured against the budget this phase alone was given."),
+            ev("rp-2", "policy", "per phase, always", "Sales are measured against the budget this phase alone was given."),
           ]),
         });
         acc.figures.push({
           key: "target", label: "Phase target", cardRef: "card-revenue",
-          value: S(fmtUSD(ph.revTarget ?? 0), `Your budget times the ${ph.guaranteedRoas}× guaranteed on this phase.`, [
-            ev("rp-3", "policy", "the guarantee", `${fmtUSD(ph.budget)} × ${ph.guaranteedRoas} = ${fmtUSD(ph.revTarget ?? 0)}.`),
-          ], `${fmtUSD(ph.budget)} × ${ph.guaranteedRoas}`),
+          value: S(fmtUSD(ph.revTarget ?? 0), `Your budget times the ${ph.guaranteedRoas}x guaranteed on this phase.`, [
+            ev("rp-3", "policy", "the guarantee", `${fmtUSD(ph.budget)} x ${ph.guaranteedRoas} = ${fmtUSD(ph.revTarget ?? 0)}.`),
+          ], `${fmtUSD(ph.budget)} x ${ph.guaranteedRoas}`),
         });
       },
     },
@@ -1078,10 +1064,10 @@ async function* get_report(i: { phase: Phase; question?: string }, ctx: RunConte
           { pctNow: Math.round(pc.pctNow), pctForecast: Math.round(pc.pctForecast), daysToUnlock: pc.daysToUnlock, onPace: pc.onPace },
           `Straight-line run rate: ${fmtUSD(Math.round(pc.perDay))} a day over ${ph.dayOfPhase} days so far, carried out to the ${ph.plannedDays}-day window.`,
           [
-            ev("pc-1", "orders", "daily attributed revenue", `${fmtUSD(ph.rev)} over ${ph.dayOfPhase} days = ${fmtUSD(Math.round(pc.perDay))} a day.`),
+            ev("pc-1", "orders", "daily attributed sales", `${fmtUSD(ph.rev)} over ${ph.dayOfPhase} days = ${fmtUSD(Math.round(pc.perDay))} a day.`),
             ev("pc-2", "policy", "the 80% line", `The next phase unlocks at ${fmtUSD((ph.revTarget ?? 0) * UNLOCK_AT)}.`),
           ],
-          "revenue ÷ days elapsed × planned days"
+          "sales ÷ days elapsed x planned days"
         );
       },
     },
@@ -1101,10 +1087,10 @@ async function* get_report(i: { phase: Phase; question?: string }, ctx: RunConte
           ]),
         });
         acc.figures.push({
-          key: "adrev", label: "Revenue from live ads", cardRef: "card-ads",
+          key: "adrev", label: "Sales from live ads", cardRef: "card-ads",
           value: S(fmtUSD(adRevenue), "Summed from the tracking code on each live ad.", [
             ev("ad-3", "orders", "per-ad attribution", live.map((a) => `${a.track} ${fmtUSD(a.performance?.revenue.value ?? 0)}`).join(" · ")),
-          ], "Σ per-ad attributed revenue"),
+          ], "Σ per-ad attributed sales"),
         });
       },
     },
@@ -1187,16 +1173,16 @@ function interpret(i: { text: string; plan?: Plan; paid?: boolean }): Interpreta
   if (/\b(fund|pay|check ?out|start phase|start it|let.s go|begin)\b/.test(lower) && !/\?$/.test(t))
     return { kind: "command", command: "fund", say: "" };
   if (/\bapprove all|approve everything|batch approve\b/.test(lower))
-    return { kind: "command", command: "approve-all", say: "Here is everything waiting, with my read on each. Approving is still one action by you." };
+    return { kind: "command", command: "approve-all", say: "Everything waiting, with my read on each. Approving is yours." };
   if (/\bshow.*(creator|shortlist|crew)|who are the creators\b/.test(lower))
     return {
       kind: "command", command: "show-creators",
       say: paid
-        ? "Here is your crew — every creator on the plan, with why each one is on it."
-        : "Here is the shortlist as it stands — how many creators, their reach, and how much of it is in your markets. Their names come the moment Phase 1 starts.",
+        ? "Your crew. Every creator on the plan, with why each one is on it."
+        : "The shortlist as it stands: how many creators, their reach, and how much of it is in your markets. Their names come the moment Phase 1 starts.",
     };
   if (/\bshow.*brief|the brief\b/.test(lower))
-    return { kind: "command", command: "show-brief", say: "Here is the brief as it stands — what every creator must say, what they must not say, and the formats they will use." };
+    return { kind: "command", command: "show-brief", say: "The brief as it stands. What every creator must say, what they must not, and the formats." };
   if (/\breport|how.*(doing|going)|performance\b/.test(lower))
     return { kind: "command", command: "show-report", say: "Pulling this phase's numbers against its target now." };
 
@@ -1221,7 +1207,7 @@ function interpret(i: { text: string; plan?: Plan; paid?: boolean }): Interpreta
     if (!markets.length) return { kind: "unknown", say: "That would leave no markets at all. Which one should it run in?" };
     return {
       kind: "edit", patch: { markets }, because,
-      say: `Setting the markets to ${markets.map(marketName).join(", ")}. That changes who is worth briefing, so the shortlist and the guarantee move with it.`,
+      say: `${markets.map(marketName).join(" and ")} only. That changes which creators fit, so the plan and the guarantee are rebuilt.`,
     };
   }
   /* "Change the markets" with no market named: say where it runs now and
@@ -1229,19 +1215,19 @@ function interpret(i: { text: string; plan?: Plan; paid?: boolean }): Interpreta
   if (plan && /\b(change|different|other|which|pick|choose) (the )?markets?\b|^markets\??$/.test(lower))
     return {
       kind: "question", answerRef: "markets",
-      say: `Phase 1 runs in ${plan.markets.value.map(marketName).join(", ") || "no markets yet"}. Tell me the markets you want — “Kuwait only”, “add Saudi”, or “drop Qatar” — and I will rebuild the crew and the guarantee for them.`,
+      say: `Phase 1 runs in ${plan.markets.value.map(marketName).join(", ") || "no markets yet"}. Tell me the markets you want and the crew and the guarantee are rebuilt around them.`,
     };
 
-  /* Guaranteed multiple. The `×` is not a word character, so the old
-     `\b` after it never matched the "8× instead" chip. */
-  const mult = lower.match(/(\d+(?:\.\d)?)\s*(?:x\b|×)/);
+  /* Guaranteed multiple. The `x` is not a word character, so the old
+     `\b` after it never matched the "8x instead" chip. */
+  const mult = lower.match(/(\d+(?:\.\d)?)\s*(?:x\b|x)/);
   if (mult) {
     const m = Math.max(1, Math.min(12, parseFloat(mult[1])));
     const strat: StrategyKey = m <= 3.5 ? "steady" : m <= 6 ? "balanced" : "aggressive";
     const meta = STRATEGY_META[strat];
     return {
-      kind: "edit", patch: { strategy: strat }, because: `because you asked for ${m}×`,
-      say: `A guarantee of ${m}× is closest to ${meta.name.toLowerCase()} — ${meta.sentence}. I have moved the plan onto it and repriced Phase 1.`,
+      kind: "edit", patch: { strategy: strat }, because: `because you asked for ${m}x`,
+      say: `${m}x is closest to ${meta.name.toLowerCase()}. ${meta.sentence}. The plan is on it, and Phase 1 is repriced.`,
     };
   }
 
@@ -1252,23 +1238,23 @@ function interpret(i: { text: string; plan?: Plan; paid?: boolean }): Interpreta
     if (lower.includes(meta.name.toLowerCase()) || lower.includes(plain))
       return {
         kind: "edit", patch: { strategy: key }, because: `because you chose ${meta.name.toLowerCase()}`,
-        say: `You have chosen ${meta.name.toLowerCase()} — ${meta.sentence}. I am rebuilding Phase 1 around it now.`,
+        say: `${meta.name}. ${meta.sentence}. Rebuilding Phase 1 around it.`,
       };
   }
   if (/more aggressive|be bolder|push harder|go bigger|bigger multiple|more ambitious/.test(lower)) {
     const m = STRATEGY_META.aggressive;
     return { kind: "edit", patch: { strategy: "aggressive" }, because: "because you asked to push harder",
-      say: `Moving you to ${m.name.toLowerCase()} — ${m.sentence}. ${m.costLine}` };
+      say: `${m.name}. ${m.sentence}. ${m.costLine}` };
   }
   if (/safer|more conservative|play it safe|lower.*risk|less risk|be careful/.test(lower)) {
     const m = STRATEGY_META.steady;
     return { kind: "edit", patch: { strategy: "steady" }, because: "because you asked to play it safer",
-      say: `Moving you to ${m.name.toLowerCase()} — ${m.sentence}. ${m.costLine}` };
+      say: `${m.name}. ${m.sentence}. ${m.costLine}` };
   }
   if (/balanced|the middle|the default|middle one/.test(lower)) {
     const m = STRATEGY_META.balanced;
     return { kind: "edit", patch: { strategy: "balanced" }, because: "because you chose the middle option",
-      say: `Moving you to ${m.name.toLowerCase()} — ${m.sentence}. ${m.costLine}` };
+      say: `${m.name}. ${m.sentence}. ${m.costLine}` };
   }
 
   /* Confirmations. A brand answering "yes, that is right" is taking a
@@ -1276,7 +1262,7 @@ function interpret(i: { text: string; plan?: Plan; paid?: boolean }): Interpreta
      treating it as noise. */
   if (/^(markets? (are|look) right|that is the crew|that.s the crew|the budget is fine|looks right|keep it|yes|yep|correct|fine|good)\b/.test(lower)) {
     return { kind: "question", answerRef: "confirm",
-      say: "Good — I will leave that as it is." };
+      say: "Good. I'll leave that as it is." };
   }
 
   /* "Why this budget?" — answered before any budget edit is attempted,
@@ -1300,7 +1286,7 @@ function interpret(i: { text: string; plan?: Plan; paid?: boolean }): Interpreta
       kind: "question", answerRef: "budget",
       say:
         `Phase 1 is always ${fmtUSD(PHASE1_BUDGET)}, for every brand, whichever plan you pick. It is the price of finding out whether this works on your real orders, so there is nothing to size and nothing to negotiate before you start.\n\n` +
-        `The number you do set is the whole plan — all three phases together. That is what I measure confidence against, and only the ${fmtUSD(PHASE1_BUDGET)} warm-up is charged today.`,
+        `The number you do set is the whole plan, all three phases together. That is what I measure confidence against, and only the ${fmtUSD(PHASE1_BUDGET)} warm-up is charged today.`,
     };
   }
 
@@ -1313,12 +1299,12 @@ function interpret(i: { text: string; plan?: Plan; paid?: boolean }): Interpreta
     return {
       kind: "edit", patch: { planBudget: clamped }, because: `because you set the plan to ${fmtUSD(clamped)}`,
       say:
-        `Plan set to ${fmtUSD(clamped)} across all three phases, at ${roas}× guaranteed. That is ${conf.label.toLowerCase()} — ${conf.desc}` +
+        `Plan set to ${fmtUSD(clamped)} across all three phases, at ${roas}x guaranteed. That is ${conf.label.toLowerCase()}. ${conf.desc}` +
         (conf.level === "high"
           ? " Phase 1 is still the $1,000 warm-up, and it is all that is due today."
           : need !== null
-            ? ` To make it high confidence at ${roas}×, the plan needs to be ${fmtUSD(need)}. I would rather push you there than promise something I am not sure of.`
-            : ` At ${roas}× no plan inside our range reaches high confidence. Drop the multiple and I can commit properly.`),
+            ? ` To make it high confidence at ${roas}x, the plan needs to be ${fmtUSD(need)}. I would rather push you there than promise something I am not sure of.`
+            : ` At ${roas}x no plan inside HeyMoon's range reaches high confidence. Drop the multiple and I can commit properly.`),
     };
   }
 
@@ -1330,13 +1316,13 @@ function interpret(i: { text: string; plan?: Plan; paid?: boolean }): Interpreta
     if (need !== null) {
       return {
         kind: "edit", patch: { planBudget: need }, because: "because you asked for high confidence",
-        say: `Done. At ${fmtUSD(need)} across the three phases, a ${roas}× guarantee is high confidence — the ratio is 12,000, which is the line above which we commit rather than hope. Phase 1 is still ${fmtUSD(PHASE1_BUDGET)}, due today.`,
+        say: `Done. At ${fmtUSD(need)} across the three phases, a ${roas}x guarantee is high confidence. The ratio is 12,000, which is the line above which HeyMoon commits rather than hopes. Phase 1 is still ${fmtUSD(PHASE1_BUDGET)}, due today.`,
       };
     }
     const best = roasForHigh(PLAN_BUDGET_MAX) ?? 3;
     return {
       kind: "edit", patch: { planBudget: PLAN_BUDGET_MAX, guaranteedRoas: best }, because: "because you asked for high confidence",
-      say: `A ${roas}× guarantee cannot reach high confidence at any plan size we offer — even at ${fmtUSD(PLAN_BUDGET_MAX)} the ratio only gets to ${Math.round(PLAN_BUDGET_MAX / roas).toLocaleString("en-US")}. I have taken it to ${best}× at ${fmtUSD(PLAN_BUDGET_MAX)}, which is high confidence and something I can stand behind.`,
+      say: `A ${roas}x guarantee cannot reach high confidence at any plan size HeyMoon offers. Even at ${fmtUSD(PLAN_BUDGET_MAX)} the ratio only gets to ${Math.round(PLAN_BUDGET_MAX / roas).toLocaleString("en-US")}. I have taken it to ${best}x at ${fmtUSD(PLAN_BUDGET_MAX)}, which is high confidence and something I can stand behind.`,
     };
   }
 
@@ -1348,7 +1334,7 @@ function interpret(i: { text: string; plan?: Plan; paid?: boolean }): Interpreta
     const patch: PlanPatch = { audience: {} };
     if (gender) patch.audience!.gender = gender as "female" | "male";
     if (range) { patch.audience!.ageLow = parseInt(range[1], 10); patch.audience!.ageHigh = parseInt(range[2], 10); }
-    if (!gender && !range && !ages) return { kind: "unknown", say: "Tell me the audience as a gender, an age range, or both — “women 25 to 40”." };
+    if (!gender && !range && !ages) return { kind: "unknown", say: "Tell me the audience as a gender, an age range, or both. “Women 25 to 40”." };
     return {
       kind: "edit", patch, because: `because you set the audience`,
       say: `I have updated the audience. That does not change the crew on its own, because the creators' audiences already overlap it, but it does change the brief they are given.`,
@@ -1408,8 +1394,8 @@ function interpret(i: { text: string; plan?: Plan; paid?: boolean }): Interpreta
     return {
       kind: "question", answerRef: "next",
       say: paid
-        ? "Two of the three steps are done: the plan is approved and Phase 1 is paid. The last step is connecting your store, so every order a creator brings in can be attributed to this phase — that is what the guarantee is measured against. Once it is connected, I brief the creators, and their drafts start arriving here for your approval."
-        : "There are three steps, and you are on the first: review this proposed plan and change anything you want. Then you start Phase 1, which is the one payment. Last, you connect your store, so the revenue can be attributed — that is what the guarantee is measured against.",
+        ? "Two of the three steps are done: the plan is approved and Phase 1 is paid. The last step is connecting your store, so every order a creator brings in can be attributed to this phase. That is what the guarantee is measured against. Once it is connected, I brief the creators, and their drafts start arriving here for your approval."
+        : "There are three steps, and you are on the first: review this proposed plan and change anything you want. Then you start Phase 1, which is the one payment. Last, you connect your store, so the sales can be attributed. That is what the guarantee is measured against.",
     };
 
   /* Questions — answered by pointing at the card that holds the answer. */
@@ -1551,7 +1537,7 @@ export function repair(plan: Plan): Repair {
       return {
         kind: "lower",
         crewIds: crew.map((c) => c.id), budget, multiple: m, implied,
-        headline: `Keep the crew and lower the guarantee to ${m}×, which I can stand behind on ${fmtUSD(budget)} in ${markets.map(marketName).join(", ")}.`,
+        headline: `Keep the crew and lower the guarantee to ${m}x, which I can stand behind on ${fmtUSD(budget)} in ${markets.map(marketName).join(", ")}.`,
       };
     }
   }
@@ -1584,22 +1570,22 @@ export function repair(plan: Plan): Repair {
     implied: bestAdd?.implied ?? implied,
     markets: bestAdd ? [...markets, bestAdd.code] : undefined,
     headline: bestAdd
-      ? `${markets.map(marketName).join(", ")} on its own cannot carry a guarantee — the creators with real audience there do not reach enough people for ${fmtUSD(budget)} to be worth guaranteeing. Add ${marketName(bestAdd.code)} and it works: ${bestAdd.crewIds.length} creators, ${bestAdd.multiple}× guaranteed.`
-      : `There is nobody in ${markets.map(marketName).join(", ")} I can guarantee a return on, and no single market I can add that fixes it. Widen it further and I will rebuild.`,
+      ? `${markets.map(marketName).join(", ")} on its own cannot carry a guarantee. The creators with real audience there do not reach enough people for ${fmtUSD(budget)} to be worth guaranteeing. Add ${marketName(bestAdd.code)} and it works: ${bestAdd.crewIds.length} creators, ${bestAdd.multiple}x guaranteed.`
+      : `There is nobody in ${markets.map(marketName).join(", ")} I can guarantee sales on, and no single market I can add that fixes it. Widen it further and I will rebuild.`,
     addMarket: bestAdd?.code,
   };
 }
 
-/** What the agent says when a plan stops being deliverable. */
+/** What HeyMoon says when a plan stops being deliverable. */
 export function underwritingNote(u: Underwriting, plan: Plan, r: Repair): string {
   if (u.ok) return "";
   const crew = plan.creators.value.length;
   return [
-    `One thing before you go further: on this crew, in these markets, I model about ${u.implied.toFixed(1)}× — and we are guaranteeing ${u.promised}×.`,
+    `One thing first. In ${fmtMarkets(plan.markets.value)}, I expect about ${u.implied.toFixed(1)}x at this budget, not ${u.promised}x.`,
     crew < 5
-      ? `Only ${crew} creators have enough audience left there, and most of their reach is somewhere else.`
-      : `The crew is intact, but the share of their audience inside your markets has dropped too far.`,
-    `I will not quote a guarantee I expect to miss.`,
+      ? `Fewer creators there reach your audience for ${fmtUSD(plan.budget.value)}.`
+      : `Too little of this crew's audience sits inside your markets.`,
+    `I won't guarantee a number I expect to miss.`,
     r.headline,
   ].join(" ");
 }

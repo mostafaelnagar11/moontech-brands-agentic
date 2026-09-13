@@ -17,10 +17,10 @@
    it — the demonstration belongs a click away, in the conversation,
    running on their own store. */
 
-import Image from "next/image";
+import { Wordmark } from "./components/Wordmark";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Lock, MagnifyingGlass } from "@phosphor-icons/react";
+import { Lock, MagnifyingGlass } from "@phosphor-icons/react";
 import { normaliseUrl } from "./lib/mock/reads";
 import { useT } from "./lib/i18n";
 import { LangToggle } from "./components/DirSync";
@@ -47,7 +47,7 @@ export default function Landing() {
   return (
     <div dir={dir} className="flex min-h-[100dvh] flex-col bg-white">
       <header className="flex items-center justify-between px-5 py-5 sm:px-8">
-        <Image src="/logo.svg" alt="MoonTech" width={130} height={24} priority className="h-6 w-auto" />
+        <Wordmark size="lg" />
         <LangToggle />
       </header>
 
@@ -57,7 +57,11 @@ export default function Landing() {
       <main className="flex flex-1 items-center justify-center px-5 pb-16 pt-4">
         <div className="w-full max-w-[660px] text-center">
           <Eyebrow>{t("landing.eyebrow")}</Eyebrow>
-          <h1 className="mx-auto mt-3 max-w-[18ch] text-[34px] font-bold leading-[1.08] tracking-tight text-ink sm:text-[48px]">
+          {/* Two lines, and they have to stay two lines. The first is
+              long enough that 48px stranded "seconds." on a line of its
+              own, so the desktop size steps down and the measure opens
+              to the full column. */}
+          <h1 className="mx-auto mt-3 max-w-[23ch] text-[34px] font-bold leading-[1.08] tracking-tight text-ink sm:text-[44px]">
             {t("landing.h1a")}
             <br />
             <span className="bg-gradient-to-r from-brand to-brand-500 bg-clip-text text-transparent">
@@ -83,16 +87,15 @@ export default function Landing() {
             <button
               type="submit"
               disabled={!armed}
-              className={`inline-flex shrink-0 items-center gap-1.5 rounded-[20px] px-3.5 py-2 text-body font-semibold transition ${
+              className={`inline-flex shrink-0 items-center rounded-[20px] px-3.5 py-2 text-body font-semibold transition ${
                 /* The composer's send is ink when armed and grey when it
-                   is not. This one carries words rather than an arrow,
-                   so the disarmed label stays ink — white on grey is a
-                   button nobody can read. */
+                   is not. This one carries a verb and nothing else, no
+                   arrow, so the disarmed label stays ink. White on grey
+                   is a button nobody can read. */
                 armed ? "bg-ink text-white hover:bg-ink/85" : "cursor-not-allowed bg-neutral-200 text-ink-soft"
               }`}
             >
               {going ? t("landing.reading") : t("landing.cta")}
-              <ArrowRight size={13} weight="bold" aria-hidden className="rtl:rotate-180" />
             </button>
           </form>
 
@@ -101,18 +104,19 @@ export default function Landing() {
           {/* Three lines that say what the product actually promises.
               The meeting note was to over-communicate the value, and a
               headline cannot carry a guarantee, a phase ladder and a
-              pricing model at once. */}
+              pricing model at once.
+
+              Unnumbered on purpose. These are three promises that all
+              hold at once, not a sequence you walk through, and a 1/2/3
+              above them reads as steps. */}
           <ul className="mt-14 grid gap-7 border-t border-hairline pt-10 sm:grid-cols-3">
             {[
               { t: "landing.v1t", d: "landing.v1d" },
               { t: "landing.v2t", d: "landing.v2d" },
               { t: "landing.v3t", d: "landing.v3d" },
-            ].map((v, i) => (
+            ].map((v) => (
               <li key={v.t}>
-                <span aria-hidden className="mx-auto grid h-7 w-7 place-items-center rounded-full bg-brand/[0.08] text-meta font-bold text-brand">
-                  {i + 1}
-                </span>
-                <p className="mt-2.5 text-body font-semibold text-ink">{t(v.t)}</p>
+                <p className="text-body font-semibold text-ink">{t(v.t)}</p>
                 <p className="mt-1 text-meta leading-5 text-ink-soft">{t(v.d)}</p>
               </li>
             ))}
@@ -122,6 +126,10 @@ export default function Landing() {
             <Lock size={13} weight="fill" aria-hidden />
             {t("landing.nothing")}
           </p>
+
+          {/* Who is behind the agents. One quiet line, once, at the
+              bottom of the page. */}
+          <p className="mt-3 text-micro text-ink-faint">{t("landing.credit")}</p>
         </div>
       </main>
     </div>

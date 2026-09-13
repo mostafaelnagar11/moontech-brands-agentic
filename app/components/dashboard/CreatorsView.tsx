@@ -4,7 +4,7 @@
  *
  * Same shape: a queue on the left, one profile on the right, and three
  * tabs — waiting, liked, passed. A like or a pass is a SIGNAL and never
- * a booking: it shapes who MoonMatch AI brings next, and the page says
+ * a booking: it shapes who HeyMoon brings next, and the page says
  * so rather than implying the brand just hired someone.
  *
  * Four things are deliberately different from the original, all of them
@@ -72,8 +72,8 @@ function signalsFor(c: CreatorSeed, markets: string[], wantNiche: string[]) {
       ? `${Math.round(fit * 100)}% in ${inside.map((m) => marketName(m.code)).join(", ")}`
       : "Outside your markets",
     why: fit >= MIN_MARKET_FIT
-      ? "past the share we need before a creator is worth briefing"
-      : `under the ${Math.round(MIN_MARKET_FIT * 100)}% we need, so she is not shortlisted`,
+      ? "past the share HeyMoon needs before a creator is worth briefing"
+      : `under the ${Math.round(MIN_MARKET_FIT * 100)}% HeyMoon needs, so she is not shortlisted`,
     ok: fit >= MIN_MARKET_FIT,
   };
   const niche: Signal = {
@@ -119,7 +119,7 @@ export function CreatorsView() {
     return ["Fashion", "Luxury", "Beauty"];
   }, [plan?.brandName]);
 
-  /* Everyone MoonSearch AI would let through. A creator publishing for
+  /* Everyone HeyMoon would let through. A creator publishing for
      a competitor never reaches the queue — that is a safety call, not a
      taste one, and it is not the brand's to make. */
   const pool = useMemo(() => CREATORS.filter((c) => !c.competing), []);
@@ -329,7 +329,7 @@ function Profile({
         {status === "liked" && (
           <div className="mt-5 flex flex-wrap items-center gap-3 rounded-control border border-good/25 bg-good/[0.05] px-3.5 py-2.5">
             <p className="min-w-0 flex-1 text-meta text-good-deep">
-              Liked. MoonMatch AI will bring you more profiles like hers.
+              Liked. HeyMoon will bring you more profiles like hers.
             </p>
             <button onClick={onPass} className="shrink-0 text-[11px] font-semibold text-ink-soft hover:underline">
               Pass instead
@@ -341,7 +341,7 @@ function Profile({
           <div className="mt-5 rounded-control border border-hairline bg-neutral-50 px-3.5 py-2.5">
             <div className="flex flex-wrap items-center gap-3">
               <p className="min-w-0 flex-1 text-meta text-ink-soft">
-                Passed. MoonMatch AI will ease off profiles like hers.
+                Passed. HeyMoon will ease off profiles like hers.
               </p>
               <button onClick={onUndo} className="shrink-0 text-[11px] font-semibold text-brand hover:underline">
                 Undo
@@ -400,7 +400,7 @@ function Profile({
           {c.posts.map((p, i) => (
             <span key={i} className="relative block aspect-[9/14] overflow-hidden rounded-control bg-neutral-200">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={p.img} alt={`${c.name} — ${p.type}`} loading="lazy" className="h-full w-full object-cover" />
+              <img src={p.img} alt={`${c.name}, ${p.type}`} loading="lazy" className="h-full w-full object-cover" />
               <span className="absolute start-1.5 top-1.5 rounded bg-black/50 px-1.5 py-0.5 text-[9px] font-bold text-white">
                 {p.type}
               </span>

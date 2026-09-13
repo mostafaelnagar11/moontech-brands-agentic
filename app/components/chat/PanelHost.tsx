@@ -35,7 +35,7 @@ export function PanelHost() {
       );
     case "read":
       return (
-        <PanelFrame title="What we found" sub={url}>
+        <PanelFrame title="What I found" sub={url}>
           <ReadPanel />
         </PanelFrame>
       );
@@ -57,7 +57,7 @@ export function PanelHost() {
             href="/dashboard"
             className="mt-4 inline-flex items-center gap-1.5 rounded-control bg-brand px-3.5 py-2 text-body font-semibold text-white transition hover:bg-brand-hover"
           >
-            Go to dashboard <ArrowRight size={13} weight="bold" aria-hidden className="rtl:rotate-180" />
+            Go to the dashboard <ArrowRight size={13} weight="bold" aria-hidden className="rtl:rotate-180" />
           </Link>
         </PanelFrame>
       );
@@ -68,6 +68,6 @@ const RUNNING_LABEL: Partial<Record<string, string>> = {
   campaign: "How the phase is doing",
   ads: "The drafts waiting on you",
   inbox: "What needs you",
-  activity: "What the agents did on their own",
+  activity: "What HeyMoon did on its own",
   autonomy: "What they may do alone",
 };

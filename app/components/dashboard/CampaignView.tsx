@@ -154,7 +154,7 @@ function OneCampaign() {
           see which rung the line belongs to without scrolling. */}
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
         <Section
-          title="Revenue against target"
+          title="Sales against target"
           aside={
             <span className={`inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-[11px] font-semibold ${
               crossed ? "bg-good/10 text-good-deep" : "bg-brand/10 text-brand"
@@ -192,7 +192,7 @@ function OneCampaign() {
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-body font-medium text-ink">{phaseTitle(ph.phaseNo)}</span>
                       <span className="block truncate text-[11px] text-ink-faint">
-                        {fmtUSD(ph.budget)} · {ph.guaranteedRoas}× guaranteed
+                        {fmtUSD(ph.budget)} · {ph.guaranteedRoas}x guaranteed
                       </span>
                     </span>
                     <span className="shrink-0 text-body font-semibold tabular-nums text-ink">

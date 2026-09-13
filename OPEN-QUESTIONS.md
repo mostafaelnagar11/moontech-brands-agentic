@@ -4,6 +4,17 @@ Things I decided so the prototype could exist. Each one is a real product
 decision, each is reversible, and each says what I chose and why. The first two
 are the ones you named.
 
+**Renamed to HeyMoon, 14 Sep.** The brand is HeyMoon, the wordmark is
+"HeyMoon.AI", and the copy now follows
+`heymoon-copy-changes-before-after.md`. Two of its rules cut across entries
+below: **G1** removes every agent name from anything a brand can see, and
+**G2** makes "sales" the only word for the money a brand earns. Entries written
+before that date still say MoonTech, and still name MoonShot, MoonMatch,
+MoonSearch, MoonWriter, MoonLive, MoonScore and MoonLearning, because that is
+what was on screen when the decision was taken. The reasoning stands; the names
+no longer ship. Question 14 below is the one that G1 changed rather than
+recorded — see it for what the Autonomy page lost.
+
 **Rebuilt as one chat surface, 10 Sep.** Every route except the landing is
 gone. The conversation is the product and the panel is the only other place a
 brand can act. Seven former screens are now panel views. That answers the
@@ -545,3 +556,58 @@ on MoonLearning AI carrying one campaign's results into the next, and a brand
 should not have to re-explain themselves in a new thread to get it. The
 alternative is one standing conversation per brand with campaigns as artifacts
 inside it, which is what the panel already is.
+
+## 14. What the HeyMoon rename left open
+
+Five things the copy spec created or exposed. None of them is mine to settle.
+
+**The Autonomy page has no names left, and that was its subject.** G1 says no
+agent names anywhere brand-facing. The Autonomy page existed to show which of
+the seven agents holds which permission, so applying G1 there is not a copy
+edit, it removes the page's content. What it shows now is the same pipeline by
+**stage** — Intake, Matching, Safety, Creative, Activation, Optimization,
+Learning — with the same two locks on activation and optimization, the same
+three fixed-at-Never rules and the same table of adjustable ones. That keeps
+the question a brand actually comes here with ("what can this do without me?")
+and drops the one only we were asking. If the seven names are a deliberate part
+of what a brand is buying, G1 needs an exception written for this page, and
+that exception has to say why a name is worth showing here and nowhere else.
+
+**Phase 1 guarantees 1x in the build, and the spec's examples assume 5x.**
+`PHASE1_ROAS = 1` in `app/lib/agent/tools.ts`, so the warm-up promises $1,000
+of sales on $1,000 — your money back, no profit, which is what the whole
+warm-up argument in the product rests on. The spec's worked examples (C11, C15,
+C20, C34, C37) are all written as $1,000 guaranteed at 5x, which is $5,000. The
+figures on screen are bound to the plan rather than hardcoded, so nothing is
+wrong in the build, but the two documents describe different products. This is
+a pricing decision, not a copy one.
+
+There is a visible consequence of the mismatch worth deciding on its own: the
+plan card now shows "Guaranteed sales $1,000 · 1x" beside "Expected sales
+$5,242 to $8,591". C16's rule is that the expected range must never sit *below*
+the guarantee, and it does not — but a floor five times under the expectation
+makes the guarantee read as a formality.
+
+**The wordmark is type, not art.** `public/logo.svg` draws "MOONTech" as vector
+outlines; a rename cannot be done by editing paths. `app/components/Wordmark.tsx`
+sets "HeyMoon.AI" in the interface font as a stopgap, which is correct in every
+placement and is nobody's idea of a logo. Design owes a real mark.
+
+**The new copy is English only.** The landing page has full Arabic parity: L1 to
+L16 are all in `app/lib/i18n.ts` and the RTL layout is correct. The
+conversation and the dashboard are not — every sentence written for this spec
+is a hardcoded English string, and 41 of the file's 74 keys are now unused,
+which means an Arabic copywriter reading it would translate strings that no
+longer appear. The spec points at `heymoon-copy-arabic.md` for the Arabic; that
+file has not reached this repo.
+
+**Five claims the spec says to confirm before shipping** (its section 3):
+
+| Claim now in the product | Confirm with |
+| --- | --- |
+| "Creates one code per creator, and reads the orders that use it" (C46). If the grant really is read-only, swap to the read-only line. | Nick |
+| "HeyMoon.AI is a Saudi company" (L16, C56). A CR or Maroof listing beside it would carry more, the way Tamara and Qoyod do it. | Mansour, legal |
+| "HeyMoon pays you the difference" is cash, not credits. If cash, L12 gains "In cash, not credits." | Finance, legal |
+| The expected range never sits below the guaranteed floor (C16). | Ops, Finance |
+| "Check the details before you pay." is enough as the disclaimer (C55). | Legal |
+| "Sales" in copy, "revenue" in contract terms (G2). | Legal |

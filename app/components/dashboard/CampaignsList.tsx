@@ -170,10 +170,10 @@ function Card({ c, waiting }: { c: Campaign; waiting: number }) {
             note: crew ? `on phase ${crew.phaseNo}` : "not briefed yet",
           },
           {
-            label: "ROAS",
+            label: "Multiple",
             value: roas !== null ? roas.toFixed(1) : "—",
-            suffix: roas !== null ? "×" : "",
-            note: guarantee !== null ? `${fmtX(guarantee)}× guaranteed` : "nothing funded yet",
+            suffix: roas !== null ? "x" : "",
+            note: guarantee !== null ? `${fmtX(guarantee)}x guaranteed` : "nothing funded yet",
           },
         ].map((m) => (
           <span key={m.label} className="block min-w-0">

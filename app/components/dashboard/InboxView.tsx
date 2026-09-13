@@ -98,7 +98,7 @@ export function InboxView() {
       group: "money",
       icon: Lightning,
       title: `${phaseTitle(ready.phaseNo)} is unlocked and not started`,
-      note: "you press Start — no agent moves money",
+      note: "you press Start. HeyMoon never moves money",
       value: fmtUSD(withVat(ready.budget)),
       hero: true,
       /* The Start button lives in the campaign view, beside the numbers
@@ -142,8 +142,8 @@ export function InboxView() {
       go: "ads",
       cta: "Review",
       why: toUnlock
-        ? `Every one is on brief. Approving them is the single biggest thing that moves this phase — it is ${toUnlock} points from the unlock line.`
-        : `Every one is on brief, and this phase is already past the ${unlockPct}% line. Approving them is the fastest revenue left in this list.`,
+        ? `Every one is on brief. Approving them is the single biggest thing that moves this phase. It is ${toUnlock} points from the unlock line.`
+        : `Every one is on brief, and this phase is already past the ${unlockPct}% line. Approving them is the fastest sales left in this list.`,
     });
   }
 
@@ -178,7 +178,7 @@ export function InboxView() {
   const shown = items.filter((i) => !dismissed.includes(i.id));
   const groups: { key: Group; label: string }[] = [
     { key: "money", label: "Money" },
-    { key: "blocking", label: "Blocking revenue" },
+    { key: "blocking", label: "Blocking sales" },
     { key: "fyi", label: "For information" },
   ];
 

@@ -15,7 +15,7 @@
  */
 
 import type { ReactNode } from "react";
-import Image from "next/image";
+import { Wordmark } from "../Wordmark";
 import Link from "next/link";
 import { CaretLeft, X } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
@@ -43,7 +43,7 @@ export function ChatShell({ children, panel }: { children: ReactNode; panel: Rea
           aria-label="Your campaigns"
         >
           <div className="px-4 pb-3 pt-4">
-            <Image src="/logo.svg" alt="MoonTech" width={104} height={19} priority className="h-[18px] w-auto" />
+            <Wordmark size="sm" />
           </div>
           <button
             onClick={() => startConversation()}
@@ -76,10 +76,10 @@ export function ChatShell({ children, panel }: { children: ReactNode; panel: Rea
         <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-gradient-to-b from-white from-40% to-transparent" />
         {!railed && <Link
           href="/"
-          aria-label="MoonTech — start a new campaign"
+          aria-label="HeyMoon, start a new campaign"
           className="pointer-events-auto absolute start-5 top-4 z-20 rounded transition hover:opacity-70"
         >
-          <Image src="/logo.svg" alt="MoonTech" width={104} height={19} priority className="h-[18px] w-auto" />
+          <Wordmark size="sm" />
         </Link>}
         {children}
       </main>

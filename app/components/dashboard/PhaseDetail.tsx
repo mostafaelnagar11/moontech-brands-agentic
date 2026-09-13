@@ -45,7 +45,7 @@ export function PhaseDetail({ campaign, phase }: { campaign: Campaign; phase: Ph
           </p>
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
             <Tile label="Budget" value={fmtUSD(phase.budget)} sub="indicative" />
-            <Tile label="Guarantee" value={`${phase.guaranteedRoas}×`} sub="priced for real when it opens" />
+            <Tile label="Guarantee" value={`${phase.guaranteedRoas}x`} sub="priced for real when it opens" />
             <Tile label="Would guarantee" value={fmtUSD(Math.round(phase.budget * phase.guaranteedRoas))} />
           </div>
         </Surface>
@@ -61,7 +61,7 @@ export function PhaseDetail({ campaign, phase }: { campaign: Campaign; phase: Ph
             <Tile
               label="Guaranteed"
               value={fmtUSD(target)}
-              sub={`${phase.guaranteedRoas}× on ${fmtUSD(phase.budget)}`}
+              sub={`${phase.guaranteedRoas}x on ${fmtUSD(phase.budget)}`}
             />
             <Tile label="Ads live" value={live} sub={waiting ? `${waiting} waiting on you` : "nothing waiting"} />
             <Tile
@@ -73,7 +73,7 @@ export function PhaseDetail({ campaign, phase }: { campaign: Campaign; phase: Ph
           </div>
 
           {phase.status === "live" && (
-            <Section title="Revenue against target">
+            <Section title="Sales against target">
               <Surface className="p-4">
                 <RevenueChart phase={phase} />
               </Surface>
@@ -93,8 +93,8 @@ export function PhaseDetail({ campaign, phase }: { campaign: Campaign; phase: Ph
 
         <Section title="What it promises">
           <Surface>
-            <DataRow label="Guarantee" value={`${phase.guaranteedRoas}×`} />
-            <DataRow label="Revenue guaranteed" value={fmtUSD(Math.round(phase.budget * phase.guaranteedRoas))} />
+            <DataRow label="Guarantee" value={`${phase.guaranteedRoas}x`} />
+            <DataRow label="Sales guaranteed" value={fmtUSD(Math.round(phase.budget * phase.guaranteedRoas))} />
             <DataRow label="Creators briefed" value={phase.creators ?? "—"} />
           </Surface>
         </Section>

@@ -32,7 +32,8 @@ export function Composer({
   onChip?: (c: string) => void;
   disabled?: boolean;
   placeholder: string;
-  note: string;
+  /** Optional: a beat with nothing left to warn about passes nothing. */
+  note?: string;
   /** A run is open. The send button becomes stop for as long as it is. */
   busy?: boolean;
   onStop?: () => void;
@@ -80,7 +81,7 @@ export function Composer({
                  a decision, not something to do by pressing return. */
               if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); if (!busy) onSend(); }
             }}
-            aria-label="Message the agent"
+            aria-label="Message HeyMoon"
             className="max-h-[200px] min-h-[24px] flex-1 resize-none bg-transparent py-1 text-prose leading-6 text-ink outline-none placeholder:text-ink-faint disabled:opacity-60"
           />
           {busy && onStop ? (
@@ -106,7 +107,7 @@ export function Composer({
           )}
         </div>
 
-        <p className="mt-2 text-center text-[11px] text-ink-faint">{note}</p>
+        {note && <p className="mt-2 text-center text-[11px] text-ink-faint">{note}</p>}
       </div>
     </div>
   );

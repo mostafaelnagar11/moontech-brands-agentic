@@ -30,7 +30,7 @@ export type EvidenceKind =
   | "product"     // a catalogue item
   | "social"      // a public profile or post
   | "orders"      // the brand's own connected order data
-  | "platform"    // MoonTech's own records
+  | "platform"    // HeyMoon's own records
   | "benchmark"   // other brands, anonymised
   | "creator"     // a creator's profile numbers
   | "policy";     // a rule of the product
@@ -240,7 +240,7 @@ export interface Plan {
   planBudget: Sourced<number>;
   guaranteedRoas: Sourced<number>;
   creators: Sourced<CreatorMatch[]>;
-  /** How many creators MoonMatch AI matched and MoonSearch AI cleared,
+  /** How many creators HeyMoon matched and HeyMoon cleared,
       before the fixed warm-up budget cut `creators` down to the crew it
       pays for. A field rather than a number inside a sentence: the
       sentence gets rewritten on every edit, and the count went with it.

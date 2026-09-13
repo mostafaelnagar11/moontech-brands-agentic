@@ -46,8 +46,8 @@ export function PlanPanel() {
   }
 
   /* Two counts, never a fee. How many the warm-up briefs, and how many
-     MoonMatch found in total — the second is the whole point of saying
-     the first, because $1,000 is what decides the difference. */
+     were matched in total — the second is the whole point of saying the
+     first, because $1,000 is what decides the difference. */
   const crew = plan.creators.value.length;
   const pool = plan.pool.value || null;
 
@@ -101,7 +101,7 @@ export function PlanPanel() {
           and what anyone is paid appears in neither, in any state.
 
           The number that matters here is a fraction, not a total: the
-          warm-up briefs a SUBSET of what MoonMatch found, because
+          warm-up briefs a SUBSET of everyone matched, because
           $1,000 buys that many creator fees and no more. Saying "3
           creators matched" would hide the pool and make Phases 2 and 3
           look like an upsell rather than the rest of the same crew. */}
@@ -111,13 +111,13 @@ export function PlanPanel() {
           <span className="text-body leading-6">
             {pool ? (
               <>
-                {crew} of the {pool} creators MoonMatch AI found for you, and MoonSearch AI cleared every one of
+                {crew} of the {pool} creators HeyMoon found for you, and HeyMoon cleared every one of
                 them. {fmtUSD(PHASE1_BUDGET)} briefs {spell(crew)}; Phases 2 and 3 bring in the rest.
               </>
             ) : (
               <>
-                The {spell(crew)} creators {fmtUSD(PHASE1_BUDGET)} briefs, out of everyone MoonMatch AI found for you
-                and MoonSearch AI cleared. Phases 2 and 3 bring in the rest.
+                The {spell(crew)} creators {fmtUSD(PHASE1_BUDGET)} briefs, out of everyone HeyMoon found for you
+                and HeyMoon cleared. Phases 2 and 3 bring in the rest.
               </>
             )}
             {paid && (

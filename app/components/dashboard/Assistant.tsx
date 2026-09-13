@@ -152,7 +152,7 @@ export function DashboardAssistant({ onClose }: { onClose?: () => void }) {
           ✦
         </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-body font-semibold text-ink">Ask MoonTech</p>
+          <p className="truncate text-body font-semibold text-ink">Ask HeyMoon</p>
           <p className="truncate text-[11px] text-ink-faint">About this phase, while it runs</p>
         </div>
         {onClose && (

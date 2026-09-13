@@ -20,42 +20,60 @@ export type Locale = "en" | "ar";
 type Dict = Record<string, { en: string; ar: string }>;
 
 export const STR: Dict = {
-  /* Landing */
-  "landing.eyebrow": { en: "MoonTech for brands", ar: "مون‑تك للعلامات التجارية" },
-  "landing.h1a": { en: "Paste your store link.", ar: "الصق رابط متجرك." },
-  "landing.h1b": { en: "We do the rest.", ar: "ونحن نتكفّل بالباقي." },
+  /* Landing.
+
+     The Arabic below is a first pass in the same register as the English,
+     pending the Arabic copywriter. */
+  "landing.eyebrow": { en: "HeyMoon.AI for Brands", ar: "HeyMoon.AI للعلامات التجارية" },
+  "landing.h1a": { en: "A campaign in fifteen seconds.", ar: "حملة في 15 ثانية." },
+  "landing.h1b": { en: "Sales, guaranteed.", ar: "ومبيعات مضمونة." },
   "landing.sub": {
-    en: "In about fifteen seconds, our agents read your catalogue, your prices, how you write and where you ship — then build a complete creator campaign with a revenue figure we guarantee. No forms, no brief, no agency.",
-    ar: "خلال خمس عشرة ثانية تقريبًا، يقرأ وكلاؤنا كتالوجك وأسعارك وأسلوب كتابتك وأسواق شحنك، ثم يبنون حملة كاملة مع صنّاع المحتوى برقم إيرادات نضمنه. بلا استمارات، بلا موجز، بلا وكالة.",
+    en: "Paste your store link. HeyMoon builds a complete creator campaign around what you sell, and guarantees the sales. Sell less, and it pays you the difference. No forms to fill in. No brief to write. No agency to manage.",
+    ar: "ألصق رابط متجرك، وتبني لك هاي مون حملة مؤثرين كاملة حول ما تبيعه، وتضمن لك المبيعات. وإذا بعت أقل، تدفع لك هاي مون الفرق. لا نماذج تملؤها. لا بريف تكتبه. لا وكالة تتابعها.",
   },
-  "landing.v1t": { en: "You see the whole plan first", ar: "ترى الخطة كاملة أولًا" },
+  "landing.v1t": {
+    en: "See everything. Before you pay anything.",
+    ar: "شاهد كل شيء. قبل أن تدفع أي شيء.",
+  },
   "landing.v1d": {
-    en: "Markets, budget, creators and the brief — priced and complete before you pay for anything.",
-    ar: "الأسواق والميزانية وصنّاع المحتوى والموجز — مُسعّرة وكاملة قبل أن تدفع أي شيء.",
+    en: "The whole campaign, built and priced before you approve it: the markets, the creators, the budget and the brief.",
+    ar: "الحملة كاملة، مبنية ومُسعّرة قبل أن توافق عليها: الأسواق وصنّاع المحتوى والميزانية والموجز.",
   },
-  "landing.v2t": { en: "The return is guaranteed", ar: "العائد مضمون" },
+  "landing.v2t": {
+    en: "Miss the number? HeyMoon pays the difference.",
+    ar: "لم يتحقق الرقم؟ تدفع هاي مون الفرق.",
+  },
   "landing.v2d": {
-    en: "Every phase carries a revenue figure in writing. Close below it and MoonTech pays you the difference.",
-    ar: "كل مرحلة تحمل رقم إيرادات مكتوبًا. إذا أُغلقت دونه تدفع لك مون‑تك الفرق.",
+    en: "Every campaign comes with a sales figure, in writing, before you pay. If your sales come in under it, the shortfall is HeyMoon's to cover, not yours.",
+    ar: "كل حملة تأتي برقم مبيعات مكتوب قبل أن تدفع. وإذا جاءت مبيعاتك أقل منه، فالفرق على هاي مون لا عليك.",
   },
-  "landing.v3t": { en: "One phase at a time", ar: "مرحلة واحدة في كل مرة" },
+  "landing.v3t": {
+    en: "Start small. Scale on results.",
+    ar: "ابدأ صغيرًا. وتوسّع على النتائج.",
+  },
   "landing.v3d": {
-    en: "You start Phase 1 only. It has to hit 80% of its target before the next one is even offered.",
-    ar: "تبدأ بالمرحلة الأولى فقط. وعليها بلوغ ٨٠٪ من هدفها قبل أن تُعرض التالية أصلًا.",
+    en: "Your first campaign is $1,000, the same for every brand. The next is offered only when this one reaches 80% of its target.",
+    ar: "حملتك الأولى بـ 1,000 دولار، وهي نفسها لكل علامة تجارية. ولا تُعرض التالية إلا عندما تبلغ هذه 80% من هدفها.",
   },
   "landing.placeholder": { en: "yourstore.com", ar: "متجرك.com" },
-  "landing.cta": { en: "Read my store", ar: "اقرأ متجري" },
-  "landing.free": { en: "Free, and no account needed to see the plan.", ar: "مجانًا، وبلا حساب لرؤية الخطة." },
+  "landing.cta": { en: "See the plan", ar: "عرض الخطة" },
+  "landing.free": { en: "Free. No account needed.", ar: "مجانًا. وبدون حساب." },
   "landing.reading": { en: "Reading", ar: "جارٍ القراءة" },
   "landing.nothing": {
-    en: "Nothing is charged and nothing is published until you say so.",
-    ar: "لا يُخصم أي مبلغ ولا يُنشر أي محتوى إلا بموافقتك.",
+    en: "Nothing is charged. Nothing is published. Not until you say so.",
+    ar: "لا يُخصم أي مبلغ. ولا يُنشر أي محتوى. ولا شيء قبل موافقتك.",
+  },
+  /* The line under the trust note. HeyMoon is the company behind the
+     agents, and the page says so once, quietly, at the bottom. */
+  "landing.credit": {
+    en: "Built by AI. Backed by HeyMoon.AI, a Saudi company.",
+    ar: "مبني بالذكاء الاصطناعي. ومدعوم من HeyMoon.AI، شركة سعودية.",
   },
 
   /* Read */
-  "read.title": { en: "What we found", ar: "ما وجدناه" },
+  "read.title": { en: "What I found", ar: "ما وجدناه" },
   "read.working": { en: "Still reading", ar: "ما زلنا نقرأ" },
-  "read.stopped": { en: "Stopped. Everything below is what we had.", ar: "توقفنا. كل ما يظهر أدناه هو ما جمعناه." },
+  "read.stopped": { en: "Stopped. Everything below is what I had.", ar: "توقفنا. كل ما يظهر أدناه هو ما جمعناه." },
   "read.resume": { en: "Keep reading", ar: "تابع القراءة" },
   "read.evidence": { en: "Evidence", ar: "الدليل" },
   "read.yes": { en: "Yes", ar: "صحيح" },
@@ -87,10 +105,7 @@ export const STR: Dict = {
   "thread.planPaid": { en: "Your campaign", ar: "حملتك" },
   /* No creator name here: the placeholder is on screen before Phase 1
      is paid for, and identities are withheld until then. */
-  "thread.placeholder": {
-    en: "Change anything — “Kuwait only”, “guarantee 8× instead”, “women 25 to 40”",
-    ar: "غيّر ما تشاء — «الكويت فقط»، «اضمن ٨× بدلًا من ذلك»، «نساء من ٢٥ إلى ٤٠»",
-  },
+  "thread.placeholder": { en: "Change anything about the plan", ar: "غيّر أي شيء في الخطة" },
   "thread.send": { en: "Send", ar: "إرسال" },
   "thread.thinking": { en: "Working", ar: "يعمل الآن" },
   "thread.stop": { en: "Stop", ar: "إيقاف" },
@@ -104,8 +119,8 @@ export const STR: Dict = {
   "plan.phase1Proposed": { en: "Proposed · Phase 1 · Warm-up", ar: "مقترح · المرحلة ١ · الإحماء" },
   "plan.guaranteed": { en: "guaranteed", ar: "مضمون" },
   "plan.budget": { en: "Budget", ar: "الميزانية" },
-  "plan.target": { en: "Revenue target", ar: "هدف الإيرادات" },
-  "plan.expected": { en: "What we expect", ar: "ما نتوقعه" },
+  "plan.target": { en: "Guaranteed sales", ar: "المبيعات المضمونة" },
+  "plan.expected": { en: "Expected sales", ar: "ما نتوقعه" },
   /* The three warm-up figures, as one sentence read left to right:
      what you pay, the floor under it, what we actually think happens.
      The first two are the same number on purpose, which is why each
@@ -117,9 +132,9 @@ export const STR: Dict = {
   "plan.expectedNote": { en: "from this crew, in these markets", ar: "من هذا الفريق، في هذه الأسواق" },
   /* Upside reads as a note under the guarantee, never as a second
      figure beside it. Two big numbers are two promises. */
-  "plan.upsideLead": { en: "We expect this crew to do", ar: "نتوقع من هذا الفريق تحقيق" },
+  "plan.upsideLead": { en: "HeyMoon expects this crew to do", ar: "نتوقع من هذا الفريق تحقيق" },
   "plan.upsideTail": {
-    en: "That is what we think happens. The number above is what we guarantee.",
+    en: "That is what tends to happen. The number above is what HeyMoon guarantees.",
     ar: "هذا ما نتوقع حدوثه. الرقم أعلاه هو ما نضمنه.",
   },
   "plan.markets": { en: "Markets", ar: "الأسواق" },
@@ -128,7 +143,7 @@ export const STR: Dict = {
   "plan.brief": { en: "Brief", ar: "الموجز" },
   "plan.matched": { en: "matched", ar: "مطابقين" },
   "plan.unlock": { en: "Phase 2 unlocks at", ar: "تُفتح المرحلة ٢ عند" },
-  "plan.unlockTail": { en: "— 80% of this phase's target.", ar: "— ٨٠٪ من هدف هذه المرحلة." },
+  "plan.unlockTail": { en: ", 80% of this phase's target.", ar: "، ٨٠٪ من هدف هذه المرحلة." },
   "aud.all": { en: "All genders", ar: "كل الأجناس" },
   "aud.female": { en: "Women", ar: "نساء" },
   "aud.male": { en: "Men", ar: "رجال" },

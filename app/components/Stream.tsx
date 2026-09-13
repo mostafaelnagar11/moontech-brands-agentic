@@ -154,7 +154,7 @@ export function Thinking() {
   return (
     <div className="flex items-start gap-3">
       <span aria-hidden className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand text-[12px] text-white">✦</span>
-      <span className="mt-2.5 flex gap-1" role="status" aria-label="The agent is replying">
+      <span className="mt-2.5 flex gap-1" role="status" aria-label="HeyMoon is replying">
         {[0, 160, 320].map((d) => (
           <span key={d} className="h-1.5 w-1.5 animate-bounce rounded-full bg-brand/45" style={{ animationDelay: `${d}ms` }} />
         ))}

@@ -13,7 +13,7 @@
  *
  * The chrome is the current app's, deliberately: a 210px rail that
  * collapses to 60px, a 67px translucent top bar, and a full-bleed main
- * column on the canvas. A brand who uses MoonTech today should not
+ * column on the canvas. A brand who uses HeyMoon today should not
  * have to learn a new shell to look at the same numbers. What has
  * changed is the third column.
  *
@@ -56,7 +56,7 @@ function EmptyDashboard() {
       <p className="text-[15px] font-semibold text-ink">No campaign yet</p>
       <p className="mx-auto mt-1.5 max-w-[420px] text-body leading-6 text-ink-soft">
         Build one and this fills in: what your creators earn you against the guarantee, the drafts waiting on your
-        approval, and everything the agents did on their own.
+        approval, and everything HeyMoon did on its own.
       </p>
       <Link
         href="/c"

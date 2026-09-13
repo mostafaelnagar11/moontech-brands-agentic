@@ -45,17 +45,17 @@ const VIEW_WORDS: { view: DashboardView; re: RegExp; say: string }[] = [
   {
     view: "creators",
     re: /\b(creators?|influencers?|talent|roster|who (are|is)|shortlist)\b/,
-    say: "Everyone MoonMatch AI has brought you, with why each one was matched. A like or a pass shapes the next batch; nobody is booked or told.",
+    say: "Everyone HeyMoon has brought you, with why each one was matched. A like or a pass shapes the next batch; nobody is booked or told.",
   },
   {
     view: "ads",
     re: /\b(ads?|drafts?|creatives?|approvals?|approval queue|what.s waiting|review)\b/,
-    say: "Here is the queue. Every draft carries MoonWriter AI's check against the brief it wrote, and nothing goes out until you decide on it.",
+    say: "Here is the queue. Every draft carries HeyMoon's check against the brief it wrote, and nothing goes out until you decide on it.",
   },
   {
     view: "inbox",
     re: /\b(needs me|needs you|inbox|to.?do|what should i do|what do you need|outstanding)\b/,
-    say: "Everything waiting on you, ordered by what it costs to leave it — money first, then work that is blocking revenue, then things that only need acknowledging.",
+    say: "Everything waiting on you, ordered by what it costs to leave it: money first, then work that is blocking sales, then things that only need acknowledging.",
   },
   {
     view: "activity",
@@ -65,7 +65,7 @@ const VIEW_WORDS: { view: DashboardView; re: RegExp; say: string }[] = [
   {
     view: "autonomy",
     re: /\b(autonomy|permissions?|allowed|may you|can you do|rules|settings)\b/,
-    say: "These are my permissions. Moving money, publishing and signing are fixed at never and cannot be turned on — not by you, not by me.",
+    say: "These are my permissions. Moving money, publishing and signing are fixed at never and cannot be turned on. Not by you, not by me.",
   },
   {
     view: "campaign",
@@ -92,7 +92,7 @@ export function paceSentence(phase: Phase | null, ads: AdRecord[]): string {
     ? `The 80% line is already crossed, so the next phase is unlocked.`
     : `The 80% line is ${p.daysToUnlock} days out, with ${p.daysLeft} left in the window.`;
   const you = waiting
-    ? `${liveNow} ads are live and ${waiting} are waiting on you — approving them is the single biggest thing that moves this.`
+    ? `${liveNow} ads are live and ${waiting} are waiting on you. Approving them is the single biggest thing that moves this.`
     : `${liveNow} ads are live and nothing is waiting on you.`;
   return `${head} ${rate} ${gate}\n\n${you}`;
 }
@@ -112,21 +112,21 @@ export function interpretDashboard(i: {
      so it is checked first and it never completes on its own. */
   if (/\b(approve|publish|push|send)\b.*\b(all|everything|them|the drafts?|the queue)\b|\bapprove all\b|\bbatch approve\b/.test(lower)) {
     if (!waiting.length) {
-      return { kind: "answer", say: "Nothing is waiting on you — every draft in this phase is already decided." };
+      return { kind: "answer", say: "Nothing is waiting on you. Every draft in this phase is already decided." };
     }
     const held = waiting.filter((a) => a.compliance.verdict === "hold").length;
     return {
       kind: "approve-all",
       say:
         `${waiting.length} drafts are waiting, and ${held ? `I would hold ${held} of them` : "I would approve all of them"}. ` +
-        `Here is the list with my read on each. I have prepared it; pressing it is yours — I cannot publish anything myself.`,
+        `Here is the list, with what I make of each. I have prepared it; pressing it is yours, and I cannot publish anything myself.`,
     };
   }
 
   if (/\bundo\b|\bput (that|it) back\b|\brevert\b|\broll ?back\b/.test(lower)) {
     return i.undoable
       ? { kind: "undo", say: "Undone, and put back the way it was. It is still in the log with the undo recorded against it." }
-      : { kind: "answer", say: "There is nothing of mine left to undo — everything I did on my own is either still standing or already reverted." };
+      : { kind: "answer", say: "There is nothing of mine left to undo. Everything I did on my own is either still standing or already reverted." };
   }
 
   /* A question about the numbers is answered rather than navigated to.

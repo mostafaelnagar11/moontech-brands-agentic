@@ -20,7 +20,7 @@
  * agent just built, and a switcher with one row is furniture.
  */
 
-import Image from "next/image";
+import { Wordmark } from "../Wordmark";
 import Link from "next/link";
 import { useState } from "react";
 import {
@@ -74,10 +74,10 @@ function Content({ collapsed, view, onView, waiting, brandName, onMobileClose }:
             aria-hidden
             className="grid h-8 w-8 place-items-center rounded-control bg-brand text-micro font-medium text-white shadow-md"
           >
-            M
+            H
           </span>
         ) : (
-          <Image src="/logo.svg" alt="MoonTech" width={110} height={20} priority className="h-[19px] w-auto" />
+          <Wordmark size="sm" />
         )}
         {onMobileClose && (
           <button

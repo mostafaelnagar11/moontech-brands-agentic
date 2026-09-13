@@ -48,7 +48,7 @@ export function AgentMonitor({ phase, compact = false }: { phase: Phase; compact
     <Card className="overflow-hidden">
       <div className="flex flex-wrap items-center gap-2 border-b border-hairline px-4 py-3">
         <span aria-hidden className="flex h-6 w-6 items-center justify-center rounded-full bg-brand text-[12px] text-white">✦</span>
-        <p className="text-body font-semibold text-ink">Agent monitor</p>
+        <p className="text-body font-semibold text-ink">Live monitor</p>
         <Pill tone={crossed ? "good" : "live"}>{crossed ? "Past the unlock line" : "Running"}</Pill>
         <span className="ms-auto text-[11px] text-ink-faint">
           {phaseTitle(phase.phaseNo)} · day {phase.dayOfPhase} of {phase.plannedDays} · checked {ago(Date.now() - 4 * 60_000)}
@@ -73,7 +73,7 @@ export function AgentMonitor({ phase, compact = false }: { phase: Phase; compact
             p.onPace ? (
               <>
                 At {fmtUSD(Math.round(p.perDay))} a day this lands near{" "}
-                <span className="font-semibold text-ink">{fmtUSD(Math.round(p.atEnd))}</span> —{" "}
+                <span className="font-semibold text-ink">{fmtUSD(Math.round(p.atEnd))}</span>,{" "}
                 {Math.round(p.pctForecast)}% of target.{" "}
                 {crossed ? `Phase ${phase.phaseNo + 1} is already unlocked.` : `The unlock line is ${p.daysToUnlock} days out.`}
               </>

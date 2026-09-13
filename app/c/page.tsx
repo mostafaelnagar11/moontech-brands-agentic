@@ -30,13 +30,13 @@
 import { Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  BUILD_TASKS, PHASE1_BUDGET, PHASE1_ROAS, READ_TASKS, STRATEGY_META, ladderTotals, marketName, repair, suggestPlanShape,
-  tools, underwriting, underwritingNote,
+  BUILD_TASKS, PHASE1_BUDGET, ladderTotals, marketName, repair, suggestPlanShape,
+  tools, underwriting,
   type Repair,
 } from "../lib/agent/tools";
 import type { BrandRead, Plan, PlanChange, PlanPatch, Report } from "../lib/agent/types";
 import {
-  CONFIDENCE_HIGH_RATIO, PLAN_BUDGET_MAX, PLAN_BUDGET_MIN, ROAS_MAX, ROAS_MIN,
+  PLAN_BUDGET_MAX, PLAN_BUDGET_MIN, ROAS_MAX, ROAS_MIN,
   budgetForHigh, budgetForMedium, getConfidence, roasForHigh, roasForMedium,
 } from "../lib/agent/model";
 import { useStream } from "../lib/agent/useStream";
@@ -59,7 +59,7 @@ import { AgentTurn, BlockRow, UserTurn } from "../components/chat/Turn";
 import {
   AdCardBlock, ApprovalBlock, BriefBlock, ChangesBlock, ChecklistBlock, ConfidenceBar, ConfidenceBlock,
   CreatorBlock, FundingBlock, IntegrationBlock, LadderBlock, PlanBlock, ReadBlock, ReceiptBlock,
-  RejectedBlock, ReportBlock, TaskRoster, agentsIn, countWord, rosterTitle, type StorePlatform,
+  RejectedBlock, ReportBlock, TaskRoster, countWord, type StorePlatform,
 } from "../components/blocks";
 import { PlanCard } from "../components/PlanCard";
 
@@ -78,49 +78,46 @@ const touchesLocked = (p: PlanPatch) =>
    warm-up price is the same for everybody. After payment the plan is
    locked, so they are about what happens now. */
 const WHY_CHIP = `Why is it ${fmtUSD(PHASE1_BUDGET)}?`;
-const PRE_CHIPS = ["Kuwait only", "Guarantee 8× instead", WHY_CHIP, "Show me the three phases"];
+const PRE_CHIPS = ["Kuwait only", "Women 25 to 45", "Guarantee 8x instead", WHY_CHIP];
 /* After payment there is exactly one thing left to do, and it is not
    looking at a dashboard: until the store is connected there is nothing
    for a dashboard to count. Offering it early sends a brand to an empty
    room and puts the step that makes the guarantee measurable behind a
    chip they have already walked past. */
-const POST_CHIPS = ["What happens next?", "Go to dashboard"];
+const POST_CHIPS = ["What happens next?", "Go to the dashboard"];
 const POST_CHIPS_UNCONNECTED = ["What happens next?"];
 
-/* What each agent is doing while the store is read, in the brand's own
-   terms. Only the agents on READ_TASKS are ever named — the size of the
-   pipeline behind them is our business, not the brand's, and a brand
-   who has just pasted a link does not need a staffing chart to read the
-   answer. The sentence is assembled from the task list rather than
-   typed, so it cannot claim an agent that is not working. */
-const READ_CLAUSE: Record<string, string> = {
-  "MoonShot AI": "MoonShot AI reads the store itself",
-  "MoonMatch AI": "MoonMatch AI your audience",
-  "MoonSearch AI": "MoonSearch AI who would be safe to work with",
-  "MoonWriter AI": "MoonWriter AI how you write",
-  "MoonScore AI": "MoonScore AI decides what we can guarantee",
-  "MoonLive AI": "MoonLive AI the channels you already run",
-  "MoonLearning AI": "MoonLearning AI what earlier campaigns in your category found",
-};
+/* The brand never reads a staffing chart. What the agents are called,
+   how many of them there are and which one found what is our business;
+   the brand is told the result. The only place a name may appear is a
+   roster block, and never in a sentence. */
+
 /** "a, b and c" — the agent speaks, so it does not use a serial comma. */
 const listOf = (parts: string[]) =>
   parts.length <= 1 ? parts.join("") : `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`;
 
-const READ_AGENTS = agentsIn(READ_TASKS);
-const READ_TEAM = listOf(READ_AGENTS.map((a) => READ_CLAUSE[a] ?? `${a} is working`));
+/** "Three creators" — the count as a word, at the start of a sentence. */
+const countUp = (n: number) => {
+  const w = countWord(n);
+  return `${w[0].toUpperCase()}${w.slice(1)}`;
+};
 
-const NOTE = "MoonTech never moves money or publishes anything without you.";
+/* The disclaimer is about the decision it sits under, so it only sits
+   under that decision. Once Phase 1 is paid there is nothing left to
+   check before paying, and a line that repeats a warning about a step
+   already taken teaches a brand to stop reading the composer. */
+const NOTE = "Check the details before you pay.";
 
 /* A domain, with or without a scheme or a path. Deliberately narrow —
    it only has to beat "Kuwait only" and "guarantee 8x", not validate a
    URL, and `normaliseUrl` does the tidying afterwards. */
 const LOOKS_LIKE_STORE = /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,}(\/\S*)?$/i;
 
-const ALREADY_PAID = "Phase 1 is already started and paid. Phase 2 is offered when Phase 1 reaches 80% of its revenue target.";
+const ALREADY_PAID = "Phase 1 is already started and paid. Phase 2 opens when Phase 1 reaches 80% of its sales target.";
 const LOCKED = "Phase 1 is paid and its plan is locked. I will carry that change into Phase 2 when it is offered.";
-const SHOW_PHASES = "Here is the whole plan, all three phases. You are only starting the first; Phases 2 and 3 are offered one at a time, each on the results of the one before.";
+const SHOW_PHASES = "All three phases. You're starting the first.";
 
-/* "Show me the three phases" and the ways a person actually says it. */
+/* "See all three phases" and the ways a person actually says it. */
 const PHASES_RE = /three phases|the phases|later phases|other phases|next phases|further phases|phases? (2|3|two|three)|whole plan|big picture/;
 
 /* Four views a brand may simply name. `interpret` knows about the plan,
@@ -130,22 +127,22 @@ const PANEL_INTENT: { re: RegExp; view: PanelView; say: string }[] = [
   {
     re: /\bads?\b|\bcreatives?\b/,
     view: "ads",
-    say: "Opening every ad in the panel beside this conversation. Each one shows what it is for, how it is doing, and whether it is still waiting on you.",
+    say: "Opening every ad in the panel. Each one shows how it is doing and whether it is waiting on you.",
   },
   {
     re: /\binbox\b|needs (me|you)|waiting on me/,
     view: "inbox",
-    say: "Opening what needs you, in the panel. It is ordered by what it costs to leave it, and nothing on it goes out without your approval.",
+    say: "Opening what needs you, in the panel. Nothing on it goes out without your approval.",
   },
   {
     re: /\bactivity\b|on your own|what have you done/,
     view: "activity",
-    say: "Opening what I did on my own, in the panel. Every one of them has the reason I did it and a way to undo it.",
+    say: "Opening what I did on my own, in the panel. Each one carries its reason and an undo.",
   },
   {
     re: /\bautonomy\b|what (can|may) you do|without asking/,
     view: "autonomy",
-    say: "Opening what I may do alone, in the panel. Moving money and publishing are never on that list, whatever else you allow.",
+    say: "Opening what I may do alone, in the panel. Moving money and publishing are never on that list.",
   },
 ];
 
@@ -187,7 +184,7 @@ function ChatInner() {
      asks and then forgets is not a conversation. */
   const [asking, setAsking] = useState<{ q: string; options: string[] } | null>(null);
   /* After the read the agent asks whether it looks right before building.
-     "Something is off" parks the build until the brand says what — the
+     "Something's off" parks the build until the brand says what — the
      next message is recorded as a correction and the build proceeds. */
   const [pendingRead, setPendingRead] = useState<BrandRead | null>(null);
   /* The two numbers the calculator owns, before there is a plan to hold
@@ -288,51 +285,36 @@ function ChatInner() {
          The agent picks the conversation up at the question it would
          have asked when the read landed. */
       if (storedRead?.eligibility) {
-        push({
-          kind: "say",
-          text: `I have already read ${readUrl}. Here is what the ${countWord(READ_AGENTS.length)} agents found, exactly as they left it.`,
-        });
+        push({ kind: "say", text: `Already read ${readUrl}.` });
         push({ kind: "read", url: readUrl });
         afterRead(storedRead);
         return;
       }
-      push({
-        kind: "say",
-        text:
-          `Reading ${readUrl} now. ${READ_TEAM}.\n\n` +
-          `Findings appear as they land. Stop any time; everything found stays.`,
-      });
+      push({ kind: "say", text: `Reading ${readUrl}.` });
       push({ kind: "read", url: readUrl });
       return;
     }
     const existing = activePlanLive();
     if (buildFor && !existing) {
       const read = getRead(buildFor);
-      push({
-        kind: "say",
-        text:
-          `${read.url} is read. Building the campaign now.\n\n` +
-          `The price is settled: Phase 1 is ${fmtUSD(PHASE1_BUDGET)} for every brand. What I am working out is the markets, ` +
-          `the creators, the guarantee and the brief.`,
-      });
+      push({ kind: "say", text: `${read.url} is read. Building your plan now.` });
       return;
     }
     if (existing) {
       push({
         kind: "say",
         text: paid
-          ? `Your campaign for ${existing.brandName}. Phase 1 is live and paid. Ask me anything, or tell me what to carry into Phase 2.`
-          : `Your campaign for ${existing.brandName}. Phase 1 is the ${fmtUSD(PHASE1_BUDGET)} warm-up.\n\n` +
-            `Tell me what to change in plain words. I will show you what moves.`,
+          ? `Your campaign for ${existing.brandName}. Phase 1 is live and paid.`
+          : `Your campaign for ${existing.brandName}. Phase 1 is the ${fmtUSD(PHASE1_BUDGET)} warm-up.`,
       });
       push({ kind: "plan-card" });
       if (paid) setAsking({ q: "", options: postChips });
-      else ask("Anything you want different about it?", ["Markets are right", "Kuwait only", "Go more aggressive", "Show me the three phases"]);
+      else ask("Anything you want different about it?", ["Markets are right", "Kuwait only", "Go more aggressive", "See all three phases"]);
     } else {
       push({
         kind: "say",
         text: campaignCount
-          ? "A new campaign, then. Paste the store link and I will read it the same way."
+          ? "A new campaign, then. Paste the store link."
           : "Nothing is planned yet. Paste a store link and I will build a campaign from it.",
       });
       setAsking({ q: "", options: ["ounass.com", "lunabeauty.ae", "freshgrocer.ae"] });
@@ -352,15 +334,14 @@ function ChatInner() {
     const ok = v.eligibility?.state === "ok";
     if (ok) {
       setPendingRead(v);
-      ask(
-        `That is your store. ${v.eligibility!.line.value}.\n\n` +
-        `Does it look right? Tap anything above to correct it. Nothing is charged yet.`,
-        ["Looks right, build the plan", "Something is off"]
-      );
+      ask(`Here's what I found. Does it look right?`, ["Looks right", "Something's off"]);
     } else {
-      say(`One thing did not clear. ${v.eligibility!.line.value}\n\nIt is the only thing in the way. The rest of the read still stands.`);
+      /* What did not clear is on the block below, in the words the
+         read itself used. Repeating it here would put someone else's
+         punctuation in the middle of the agent's sentence. */
+      say(`One thing didn't clear. Everything else stands.`);
       push({ kind: "rejected", readId: v.id });
-      ask("Anything you want to correct in what I read, or shall I log a manual re-check?", ["Log a re-check", "Read a different store"]);
+      ask("Tell me what to correct, or I'll log a manual re-check.", ["Log a re-check", "Read a different store"]);
     }
   };
 
@@ -388,10 +369,7 @@ function ChatInner() {
         if (cancelled) {
           /* The claim belongs to the run that FINISHED. Spending it
              here would silence the completed read that follows. */
-          say(
-            "Stopped there. What I found is above, and it is yours to work with. " +
-            "Say “read it again” if you would rather I finished the job."
-          );
+          say("Stopped there. What I found is above, and I can finish the job if you want it.");
           setAsking({ q: "", options: ["Read it again", "Work with this"] });
           return;
         }
@@ -416,13 +394,10 @@ function ChatInner() {
       measure the guarantee, not to qualify the brand. */
   const onConnect = (k: StorePlatform) => {
     connectStore(k);
-    push({ kind: "user", text: `Authorised ${k[0].toUpperCase() + k.slice(1)}` });
+    push({ kind: "user", text: `Connected ${k[0].toUpperCase() + k.slice(1)}` });
     ask(
-      "That is everything, and you are good to go. Your store is connected read-only, MoonWriter AI is briefing your creators, " +
-      "and the first drafts usually land within about four days.\n\n" +
-      "From here MoonLive AI puts out every ad you approve and MoonScore AI moves the warm-up budget towards whichever creators " +
-      "are converting. I will tell you what happened, what it means, and the one thing I need from you — and nothing publishes " +
-      "without your approval.",
+      "Done. Your store is connected, your creators are briefed, and the first drafts arrive within 48 hours. " +
+      "From here, you'll hear from me when there's something to see, or something to decide.",
       /* POST_CHIPS, not `postChips`. This closure was built on the
          render BEFORE `connectStore` ran, so `connected` is still null
          in it and the dashboard chip would be withheld at the exact
@@ -441,20 +416,15 @@ function ChatInner() {
        two identical requests in the thread and two buttons that move
        the same money. */
     if (requested) {
-      say("The payment is already open below — confirm it there, or say “not yet” and nothing happens.");
+      say("The payment is already open below. Confirm it there, or say “not yet”.");
       return;
     }
     const req = tools.request_funding({ plan, phaseNo: 1 });
     putFunding(req);
-    say(
-      /* Phase 1's guarantee is 1×, not the plan's average. Saying the
-         plan's multiple here promised a return on the warm-up that the
-         card directly below it contradicts, in the sentence where the
-         brand is agreeing to pay. */
-      `Here is exactly what you are agreeing to. ${fmtUSD(req.total.value)} today — the ${fmtUSD(PHASE1_BUDGET)} warm-up plus VAT — ` +
-      `for Phase 1 only, guaranteed at ${PHASE1_ROAS}×, which is your ${fmtUSD(PHASE1_BUDGET)} back. The ${plan.guaranteedRoas.value}× is the ` +
-      `average across all three phases, and nothing after Phase 1 is committed by pressing this.`
-    );
+    /* Every figure — the total, the VAT, what Phase 1 guarantees against
+       the plan's own multiple — is on the card below. The sentence
+       introduces it and gets out of the way. */
+    say("Here's what you're agreeing to.");
     push({ kind: "funding", requestId: req.id });
   };
 
@@ -469,11 +439,7 @@ function ChatInner() {
     if (!r) return;
     setShapeSettled(true);
     const conf = getConfidence(chosen.planBudget, chosen.roas);
-    say(
-      `${fmtUSD(chosen.planBudget)} at ${chosen.roas}×, ${conf.label.toLowerCase()}. Building it now.\n\n` +
-      `MoonMatch AI finds your creators, MoonSearch AI vets them, MoonScore AI sizes the warm-up crew, ` +
-      `MoonWriter AI writes the brief. Nothing is charged while I work.`
-    );
+    say(`${fmtUSD(chosen.planBudget)} at ${chosen.roas}x, ${conf.label.toLowerCase()}. Building it now.`);
     setPendingRead(null);
     startBuild(r, chosen);
   };
@@ -512,8 +478,8 @@ function ChatInner() {
           if (wholeEnough) putPlan(v);
           say(
             wholeEnough
-              ? "Stopped. What I had is below. Tell me what to change, or say “build the plan” to finish it as it stands."
-              : "Stopped too early to show you anything. The creators had not been matched, and the rest builds on them. Say “build the plan” to run it again."
+              ? "Stopped, and what I had is below. Say “build the plan” to finish it as it stands."
+              : "Stopped too early to show you anything. Say “build the plan” to run it again."
           );
           if (wholeEnough) push({ kind: "plan-card" });
           setAsking({ q: "", options: ["Build the plan"] });
@@ -529,14 +495,12 @@ function ChatInner() {
            torn-down first run of a development double-mount never gets
            here at all — useStream only reports the run that is current. */
         if (!claimOnce(`build-done:${read.id}`)) return;
-        const m = STRATEGY_META[v.strategy.value];
+        const crew = v.creators.value.length;
         push({
           kind: "say",
           text:
-            `Here is your campaign. ${m.sentence}.\n\n` +
-            `Three phases, and you start the first. Phase 1 is ${fmtUSD(v.budget.value)} for every brand. ` +
-            `It briefs ${v.creators.value.length} creators in ${v.markets.value.map(marketName).join(", ")}.\n\n` +
-            `${fmtUSD(v.price.revenueTarget.value)} in sales is what we guarantee on it.`,
+            `Here's your plan. Phase 1 is ${fmtUSD(v.budget.value)} for ${countWord(crew)} creator${crew === 1 ? "" : "s"}, ` +
+            `with ${fmtUSD(v.price.revenueTarget.value)} in sales guaranteed. If you sell less, HeyMoon pays you the difference.`,
         });
         push({ kind: "plan-card" });
         if (v.ladder.value.length) push({ kind: "ladder" });
@@ -552,15 +516,12 @@ function ChatInner() {
         ask(
           /* Not "this is a proposal, not a decision". That sentence
              handed the brand a reason to hesitate at the exact moment
-             the plan is ready to start — it made our own work sound
-             provisional. The plan IS ready; what stays open is what it
-             is pointed at, and saying so is the same honesty without
-             the apology. */
-          `Ready to start. Everything on it is still yours to change — markets, products, how hard the guarantee pushes. ` +
-          `The price is not: Phase 1 is ${fmtUSD(PHASE1_BUDGET)} whatever you change.\n\n` +
-          `What happens next: you start Phase 1 and pay ${fmtUSD(v.price.total.value)}, the warm-up plus VAT. ` +
-          `Then you connect your store so I can count the sales. That is the last step, not a qualification.`,
-          ["Start Phase 1", "Kuwait only", "Go more aggressive", WHY_CHIP, "Show me the three phases"]
+             the plan is ready to start. The plan IS ready; what stays
+             open is what it is pointed at, and the price is the one
+             thing that never moves. */
+          `Phase 1 is ${fmtUSD(PHASE1_BUDGET)} for every brand. It isn't sized to your store, and it isn't negotiated. ` +
+          `Change anything else, or start now.`,
+          ["Start Phase 1", "Change something"]
         );
       }
     );
@@ -597,21 +558,19 @@ function ChatInner() {
       /* Two counts, and this sentence used to give the crew's while
          saying "fit those markets" — which is the pool's. */
       ask(
-        `${p.pool.value} creators fit those markets now, and the warm-up still briefs the ${p.creators.value.length} ` +
-        `best value of them at ${fmtUSD(PHASE1_BUDGET)}. Do you want the shortlist summary, or to look at the brief?`,
-        ["Show me the creators", "Show me the brief", "Go more aggressive"]
+        `The crew is rebuilt around those markets. Do you want the shortlist, or the brief?`,
+        ["Show the creators", "Show the brief", "Go more aggressive"]
       );
     } else if (touched.has("strategy") || touched.has("guaranteedRoas") || touched.has("budget")) {
       /* Rebuilt, not repriced. Phase 1 costs what it costs every brand,
          so the only things an edit here can move are what the warm-up
          is pointed at and what we will stand behind on it. */
       ask(
-        `The plan is rebuilt around that. Phase 1 is still ${fmtUSD(PHASE1_BUDGET)} — what moved is what it is pointed at and ` +
-        `what I will guarantee on it. Do you want to look at the brief before you start Phase 1?`,
-        ["Show me the brief", "Show me the creators", "Start Phase 1"]
+        `The plan is rebuilt around that, and Phase 1 is still ${fmtUSD(PHASE1_BUDGET)}. Do you want the brief before you start?`,
+        ["Show the brief", "Show the creators", "Start Phase 1"]
       );
     } else if (touched.has("creators")) {
-      ask(`Anything else you want changed on the crew?`, ["That is the crew", "Show me the brief", "Start Phase 1"]);
+      ask(`Anything else you want changed on the crew?`, ["That is the crew", "Show the brief", "Start Phase 1"]);
     } else {
       setAsking(null);
     }
@@ -638,7 +597,12 @@ function ChatInner() {
     const u = underwriting(next);
     if (!u.ok) {
       const r = repair(next);
-      say(underwritingNote(u, next, r));
+      const where = listOf(next.markets.value.map(marketName));
+      say(
+        `One thing first. In ${where}${next.markets.value.length === 1 ? " alone" : ""}, I expect about ` +
+        `${u.implied.toFixed(1)}x at this budget, not ${u.promised}x. Fewer creators there reach your audience ` +
+        `for ${fmtUSD(next.budget.value)}. I won't guarantee a number I expect to miss.`
+      );
       setFix(r);
       push({ kind: "confidence" });
     } else {
@@ -649,18 +613,19 @@ function ChatInner() {
 
   /** The answer to "what happens next?", from wherever the brand is. */
   const whatNext = () => {
-    const lead = !paid
-      ? `Once you start Phase 1 you pay for it — ${fmtUSD(PHASE1_BUDGET)} plus VAT, and nothing beyond it — and then, as the last step, you connect your store so I can count the revenue each creator earns you. After that: `
-      : connected
-      ? "Your store is connected, so from here every order that comes through a creator's code is counted automatically. "
-      : "First, connect your store below — that is the last step, and it is how I count the revenue each creator earns you. Then: ";
+    if (!paid)
+      return (
+        `You start Phase 1 and pay for it, then connect your store so the sales can be counted. ` +
+        `Your creators are briefed the same day, and the first drafts arrive within 48 hours.`
+      );
+    if (connected)
+      return (
+        "Your store is connected, so every order through a creator's code is counted. " +
+        "The first drafts arrive within 48 hours, and nothing goes out until you approve it."
+      );
     return (
-      lead +
-      "your creators are being briefed today, and the first drafts usually land in about four days. Each one waits in your queue, and nothing " +
-      "goes anywhere until you approve it. While the phase runs I watch it for you — I tell you what happened, what it means, and the one " +
-      "thing I need from you. When Phase 1 reaches 80% of its revenue target I offer you Phase 2, built from Phase 1's results — " +
-      "MoonLearning AI feeds what the warm-up found back into the matching, the writing and the budget, so Phase 2 starts better " +
-      "informed than Phase 1 did — and you decide then whether to start it."
+      "Connect your store below so the sales can be counted. " +
+      "Your creators are briefed today, and the first drafts arrive within 48 hours."
     );
   };
 
@@ -678,7 +643,7 @@ function ChatInner() {
            a heading that says the numbers are finished, was two lies in
            one: it is not finished, and it is not new. */
         if (cancelled) {
-          say("Stopped there. The figures above are the ones I had reached — ask me again and I will pull the rest.");
+          say("Stopped there. The figures above are the ones I reached, and I can pull the rest.");
           return;
         }
         const id = push({ kind: "report", campaignId: ph.id });
@@ -705,7 +670,7 @@ function ChatInner() {
        an edit is still an edit. */
     if (!plan && LOOKS_LIKE_STORE.test(v) && readRun.status !== "running") {
       const url = normaliseUrl(v);
-      say(`Reading ${url} now. ${READ_TEAM}.\n\nFindings appear as they land. Stop any time; everything found stays.`);
+      say(`Reading ${url}.`);
       push({ kind: "read", url });
       runRead(url);
       return;
@@ -718,14 +683,14 @@ function ChatInner() {
        offering it. */
     if (readRun.status === "cancelled" && readUrl) {
       if (/^(read it again|read again|pick it back up|finish the read|carry on|keep going|continue)\b/.test(lower)) {
-        say(`Picking it back up on ${readUrl}. Starting again from the top, so nothing is half-read.`);
+        say(`Picking it back up on ${readUrl}. Starting from the top, so nothing is half read.`);
         runRead();
         return;
       }
       if (/^(work with this|use this|that is enough|good enough|carry on with)/.test(lower)) {
         const partial = readRun.partial;
         if (partial) {
-          say("Working with what arrived, then. Anything I did not reach, I will treat as unknown rather than guess it.");
+          say("Working with what arrived, then. Anything I did not reach, I treat as unknown rather than guess it.");
           afterRead(partial);
           return;
         }
@@ -738,8 +703,11 @@ function ChatInner() {
     if (awaitingCorrection) {
       const r = pendingRead ?? (readUrl ? getRead(readIdFor(readUrl)) : null);
       if (r) {
-        correctRead(r.id, { layer: "category", field: "note", was: "the agent's reading", now: v, at: Date.now() }, (x) => x);
-        say(`Noted, and kept next to what I read: “${v}”. I will build the plan on your version.`);
+        correctRead(r.id, { layer: "category", field: "note", was: "what HeyMoon found", now: v, at: Date.now() }, (x) => x);
+        /* Never the brand's own sentence read back at them. The
+           correction is free text, so there is no specific field to
+           name here — what changed is shown on the read itself. */
+        say(`Fixed. Building the plan on that.`);
         setAwaitingCorrection(false);
         setPendingRead(null);
         startBuild(r);
@@ -751,30 +719,24 @@ function ChatInner() {
        flow. They are answered here rather than sent through `interpret`,
        because they are not requests about the plan. */
     if (/go to (the )?dashboard|open the dashboard/.test(lower)) {
-      /* A handoff, not another panel. My job ends when the campaign is
-         built, paid for and connected; the phase that follows runs for
-         weeks and lives somewhere you check rather than somewhere you
-         scroll back through. */
-      say(
-        "Taking you to your dashboard. That is where the phase runs from here — what the creators earn you against " +
-        "the guarantee, the drafts waiting on your approval, and everything the agents did on their own, each with " +
-        "an undo. Come back here any time you want another campaign built."
-      );
+      /* A handoff, not another panel, and it says nothing on the way:
+         a sentence about a destination you are already being taken to
+         is read after it has stopped being true. */
       router.push("/dashboard");
       return;
     }
     if (/what happens next|what.s next|what now/.test(lower)) {
       say(whatNext());
-      setAsking({ q: "", options: paid ? postChips : ["Start Phase 1", "Show me the three phases"] });
+      setAsking({ q: "", options: paid ? postChips : ["Start Phase 1", "See all three phases"] });
       return;
     }
     if (/read a different store/.test(lower)) {
-      say("Back to the first screen — paste the other store's link there and I will read it the same way.");
+      say("Back to the first screen. Paste the other store's link there.");
       router.push("/");
       return;
     }
     if (/log a re-check/.test(lower)) {
-      say("Logged. A person pulls your traffic by hand and emails you within two working days. Your read is saved either way, so nothing here is lost.");
+      say("Logged. A person checks your traffic by hand and emails you within two working days.");
       return;
     }
     /* Gated on there BEING a plan. This answer is about Phase 1's price,
@@ -787,20 +749,24 @@ function ChatInner() {
          this product that is the same for everybody, and saying so — and
          saying why — is more useful than pretending there is a dial. */
       ask(
-        `Phase 1 is always ${fmtUSD(PHASE1_BUDGET)}, for every brand and for all three of the plans I can offer you. ` +
-        `It is the price of finding out whether this works on your real orders, so there is nothing to size, no slider to move, ` +
-        `and nothing to haggle over before you start.\n\n` +
-        `What you can change is what the ${fmtUSD(PHASE1_BUDGET)} is pointed at — your whole bestselling range, your four strongest ` +
-        `products, or your two bestsellers and nothing else — and the return I guarantee moves with it: 3×, 5× or 8×.`,
-        ["Guarantee 8× instead", "Kuwait only", "Show me the three phases", "Start Phase 1"]
+        `Phase 1 is ${fmtUSD(PHASE1_BUDGET)} for every brand, and it isn't sized to your store. ` +
+        `What you choose is what it's pointed at, and the guarantee moves with it.`,
+        ["Guarantee 8x instead", "Kuwait only", "See all three phases", "Start Phase 1"]
       );
+      return;
+    }
+    /* "Change something" is a chip this thread offers, and `interpret`
+       has no reading for it — left alone it would fall through to "I
+       didn't catch that", which is the one answer a chip we wrote must
+       never get. Answered here, with the things that actually move. */
+    if (plan && !paid && /^change something$/.test(lower)) {
+      ask("Markets, audience, creators and the guarantee all move. Tell me what to change.", PRE_CHIPS);
       return;
     }
     if (plan && !paid && /^change the markets/.test(lower)) {
       ask(
-        `Phase 1 runs in ${plan.markets.value.map(marketName).join(", ")}. Tell me the markets you want, in plain words — ` +
-        `“Kuwait only”, “add Saudi Arabia” or “drop Qatar” — and I will rebuild the crew and the guarantee around them. ` +
-        `The ${fmtUSD(PHASE1_BUDGET)} does not change; who it briefs does.`,
+        `Phase 1 runs in ${plan.markets.value.map(marketName).join(", ")}. Tell me the markets you want and I'll rebuild ` +
+        `the crew and the guarantee around them.`,
         ["Kuwait only", "UAE and Saudi Arabia only", "Add Qatar"]
       );
       return;
@@ -830,17 +796,17 @@ function ChatInner() {
       if (mult) {
         const asked = Number(mult[1]);
         const r = Math.max(ROAS_MIN, Math.min(ROAS_MAX, Math.round(asked)));
-        if (asked > ROAS_MAX) adjusted.push(`${asked}× is past the most I will ever guarantee, which is ${ROAS_MAX}×.`);
-        else if (asked < ROAS_MIN) adjusted.push(`${asked}× is below ${ROAS_MIN}×, which is you getting your money back and nothing more.`);
-        else if (r !== asked) adjusted.push(`I guarantee whole multiples, so ${asked}× becomes ${r}×.`);
+        if (asked > ROAS_MAX) adjusted.push(`${asked}x is past the most I will guarantee, which is ${ROAS_MAX}x.`);
+        else if (asked < ROAS_MIN) adjusted.push(`${asked}x is below ${ROAS_MIN}x, which is your money back and nothing more.`);
+        else if (r !== asked) adjusted.push(`I guarantee whole multiples, so ${asked}x becomes ${r}x.`);
         next.roas = r;
       }
       if (money) {
         const raw = Number(money[1] ?? money[3]) * ((money[2] ?? money[4]) ? 1000 : 1);
         if (raw < 500) {
           adjusted.push(
-            `${fmtUSD(raw)} is the size of the whole campaign, not one phase, and plans start at ${fmtUSD(PLAN_BUDGET_MIN)} — ` +
-            `so I have left the number where it was.`
+            `${fmtUSD(raw)} is the whole campaign, not one phase, and plans start at ${fmtUSD(PLAN_BUDGET_MIN)}. ` +
+            `I have left the number where it was.`
           );
         } else {
           const b = Math.max(PLAN_BUDGET_MIN, Math.min(PLAN_BUDGET_MAX, Math.round(raw / 500) * 500));
@@ -856,7 +822,7 @@ function ChatInner() {
       const wantsMore = /guarantee more|more return|higher (guarantee|return|multiple)|more aggressive/.test(lower);
       if (wantsMore && !mult) {
         const r = Math.min(ROAS_MAX, next.roas + 1);
-        if (r === next.roas) adjusted.push(`${ROAS_MAX}× is the most I will ever guarantee, so there is nowhere above this to go.`);
+        if (r === next.roas) adjusted.push(`${ROAS_MAX}x is the most I will guarantee, so there is nowhere above this to go.`);
         next.roas = r;
       }
       /* A nudge that hits a bound and moves nothing has to say so. It
@@ -882,9 +848,9 @@ function ChatInner() {
         /smaller|less|cheaper|bigger|larger|more budget|lower the (plan|budget)|raise the (plan|budget)/.test(lower);
       if (!answered && !wantsBuild) {
         ask(
-          "Give me a plan size, a multiple, or both — “$40,000 at 5×”, “make it $25,000”, or just “8×”. " +
-          "I will tell you how confident I am before we build anything.",
-          [`${fmtUSD(shape.planBudget)} at ${shape.roas}×`, "Something smaller", "Guarantee 8× instead"]
+          "Give me a plan size, a multiple, or both, like “$40,000 at 5x” or “8x”. " +
+          "I'll tell you how confident I am before anything is built.",
+          [`${fmtUSD(shape.planBudget)} at ${shape.roas}x`, "Something smaller", "Guarantee 8x instead"]
         );
         return;
       }
@@ -931,19 +897,22 @@ function ChatInner() {
          the brand did ask for something and did not get it. Lead with
          what happened to it, then say where that leaves the pair. */
       const still = note
-        ? `${note}That leaves us at ${fmtUSD(next.planBudget)} and ${next.roas}×, ${conf.label.toLowerCase()}. `
-        : `Still ${conf.label.toLowerCase()} at ${fmtUSD(next.planBudget)} and ${next.roas}×. `;
+        ? `${note}That leaves the plan at ${fmtUSD(next.planBudget)} and ${next.roas}x, ${conf.label.toLowerCase()}. `
+        : `Still ${conf.label.toLowerCase()} at ${fmtUSD(next.planBudget)} and ${next.roas}x. `;
 
       if (!same) {
-        const line =
-          `${fmtUSD(next.planBudget)} at ${next.roas}× guarantees you ${fmtUSD(ladderTotals(next.planBudget, next.roas).revenue)} in sales. ` +
-          `${fmtUSD(next.planBudget)} ÷ ${next.roas} = ${Math.round(conf.ratio).toLocaleString("en-US")}. We commit at ${CONFIDENCE_HIGH_RATIO.toLocaleString("en-US")}.`;
-        say(`${note}${conf.label}. ${line} ${conf.desc}`);
+        /* The ratio, the line we commit at and the reading itself are
+           all on the bar below. The sentence says the two numbers and
+           what they are worth in sales, and stops. */
+        say(
+          `${note}${conf.label}. ${fmtUSD(next.planBudget)} at ${next.roas}x guarantees you ` +
+          `${fmtUSD(ladderTotals(next.planBudget, next.roas).revenue)} in sales.`
+        );
         push({ kind: "score", planBudget: next.planBudget, roas: next.roas });
       }
 
       if (conf.level === "high") {
-        ask(`${same ? still : ""}Shall I build it?`, ["Build my plan", "Something smaller", "Guarantee more"]);
+        ask(`${same ? still : ""}Shall I build it?`, ["Build the plan", "Something smaller", "Guarantee more"]);
         return;
       }
 
@@ -964,16 +933,14 @@ function ChatInner() {
       const soften = needR !== null && needR < next.roas;
       const fixes: string[] = [];
       if (raise) fixes.push(`Raise it to ${fmtUSD(needB!)}`);
-      if (soften) fixes.push(`Guarantee ${needR}× instead`);
+      if (soften) fixes.push(`Guarantee ${needR}x instead`);
       const ways =
-        (raise ? `At ${next.roas}× a ${fmtUSD(needB!)} plan gets us to ${highB !== null ? "high" : "medium"} confidence. ` : "") +
-        (soften ? `Or keep the plan at ${fmtUSD(next.planBudget)} and let me guarantee ${needR}×, which is ${highR !== null ? "high" : "medium"}. ` : "");
+        (raise ? `At ${next.roas}x, a ${fmtUSD(needB!)} plan reaches ${highB !== null ? "high" : "medium"} confidence. ` : "") +
+        (soften ? `Or keep the plan at ${fmtUSD(next.planBudget)} and let me guarantee ${needR}x, which is ${highR !== null ? "high" : "medium"}. ` : "");
 
       if (conf.level === "medium") {
         ask(
-          `${same ? still : ""}I can build this one. ` +
-          (ways ? `I would rather get it to high first, and there is room to. ${ways}` : "") +
-          `Say build it and I will take the pair as it stands.`,
+          `${same ? still : ""}I can build this one${ways ? ", though there is room to reach high first. " : "."}` + ways,
           [...fixes, "Build it anyway"]
         );
         return;
@@ -982,12 +949,9 @@ function ChatInner() {
       /* Low. No build chip, and no build on request either — the only
          moves offered are the ones that make the promise keepable. */
       ask(
-        (wantsBuild ? `I am not going to build that one. ` : "") +
-        (same
-          ? still
-          : `Low is below the line I will commit at, and I would rather lose the plan than sell you a guarantee I expect to pay out on. `) +
-        (ways || `Nothing inside our range carries a ${next.roas}× promise — even ${fmtUSD(PLAN_BUDGET_MAX)} only reaches ${Math.round(PLAN_BUDGET_MAX / next.roas).toLocaleString("en-US")}. Lower the multiple and I can commit. `) +
-        `Take either and I will build it.`,
+        (wantsBuild ? `I won't build that one. ` : "") +
+        (same ? still : `Low is below the line I commit at, and I won't sell a guarantee I expect to pay out on. `) +
+        (ways || `No plan in range carries a ${next.roas}x promise, so lower the multiple and I can commit. `),
         fixes
       );
       return;
@@ -1018,39 +982,39 @@ function ChatInner() {
             (readUrl ? getRead(readIdFor(readUrl)) : null) ??
             (buildFor ? getRead(buildFor) : null) ??
             (plan ? getRead(plan.readId) : null);
-          if (!r) { say("I need a store read to build from. Paste your store link on the first screen and I will start."); return; }
+          if (!r) { say("I need to read your store first. Paste the link on the first screen."); return; }
           if (paid) { say(ALREADY_PAID); return; }
-          /* Two numbers before anything is built, asked for in words.
-             The agent proposes a pair rather than asking blankly — it
-             has just read the store, so it should have an opinion — and
-             it proposes the pair it can call high confidence.
+          /* Two numbers before anything is built, and the card asks
+             them. Saying "looks right" gets no sentence back at all:
+             the brand has just answered a question, and a paragraph
+             restating the question they answered is a turn that moves
+             nothing. The bar carries the pair, the confidence in it and
+             what it is worth; the chips carry the answers.
 
-             Nothing here mentions phases or the warm-up price. Those
-             are answers to "what does the plan look like", and the plan
-             does not exist yet; raising them now asks the brand to hold
-             two shapes in their head while settling one number each.
-             Everything about the ladder waits for the build. */
+             `shapeAsked` is STATE, not a sentence in the thread. The
+             calculator was once detected by grepping the transcript for
+             its own opening line, and rewriting that line switched the
+             whole branch off. */
           const sug = suggestPlanShape(5);
           setShape(sug);
           setShapeSettled(false);
           setShapeAsked(true);
+          /* The question, restored. It had been cut on the grounds that
+             the bar carries the pair and the chips carry the answers,
+             which is true and still leaves a brand looking at a meter
+             and three buttons with nothing asking them anything. Two
+             sentences, which is the length rule, not none. */
           say(
-            `Two numbers first. How big is the campaign, and what return do you want guaranteed on it?\n\n` +
-            `Start at ${fmtUSD(sug.planBudget)} and ${sug.roas}×. That guarantees you ${fmtUSD(ladderTotals(sug.planBudget, sug.roas).revenue)} in sales, ` +
-            `and it is the smallest plan I can back at high confidence.\n\n` +
-            `Change either one. I will tell you how confident I am before anything is built.`
+            `Two numbers first. How big is the whole campaign, and what multiple of it do you want guaranteed in sales?\n\n` +
+            `Start at ${fmtUSD(sug.planBudget)} and ${sug.roas}x. That is the smallest plan HeyMoon can back at high confidence.`
           );
           push({ kind: "score", planBudget: sug.planBudget, roas: sug.roas });
-          ask("", [`${fmtUSD(sug.planBudget)} at ${sug.roas}×`, "Something smaller", "Guarantee 8× instead"]);
+          ask("", [`${fmtUSD(sug.planBudget)} at ${sug.roas}x`, "Something smaller", "Guarantee 8x instead"]);
           return;
         }
         case "correct": {
           setAwaitingCorrection(true);
-          ask(
-            "What is off? A category, a price, a market, a product that is not really a bestseller. " +
-            "I will keep your version and build on that.",
-            []
-          );
+          ask("What's off? Tell me, and I'll fix it before building the plan.", []);
           return;
         }
         case "approve-all": {
@@ -1064,7 +1028,10 @@ function ChatInner() {
         }
         case "show-ladder": {
           if (!plan) { say("There is no campaign to show yet. Read a store and I will build one."); return; }
-          say(out.say || SHOW_PHASES);
+          /* SHOW_PHASES, not the interpreter's own sentence: the whole
+             plan is a ladder block, and the line above it names what it
+             is and stops. */
+          say(SHOW_PHASES);
           push({ kind: "ladder" });
           return;
         }
@@ -1091,14 +1058,14 @@ function ChatInner() {
            stalls the moment the brand agrees with something. */
         ask(
           "What would you like to do next?",
-          paid ? postChips : ["Show me the creators", "Show me the brief", "Go more aggressive", "Start Phase 1"]
+          paid ? postChips : ["Show the creators", "Show the brief", "Go more aggressive", "Start Phase 1"]
         );
       }
       /* A brand who just asked about the price has been told it does not
          move. Leaving them with no next step would read as a refusal, so
          they are offered the two things that DO move instead. */
       if (out.answerRef === "budget" && plan && !paid) {
-        setAsking({ q: "", options: ["Guarantee 8× instead", "Kuwait only", "Show me the three phases", "Start Phase 1"] });
+        setAsking({ q: "", options: ["Guarantee 8x instead", "Kuwait only", "See all three phases", "Start Phase 1"] });
       }
       return;
     }
@@ -1124,11 +1091,8 @@ function ChatInner() {
     say(
       out.say ||
       (paid
-        ? "I did not catch that one. I can answer questions about Phase 1, show you the three phases, change the brief or the audience, " +
-          "pull a report, or open your campaign in the panel. Changes to the markets or the crew are carried into Phase 2 when it is offered."
-        : "I did not catch that one. I can change the markets, the guarantee, the audience, the creators or the brief — say it in plain " +
-          "words, like “Kuwait only” or “guarantee 8× instead”. I can also show you the three phases, pull a report, or open the Phase 1 " +
-          `payment. The one thing I cannot change is the price: Phase 1 is ${fmtUSD(PHASE1_BUDGET)} for every brand.`)
+        ? "I didn't catch that. I can change the brief or the audience, pull a report, or open your campaign in the panel."
+        : "I didn't catch that. Markets, audience, creators, the brief and the guarantee all move, so say it in plain words.")
     );
   };
 
@@ -1136,7 +1100,7 @@ function ChatInner() {
   const defaultChips = plan
     ? paid ? postChips : PRE_CHIPS
     : storedRead?.eligibility?.state === "ok" && !awaitingCorrection && build.status === "idle"
-    ? ["Looks right, build the plan", "Something is off"]
+    ? ["Looks right", "Something's off"]
     : [];
 
   /* ── The transcript ───────────────────────────────────────────────
@@ -1200,7 +1164,7 @@ function ChatInner() {
           return (
             <BlockRow key={item.id}>
               <Card className="p-4">
-                <p className="text-body text-ink-soft">Not started. Nothing was charged, and the plan is unchanged.</p>
+                <p className="text-body text-ink-soft">Not started. The plan is unchanged.</p>
               </Card>
             </BlockRow>
           );
@@ -1217,21 +1181,20 @@ function ChatInner() {
                    creator cards here: the plan beside the conversation
                    holds the crew, and the full roster belongs on the
                    campaign view, not in the chat. */
-                say("Paid. Phase 1 has started and your creators are being briefed now.");
+                say("Paid. Phase 1 has started, and your creators are being briefed.");
                 push({ kind: "receipt", requestId: req.id });
                 push({ kind: "checklist" });
                 say(
-                  "One step is left, and it comes now rather than earlier for a reason. Connecting your store is how I count the " +
-                  "revenue each creator earns you, so it is for measuring the guarantee, not for qualifying you — which is why the " +
-                  "plan and the payment came first. It is read-only, and it takes one click."
+                  "One step left. Connect your store so the guarantee can be measured. " +
+                  "This comes after payment on purpose: it's for counting your sales, not for qualifying you."
                 );
                 push({ kind: "integration" });
                 setAsking({ q: "What happens next?", options: postChips });
               }}
               onCancelled={() =>
                 ask(
-                  "No problem — nothing was charged. What would make Phase 1 right for you?",
-                  [WHY_CHIP, "Show me the three phases", "Change the markets", "Start Phase 1"]
+                  "No problem. What would make Phase 1 right for you?",
+                  [WHY_CHIP, "See all three phases", "Change the markets", "Start Phase 1"]
                 )
               }
             />
@@ -1259,18 +1222,12 @@ function ChatInner() {
                 status={readRun.status}
               />
             )}
-            {/* Finished, the read has more in it than a card in a
-                conversation should carry — every layer, every piece of
-                evidence, and which agent found it. That opens beside the
-                conversation rather than replacing it. */}
-            {!live && r && (
-              <button
-                onClick={() => openPanel("read")}
-                className="mt-2 text-meta font-semibold text-brand transition hover:underline"
-              >
-                See the full read
-              </button>
-            )}
+            {/* No second way in. What HeyMoon found has more in it than
+                a card in a conversation should carry — every layer and
+                every piece of evidence — and the card's own header
+                already carries the link that opens it beside the
+                conversation. A duplicate control directly under it, with
+                a second wording, reads as a second destination. */}
           </BlockRow>
         );
       }
@@ -1345,7 +1302,7 @@ function ChatInner() {
                 tasks={BUILD_TASKS}
                 done={BUILD_TASKS.slice(0, build.progress.done).map((task) => task.key)}
                 live
-                title={rosterTitle(BUILD_TASKS, "on your plan")}
+                title="Building your plan"
               />
               <WorkingLine
                 className="mt-2"
@@ -1404,9 +1361,10 @@ function ChatInner() {
                         by: "agent",
                       });
                       putPlan(next);
+                      const crew = next.creators.value.length;
                       say(
-                        `Rebuilt. ${next.creators.value.length} creators on the ${fmtUSD(next.budget.value)} warm-up, ${fix.multiple}× guaranteed — ` +
-                        `and I model it at ${fix.implied.toFixed(1)}×, so there is real room in it.`
+                        `${listOf(next.markets.value.map(marketName))}. ${countUp(crew)} creator${crew === 1 ? "" : "s"}, ` +
+                        `${fix.multiple}x guaranteed, and I expect about ${fix.implied.toFixed(1)}x.`
                       );
                       const id = push({ kind: "changes", changeIds: made.map((c) => c.id) });
                       setChanges((c) => ({ ...c, [id]: made }));
@@ -1430,8 +1388,8 @@ function ChatInner() {
         onSend={send}
         chips={isTyping ? [] : liveChips(asking?.options ?? defaultChips)}
         onChip={sendText}
-        placeholder={t("thread.placeholder")}
-        note={NOTE}
+        placeholder={paid ? "Ask me anything about this phase" : "Change anything about the plan"}
+        note={paid ? undefined : NOTE}
         busy={!!stop}
         onStop={stop ?? undefined}
         stopLabel={t("thread.stop")}

@@ -26,7 +26,7 @@ export function ReadValue({ read, k, compact = false }: { read: BrandRead; k: Re
       const p = read.priceBand!.value;
       return (
         <p className="text-body text-ink">
-          <span className="font-semibold tabular-nums">{p.low.toLocaleString()}–{p.high.toLocaleString()} {p.currency}</span>
+          <span className="font-semibold tabular-nums">{p.low.toLocaleString()} to {p.high.toLocaleString()} {p.currency}</span>
           <span className="text-ink-soft">, median <span className="font-semibold tabular-nums text-ink">{p.median.toLocaleString()}</span></span>
         </p>
       );
