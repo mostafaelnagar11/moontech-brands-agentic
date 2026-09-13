@@ -2,12 +2,13 @@
 
 /* Every campaign, as cards.
  *
- * This is the first thing Campaign shows once there is more than one,
- * and the reason is the same one that brought the rail back: a list of
- * one is furniture, and a list of several that you cannot see at once
- * is worse. A brand running three campaigns arrives wanting to know
- * which one needs them, and that is a comparison — three cards side by
- * side answer it, a switcher in the corner does not.
+ * This is the first thing Campaign shows, and the reason is the one
+ * that brought the rail back: a brand running several arrives wanting
+ * to know which one needs them, and that is a comparison. Cards answer
+ * it; a switcher in the corner does not.
+ *
+ * Two to a row. Three fits, and at three the card is narrow enough
+ * that the figure it exists to show gets clipped.
  *
  * Each card carries only what ranks it: what it has returned against
  * what was promised, how far through it is, and whether anything is
@@ -39,7 +40,10 @@ export function CampaignsList() {
         </Link>
       }
     >
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+      {/* Two per row, never three. At three the card is narrow enough
+          that the figure it exists to show gets clipped — and the
+          figure is the whole point of the card. */}
+      <div className="grid gap-3 md:grid-cols-2">
         {campaigns.map((c) => (
           <Card key={c.id} c={c} waiting={ads.filter((a) => c.adIds.includes(a.id) && a.state === "waiting").length} />
         ))}
@@ -72,15 +76,14 @@ function Card({ c, waiting }: { c: Campaign; waiting: number }) {
         <StatusChip campaign={c} />
       </div>
 
-      <div className="mt-3.5 flex items-end gap-4">
-        <span className="min-w-0">
-          <span className="block text-[10px] font-semibold uppercase tracking-[0.09em] text-ink-faint">Earned</span>
-          <span className="block truncate text-figure font-semibold tabular-nums text-ink">{fmtUSD(earned)}</span>
-        </span>
+      {/* The figure gets its own line. Beside a label it was competing
+          for width with it and losing — "$17,8…" is worse than no
+          number at all, because it reads as a number. */}
+      <div className="mt-3.5">
+        <span className="block text-[10px] font-semibold uppercase tracking-[0.09em] text-ink-faint">Earned</span>
+        <span className="mt-0.5 block text-figure font-semibold tabular-nums text-ink">{fmtUSD(earned)}</span>
         {promised > 0 && (
-          <span className="min-w-0 pb-1">
-            <span className="block text-[11px] text-ink-faint">of {fmtUSD(promised)} guaranteed</span>
-          </span>
+          <span className="mt-0.5 block text-[11px] text-ink-faint">of {fmtUSD(promised)} guaranteed</span>
         )}
       </div>
 
