@@ -39,7 +39,7 @@ import { DashboardSidebar, NAV } from "../components/dashboard/Sidebar";
 import { DashboardTopbar } from "../components/dashboard/Topbar";
 import { DashboardAssistant } from "../components/dashboard/Assistant";
 import {
-  setDashboardView, useActiveCampaign, useAds, useDashboardView, useLivePhase, usePaid,
+  campaignLabel, setDashboardView, useActiveCampaign, useAds, useDashboardView, useLivePhase, usePaid,
 } from "../lib/store";
 import { SurfaceProvider } from "../lib/surface";
 import { phaseTitle } from "../lib/mock/campaigns";
@@ -81,7 +81,7 @@ export default function DashboardPage() {
           <Image src="/logo.svg" alt="MoonTech" width={110} height={20} priority className="mx-auto h-[19px] w-auto" />
           <p className="mt-6 text-prose text-ink">
             {camp
-              ? `${camp.brandName} is built but not started. Start Phase 1 and connect the store, and this is where it runs — what the creators earn you against the guarantee, the drafts waiting on you, and everything the agents did on their own.`
+              ? `${campaignLabel(camp)} is built but not started. Start Phase 1 and connect the store, and this is where it runs — what the creators earn you against the guarantee, the drafts waiting on you, and everything the agents did on their own.`
               : "No campaign yet. Build one and this is where it runs — what the creators earn you against the guarantee, the drafts waiting on you, and everything the agents did on their own."}
           </p>
           <Link
@@ -115,7 +115,7 @@ export default function DashboardPage() {
         view={view}
         onView={setDashboardView}
         waiting={waiting}
-        brandName={camp.brandName}
+        brandName={campaignLabel(camp)}
         mobileOpen={mobileNav}
         onMobileClose={() => setMobileNav(false)}
       />

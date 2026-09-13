@@ -26,6 +26,7 @@ import { useState } from "react";
 import {
   CaretDown,
   Check,
+  PencilSimple,
   ClockCounterClockwise,
   House,
   Megaphone,
@@ -37,7 +38,7 @@ import {
   type Icon,
 } from "@phosphor-icons/react";
 import type { DashboardView } from "../../lib/agent/dashboard";
-import { setActiveCampaign, startConversation, useCampaigns, useStore } from "../../lib/store";
+import { campaignLabel, renameCampaign, setActiveCampaign, startConversation, useCampaigns, useStore } from "../../lib/store";
 
 export const NAV: { key: DashboardView; label: string; icon: Icon }[] = [
   { key: "campaign", label: "Campaign", icon: House },
@@ -97,12 +98,6 @@ function Content({ collapsed, view, onView, waiting, brandName, onMobileClose }:
               campaigns.length > 1 ? "hover:bg-neutral-100" : ""
             }`}
           >
-            <span
-              aria-hidden
-              className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-brand text-[11px] font-semibold text-white"
-            >
-              {brandName.slice(0, 1).toUpperCase()}
-            </span>
             <span className="min-w-0 flex-1 truncate text-body font-semibold text-ink-soft">{brandName}</span>
             {campaigns.length > 1 && (
               <CaretDown size={11} weight="bold" aria-hidden className={`shrink-0 text-ink-faint transition ${switcher ? "rotate-180" : ""}`} />
@@ -111,19 +106,23 @@ function Content({ collapsed, view, onView, waiting, brandName, onMobileClose }:
           {switcher && campaigns.length > 1 && (
             <div className="absolute inset-x-0 top-full z-50 mt-1 overflow-hidden rounded-control border border-neutral-100 bg-white shadow-float">
               {campaigns.map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => { setActiveCampaign(c.id); setSwitcher(false); onMobileClose?.(); }}
-                  className={`flex w-full items-center gap-2 px-3 py-2 text-start transition hover:bg-neutral-50 ${
-                    c.id === activeId ? "bg-brand/[0.06]" : ""
-                  }`}
-                >
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-meta font-semibold text-ink">{c.brandName}</span>
+                <div key={c.id} className={`group flex items-center ${c.id === activeId ? "bg-brand/[0.06]" : ""}`}>
+                  <button
+                    onClick={() => { setActiveCampaign(c.id); setSwitcher(false); onMobileClose?.(); }}
+                    className="min-w-0 flex-1 px-3 py-2 text-start transition hover:bg-neutral-50"
+                  >
+                    <span className="block truncate text-meta font-semibold text-ink">{campaignLabel(c)}</span>
                     <span className="block truncate text-[10px] text-ink-faint">{c.paid ? "Running" : "Not started"}</span>
-                  </span>
-                  {c.id === activeId && <Check size={11} weight="bold" aria-hidden className="shrink-0 text-brand" />}
-                </button>
+                  </button>
+                  {c.id === activeId && <Check size={11} weight="bold" aria-hidden className="me-1 shrink-0 text-brand" />}
+                  <button
+                    onClick={() => { const n = window.prompt("Name this campaign", campaignLabel(c)); if (n !== null) renameCampaign(c.id, n); }}
+                    aria-label={`Rename ${campaignLabel(c)}`}
+                    className="me-2 grid h-6 w-6 shrink-0 place-items-center rounded text-ink-faint opacity-0 transition hover:bg-black/[0.06] hover:text-ink focus-visible:opacity-100 group-hover:opacity-100"
+                  >
+                    <PencilSimple size={11} aria-hidden />
+                  </button>
+                </div>
               ))}
             </div>
           )}

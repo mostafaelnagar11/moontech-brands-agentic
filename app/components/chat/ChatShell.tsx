@@ -18,10 +18,11 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { CaretLeft, X } from "@phosphor-icons/react";
-import { Plus } from "@phosphor-icons/react";
+import { useEffect, useRef, useState } from "react";
+import { PencilSimple, Plus } from "@phosphor-icons/react";
 import {
-  closePanel, openConversation, setPanelView, startConversation, useActiveThreadId,
-  useActivePlan, useCampaigns, usePanel, useStore,
+  campaignLabel, closePanel, openConversation, renameCampaign, setPanelView, startConversation,
+  useActiveThreadId, useActivePlan, useCampaigns, usePanel, useStore, type Campaign,
 } from "../../lib/store";
 import type { PanelView } from "../../lib/store";
 
@@ -52,34 +53,9 @@ export function ChatShell({ children, panel }: { children: ReactNode; panel: Rea
           </button>
           <p className="px-4 pb-1.5 text-[9px] font-medium uppercase tracking-widest text-ink-faint">Campaigns</p>
           <nav className="min-h-0 flex-1 space-y-0.5 overflow-y-auto px-2 pb-3">
-            {campaigns.map((c) => {
-              const here = c.threadId === activeThreadId;
-              return (
-                <button
-                  key={c.id}
-                  onClick={() => openConversation(c.threadId)}
-                  aria-current={here ? "page" : undefined}
-                  className={`flex w-full items-center gap-2 rounded-control px-2.5 py-2 text-start transition ${
-                    here ? "bg-white shadow-card" : "hover:bg-black/[0.04]"
-                  }`}
-                >
-                  <span
-                    aria-hidden
-                    className={`grid h-6 w-6 shrink-0 place-items-center rounded-lg text-[10px] font-bold ${
-                      here ? "bg-brand text-white" : "bg-white text-ink-faint"
-                    }`}
-                  >
-                    {c.brandName.slice(0, 1).toUpperCase()}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-meta font-semibold text-ink">{c.brandName}</span>
-                    <span className="block truncate text-[10px] text-ink-faint">
-                      {c.paid ? "Running" : "Proposed"}
-                    </span>
-                  </span>
-                </button>
-              );
-            })}
+            {campaigns.map((c) => (
+              <CampaignRow key={c.id} c={c} here={c.threadId === activeThreadId} />
+            ))}
           </nav>
         </aside>
       )}
@@ -120,6 +96,72 @@ export function ChatShell({ children, panel }: { children: ReactNode; panel: Rea
           {panel}
         </aside>
       )}
+    </div>
+  );
+}
+
+/** One campaign in the rail.
+ *
+ * No avatar. Two campaigns built from the same store are both
+ * "Ounass", so a letter tile showed the same O twice and identified
+ * nothing — it was decoration standing where the difference should be.
+ * The name carries it instead, and the name is editable, because
+ * "Ounass" and "Ounass Black Friday" is the distinction the brand
+ * actually wants to make.
+ */
+function CampaignRow({ c, here }: { c: Campaign; here: boolean }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
+  const box = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { if (editing) box.current?.select(); }, [editing]);
+
+  const open = () => { setDraft(campaignLabel(c)); setEditing(true); };
+  const save = () => { renameCampaign(c.id, draft); setEditing(false); };
+
+  if (editing) {
+    return (
+      <div className="rounded-control bg-white px-2 py-1.5 shadow-card">
+        <input
+          ref={box}
+          value={draft}
+          autoFocus
+          maxLength={60}
+          aria-label="Campaign name"
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={save}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") { e.preventDefault(); save(); }
+            if (e.key === "Escape") { e.preventDefault(); setEditing(false); }
+          }}
+          className="w-full bg-transparent text-meta font-semibold text-ink outline-none"
+        />
+        <p className="mt-0.5 text-[10px] text-ink-faint">Enter to save</p>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`group flex w-full items-center gap-1 rounded-control transition ${
+        here ? "bg-white shadow-card" : "hover:bg-black/[0.04]"
+      }`}
+    >
+      <button
+        onClick={() => openConversation(c.threadId)}
+        aria-current={here ? "page" : undefined}
+        className="min-w-0 flex-1 px-2.5 py-2 text-start"
+      >
+        <span className="block truncate text-meta font-semibold text-ink">{campaignLabel(c)}</span>
+        <span className="block truncate text-[10px] text-ink-faint">{c.paid ? "Running" : "Proposed"}</span>
+      </button>
+      <button
+        onClick={open}
+        aria-label={`Rename ${campaignLabel(c)}`}
+        className="me-1.5 grid h-6 w-6 shrink-0 place-items-center rounded text-ink-faint opacity-0 transition hover:bg-black/[0.06] hover:text-ink focus-visible:opacity-100 group-hover:opacity-100"
+      >
+        <PencilSimple size={12} aria-hidden />
+      </button>
     </div>
   );
 }

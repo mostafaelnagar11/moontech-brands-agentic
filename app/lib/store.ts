@@ -201,6 +201,8 @@ export interface Campaign {
   /** The conversation that built it. One thread, one campaign. */
   threadId: string;
   brandName: string;
+  /** What the brand chose to call this one, if they renamed it. */
+  label?: string;
   url: string;
   readId: string | null;
   planId: string | null;
@@ -613,6 +615,22 @@ function campaignList(s: State): Campaign[] {
   campCache = { order: s.campaignOrder, map: s.campaigns, value };
   return value;
 }
+/** Rename a campaign. Two campaigns built from the same store carry
+    the same brand name and are otherwise indistinguishable in a list —
+    "Ounass" and "Ounass" — so the name has to be the brand's to set.
+    An empty name falls back to the brand rather than leaving a blank
+    row. */
+export const renameCampaign = (id: string, name: string) =>
+  set((s) => {
+    const c = s.campaigns[id];
+    if (!c) return {};
+    const trimmed = name.trim().slice(0, 60);
+    return { campaigns: { ...s.campaigns, [id]: { ...c, label: trimmed || undefined } } };
+  });
+
+/** What to call it: the brand's name for it, or the brand. */
+export const campaignLabel = (c: Campaign) => c.label ?? c.brandName;
+
 export const useCampaigns = () => useStore(campaignList);
 export const useActiveCampaign = () => useStore((s) => (s.activeCampaignId ? s.campaigns[s.activeCampaignId] ?? null : null));
 export const useActiveThreadId = () => useStore((s) => s.activeThreadId);
