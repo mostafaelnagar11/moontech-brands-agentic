@@ -45,12 +45,12 @@ const VIEW_WORDS: { view: DashboardView; re: RegExp; say: string }[] = [
   {
     view: "creators",
     re: /\b(creators?|influencers?|talent|roster|who (are|is)|shortlist)\b/,
-    say: "Everyone HeyMoon has brought you, with why each one was matched. A like or a pass shapes the next batch; nobody is booked or told.",
+    say: "Everyone MoonMatch AI has brought you, with why each one was matched. A like or a pass shapes the next batch; nobody is booked or told.",
   },
   {
     view: "ads",
     re: /\b(ads?|drafts?|creatives?|approvals?|approval queue|what.s waiting|review)\b/,
-    say: "Here is the queue. Every draft carries HeyMoon's check against the brief it wrote, and nothing goes out until you decide on it.",
+    say: "Here is the queue. Every draft carries MoonWriter AI's check against the brief it wrote, and nothing goes out until you decide on it.",
   },
   {
     view: "inbox",
@@ -65,7 +65,7 @@ const VIEW_WORDS: { view: DashboardView; re: RegExp; say: string }[] = [
   {
     view: "autonomy",
     re: /\b(autonomy|permissions?|allowed|may you|can you do|rules|settings)\b/,
-    say: "These are my permissions. Moving money, publishing and signing are fixed at never and cannot be turned on. Not by you, not by me.",
+    say: "These are the agents and what each may do alone. Moving money, publishing and signing are fixed at never and cannot be turned on. Not by you, not by me.",
   },
   {
     view: "campaign",

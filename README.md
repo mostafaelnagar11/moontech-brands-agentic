@@ -5,11 +5,14 @@ approves it, rather than a brand filling in a form and an "assistant" narrating
 it.
 
 The brand was renamed from MoonTech to **HeyMoon** (wordmark "HeyMoon.AI"), and
-the copy now follows `heymoon-copy-changes-before-after.md`: no agent names in
-anything a brand can see, "sales" rather than revenue/return/ROAS, full stops
-rather than em dashes, and HeyMoon named instead of "we". `OPEN-QUESTIONS.md`
-predates that change and still uses the old names where it records why a
-decision was made at the time.
+the copy follows `heymoon-copy-changes-before-after.md`: "sales" rather than
+revenue/return/ROAS, full stops rather than em dashes, and HeyMoon named
+instead of "we".
+
+**One rule from that spec is overruled.** G1 said no agent names anywhere
+brand-facing. The seven agents are named again, everywhere they used to be —
+the roster, the read panel's evidence, the Autonomy pipeline, the activity log,
+the compliance checks. See question 14 in `OPEN-QUESTIONS.md`.
 
 Sibling to the current app at `../moontech`, which is unchanged. Same stack
 (Next 14, TypeScript, Tailwind 3.4, Geist, Phosphor) and the same design
@@ -94,29 +97,42 @@ One field, shaped exactly like the message box you are about to use. Type
 `lunabeauty.ae` (eligible, different economics) and `freshgrocer.ae` (below the
 traffic floor). Any other domain gets a generic read, marked as a first pass.
 
-### 2. The store is read in the conversation, and nothing is named
+### 2. Named agents read the store, in the conversation
 
-HeyMoon runs a pipeline of specialised parts, and **none of them is named
-anywhere a brand can see** (rule G1). Which part of HeyMoon did a piece of work
-is a fact about our architecture, not an answer to anything a brand just asked.
-So every row of the progress card carries a verb and an output and nothing
-else: *Reading your catalogue*, *Reading your prices*, *Learning your voice*,
-*Finding your markets*. The Autonomy page lists the same pipeline by **stage**
-— Intake, Matching, Safety, Creative, Activation, Optimization, Learning — for
-the same reason: what a brand needs from that page is which steps can finish
-alone, not who they belong to.
+HeyMoon runs a pipeline of specialised agents. Only the ones a stage needs are
+put to work, and **the roster names only those**: how many agents exist behind
+them is not an answer to anything a brand just asked, and a staffing chart in
+the first message is furniture. Here is the full pipeline — the product never
+recites it, except on the Autonomy page, where which agent holds which
+permission *is* the content:
 
-The opening line is one sentence, *"Reading ounass.com."*, and the rows below
-it are assembled from `READ_TASKS` rather than typed, so the card can never go
-stale against the work actually running.
+| Agent | Stage | What it does |
+| --- | --- | --- |
+| **MoonShot AI** | Intake | Reads the brief and sets the campaign goals. On a store read there is no brief, so the store *is* the brief and MoonShot does most of the reading. |
+| **MoonMatch AI** | Matching | Finds the right creators. On the read it takes your own channels and audience. |
+| **MoonSearch AI** | Safety | Vets every matched creator for brand and fraud risk. |
+| **MoonWriter AI** | Creative | Writes the briefs and the ad copy. On the read it learns the register your store writes in. |
+| **MoonLive AI** | Activation | Launches the ads you approve, across channels. |
+| **MoonScore AI** | Optimization | Re-allocates budget to whatever converts. On the read it decides whether anything can be guaranteed at all. |
+| **MoonLearning AI** | Learning | Feeds every campaign's results back into MoonMatch, MoonWriter and MoonScore, so the next campaign starts smarter than the last. |
+
+Four of them are on the read — MoonShot, MoonMatch, MoonWriter and MoonScore.
+The roster heading is derived from `READ_TASKS` rather than typed, so it can
+neither go stale nor name an agent that is not working. One row per agent, with
+the tasks it owns collapsed behind it and a n/m count on the right.
+
+The opening line is one sentence, *"Reading ounass.com."* — the paragraph that
+used to introduce the cast is gone, because the roster card right under it says
+the same thing better.
 
 The read card fills in as findings land — category, prices, bestsellers, voice,
-socials, markets, seasonality — and each row opens into its evidence, with no
-"found by" line on any of it. Eligibility arrives as one line, not a gate.
+socials, markets, seasonality — and in the panel every row opens into
+**MoonShot AI read this off the home page:** with the evidence under it.
+Eligibility arrives as one line, not a gate.
 
-It takes about **fifteen seconds** — long enough that the work is visibly done,
-short enough that nobody walks away. A two-second read looks like a lookup,
-which is the one thing this screen must not look like.
+It takes about **fifteen seconds** — long enough that four named agents visibly
+do work, short enough that nobody walks away. A two-second read looks like a
+lookup, which is the one thing this screen must not look like.
 
 **Stopping is on the send button**, which becomes a stop button for as long as a
 run is open — where every chat people already use puts it. It used to sit beside
@@ -187,11 +203,10 @@ settling one number each.
 
 ### 5. The plan, three phases, in the panel
 
-The build streams its own roster of steps — setting the goals and markets,
-reading the audience, matching creators, vetting every match, sizing the
-warm-up crew, drafting the brief, laying out Phases 2 and 3 — then the plan
-opens in the panel beside the conversation. Same rule as the read: each row is
-a verb and an output, and nothing on it is named.
+The build streams its own five-agent roster — MoonShot sets the goals,
+MoonMatch finds the creators, MoonSearch vets them, MoonScore prices the
+warm-up and lays out the phases, MoonWriter drafts the brief — then the plan
+opens in the panel beside the conversation.
 
 **Phase 1 is always $1,000.** For every brand, every time, whatever the two
 numbers came out at. It is not sized from your store, not derived from the crew
@@ -233,13 +248,13 @@ In the panel: the plan card, the fixed warm-up price with the reason it is
 fixed, the phase ladder, the confidence line, the creators and the brief.
 
 **The crew is a subset of the pool**, and the plan card shows both — *8 matched
-· 3 in the warm-up*. HeyMoon matches the pool and clears every one of them;
-$1,000 leaves $650 for creator fees, which briefs the three best value of
-them. The rest of the pool is exactly what Phases 2 and 3 are for.
+· 3 in the warm-up*. MoonMatch AI matches the pool and MoonSearch AI clears
+every one of them; $1,000 leaves $650 for creator fees, which briefs the three
+best value of them. The rest of the pool is exactly what Phases 2 and 3 are for.
 
 A shortlist holds **between 7 and 13**. The ceiling is a cap in `matchedPool`:
-past thirteen a shortlist stops being a shortlist and HeyMoon is vouching for
-people nobody looked at twice. The floor is a property of the roster rather
+past thirteen a shortlist stops being a shortlist and MoonSearch AI is
+vouching for people nobody looked at twice. The floor is a property of the roster rather
 than a clamp — padding a thin market with creators who do not fit it would be
 the exact lie the market-fit cut exists to prevent. Every brand's proposal
 lands at 8. Narrow the markets far enough and the pool honestly falls below the
@@ -337,10 +352,9 @@ not to be.
 ### 9. The loop, which is the point of Phase 1
 
 When Phase 1 reaches 80% of its sales target, Phase 2 is offered. It is not
-the same plan with a bigger number on it: HeyMoon feeds what the warm-up
-actually did — which creators converted, which copy landed, which products
-carried it — back into how it matches, how it writes and where it puts
-budget. That is
+the same plan with a bigger number on it: MoonLearning AI feeds what the
+warm-up actually did — which creators converted, which copy landed, which
+products carried it — back into MoonMatch, MoonWriter and MoonScore. That is
 the continuous learning loop, and it is why $1,000 buys something a brand
 cannot get by spending $1,000 anywhere else: every campaign after it starts
 better informed than the one before.

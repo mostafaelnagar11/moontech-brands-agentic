@@ -240,7 +240,7 @@ export interface Plan {
   planBudget: Sourced<number>;
   guaranteedRoas: Sourced<number>;
   creators: Sourced<CreatorMatch[]>;
-  /** How many creators HeyMoon matched and HeyMoon cleared,
+  /** How many creators MoonMatch AI matched and MoonSearch AI cleared,
       before the fixed warm-up budget cut `creators` down to the crew it
       pays for. A field rather than a number inside a sentence: the
       sentence gets rewritten on every edit, and the count went with it.

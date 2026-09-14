@@ -59,7 +59,7 @@ import { AgentTurn, BlockRow, UserTurn } from "../components/chat/Turn";
 import {
   AdCardBlock, ApprovalBlock, BriefBlock, ChangesBlock, ChecklistBlock, ConfidenceBar, ConfidenceBlock,
   CreatorBlock, FundingBlock, IntegrationBlock, LadderBlock, PlanBlock, ReadBlock, ReceiptBlock,
-  RejectedBlock, ReportBlock, TaskRoster, countWord, type StorePlatform,
+  RejectedBlock, ReportBlock, TaskRoster, countWord, rosterTitle, type StorePlatform,
 } from "../components/blocks";
 import { PlanCard } from "../components/PlanCard";
 
@@ -397,7 +397,8 @@ function ChatInner() {
     push({ kind: "user", text: `Connected ${k[0].toUpperCase() + k.slice(1)}` });
     ask(
       "Done. Your store is connected, your creators are briefed, and the first drafts arrive within 48 hours. " +
-      "From here, you'll hear from me when there's something to see, or something to decide.",
+      "From here MoonLive AI publishes every ad you approve and MoonScore AI moves the budget to whatever converts. " +
+      "You'll hear from me when there's something to see, or something to decide.",
       /* POST_CHIPS, not `postChips`. This closure was built on the
          render BEFORE `connectStore` ran, so `connected` is still null
          in it and the dashboard chip would be withheld at the exact
@@ -616,16 +617,16 @@ function ChatInner() {
     if (!paid)
       return (
         `You start Phase 1 and pay for it, then connect your store so the sales can be counted. ` +
-        `Your creators are briefed the same day, and the first drafts arrive within 48 hours.`
+        `MoonWriter AI briefs your creators the same day, and the first drafts arrive within 48 hours.`
       );
     if (connected)
       return (
         "Your store is connected, so every order through a creator's code is counted. " +
-        "The first drafts arrive within 48 hours, and nothing goes out until you approve it."
+        "The first drafts arrive within 48 hours, and MoonLive AI puts nothing out until you approve it."
       );
     return (
       "Connect your store below so the sales can be counted. " +
-      "Your creators are briefed today, and the first drafts arrive within 48 hours."
+      "MoonWriter AI briefs your creators today, and the first drafts arrive within 48 hours."
     );
   };
 
@@ -1181,7 +1182,7 @@ function ChatInner() {
                    creator cards here: the plan beside the conversation
                    holds the crew, and the full roster belongs on the
                    campaign view, not in the chat. */
-                say("Paid. Phase 1 has started, and your creators are being briefed.");
+                say("Paid. Phase 1 has started, and MoonWriter AI is briefing your creators.");
                 push({ kind: "receipt", requestId: req.id });
                 push({ kind: "checklist" });
                 say(
@@ -1302,7 +1303,7 @@ function ChatInner() {
                 tasks={BUILD_TASKS}
                 done={BUILD_TASKS.slice(0, build.progress.done).map((task) => task.key)}
                 live
-                title="Building your plan"
+                title={rosterTitle(BUILD_TASKS, "on your plan")}
               />
               <WorkingLine
                 className="mt-2"

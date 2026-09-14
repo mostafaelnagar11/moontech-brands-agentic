@@ -153,36 +153,51 @@ export function suggestPlanShape(multiple: number): { planBudget: number; roas: 
    lands last. */
 export interface ReadTask {
   key: ReadLayerKey;
-  /** What it is doing right now. A verb, because "analysing…" is not a
-      status and a name is not one either. */
+  /** Who is doing it. Named, because "analysing…" is not a status. */
+  agent: string;
+  /** What that agent is for, in four words. */
+  role: string;
+  /** What it is doing right now. */
   note: string;
   /** What it will have produced. */
   produces: string;
   weight: number;
 }
 
-/* The work of reading a store, as the steps it is actually made of.
- 
-   HeyMoon runs this as a pipeline of specialised parts, and none of
-   them is named here or anywhere a brand can see. A column of internal
-   names is a fact about our architecture; what a brand is owed is what
-   is being done and what it will produce. Each row therefore carries a
-   verb and an output, and nothing else.
- 
+/* HeyMoon runs seven specialised agents as one pipeline. These are
+   those agents, doing the jobs the product says they do — not names
+   invented for a loading state.
+
+     MoonShot AI     Intake        reads the brief, sets campaign goals
+     MoonMatch AI    Matching      finds the right creators, instantly
+     MoonSearch AI   Safety        vets creators for brand and fraud risk
+     MoonWriter AI   Creative      generates briefs and ad copy
+     MoonLive AI     Activation    launches campaigns across channels
+     MoonScore AI    Optimization  re-allocates budget to what converts
+     MoonLearning AI Learning      feeds results back into every agent
+
+   On a store read there is no brief to intake, so the store IS the
+   brief and MoonShot does most of the reading. The three others that
+   appear here are reading the specific thing they will need later:
+   MoonMatch wants your audience because it is about to match creators
+   to it, MoonWriter wants your register because it is about to write in
+   it, and MoonScore wants your traffic because it decides what can be
+   guaranteed.
+
    The rows are ordered the way the work runs: the homepage first
    because everything else is reached from it, then the shallow pages,
    then the ones that need many samples. Eligibility lands last because
    it needs the traffic panel. */
 export const READ_TASKS: ReadTask[] = [
-  { key: "identity", note: "Reading the homepage", produces: "Name and positioning", weight: 1 },
-  { key: "category", note: "Walking the navigation and the designer index", produces: "What you actually sell", weight: 3 },
-  { key: "socials", note: "Following the footer links to live profiles", produces: "Your own channels and their reach", weight: 2 },
-  { key: "priceBand", note: "Sampling 60 product pages", produces: "Price band and median order value", weight: 5 },
-  { key: "voice", note: "Counting the words your store repeats", produces: "The register a creator has to match", weight: 4 },
-  { key: "markets", note: "Checking delivery promises and currencies", produces: "Markets, ranked by how you serve them", weight: 2 },
-  { key: "bestsellers", note: "Ranking by shelf position and restocks", produces: "The products worth putting behind creators", weight: 5 },
-  { key: "seasonality", note: "Reading last year's campaign pages", produces: "When your demand peaks", weight: 3 },
-  { key: "eligibility", note: "Checking traffic against the guarantee floor", produces: "Whether HeyMoon can guarantee sales", weight: 2 },
+  { key: "identity", agent: "MoonShot AI", role: "Intake", note: "Reading the homepage", produces: "Name and positioning", weight: 1 },
+  { key: "category", agent: "MoonShot AI", role: "Intake", note: "Walking the navigation and the designer index", produces: "What you actually sell", weight: 3 },
+  { key: "socials", agent: "MoonMatch AI", role: "Matching", note: "Following the footer links to live profiles", produces: "Your own channels and their reach", weight: 2 },
+  { key: "priceBand", agent: "MoonShot AI", role: "Intake", note: "Sampling 60 product pages", produces: "Price band and median order value", weight: 5 },
+  { key: "voice", agent: "MoonWriter AI", role: "Creative", note: "Counting the words your store repeats", produces: "The register a creator has to match", weight: 4 },
+  { key: "markets", agent: "MoonShot AI", role: "Intake", note: "Checking delivery promises and currencies", produces: "Markets, ranked by how you serve them", weight: 2 },
+  { key: "bestsellers", agent: "MoonShot AI", role: "Intake", note: "Ranking by shelf position and restocks", produces: "The products worth putting behind creators", weight: 5 },
+  { key: "seasonality", agent: "MoonShot AI", role: "Intake", note: "Reading last year's campaign pages", produces: "When your demand peaks", weight: 3 },
+  { key: "eligibility", agent: "MoonScore AI", role: "Optimization", note: "Checking traffic against the guarantee floor", produces: "Whether HeyMoon can guarantee sales", weight: 2 },
 ];
 
 const LAYER_WORK = READ_TASKS;
@@ -197,7 +212,7 @@ async function* read_site(i: { url: string }, ctx: RunContext): ToolStream<Brand
       finds more — the progress line is a count of work, not a clock. */
   let total = 4;
   let done = 0;
-  yield chunk({ ...acc }, `Opening ${full.url}`, done, total);
+  yield chunk({ ...acc }, `${LAYER_WORK[0].agent} · Opening ${full.url}`, done, total);
 
   for (let n = 0; n < LAYER_WORK.length; n++) {
     const unit = LAYER_WORK[n];
@@ -208,7 +223,7 @@ async function* read_site(i: { url: string }, ctx: RunContext): ToolStream<Brand
       (full as unknown as Record<string, unknown>)[unit.key];
     acc.done = [...acc.done, unit.key];
     done += 1;
-    yield chunk({ ...acc }, unit.note, done, total);
+    yield chunk({ ...acc }, `${unit.agent} · ${unit.note}`, done, total);
   }
   return acc;
 }
@@ -281,8 +296,8 @@ function defaultMarkets(read: BrandRead): string[] {
 }
 
 /** Everyone who could work on this brand: right markets, right niche,
-    and not publishing for a competitor. This is what HeyMoon finds
-    and HeyMoon vets, before any budget is applied. */
+    and not publishing for a competitor. This is what MoonMatch AI finds
+    and MoonSearch AI vets, before any budget is applied. */
 function matchedPool(read: BrandRead, markets: string[], pick: "score" | "value" = "score"): CreatorSeed[] {
   const { rpv, family } = economicsOf(read);
   const wantNiche =
@@ -544,24 +559,30 @@ function priceOf(read: BrandRead, markets: string[], budget: number, multiple: n
    independently. */
 export interface BuildTask {
   key: string;
+  /** Who is doing it. Named, because "building…" is not a status. */
+  agent: string;
+  /** What that agent is for, in a few words. */
+  role: string;
   /** What it is doing right now. */
   note: string;
   /** What it will have produced. */
   produces: string;
 }
 
-/* Building the campaign, as the steps it is made of. Same rule as the
-   read above: a verb and an output per row, no names. Activation and
-   learning are not here because neither has happened yet — one waits
-   on an approved ad going out, the other on results coming back. */
+/* Building the campaign is where the pipeline earns its name. Five of
+   the seven agents run here, each doing its own job: MoonShot sets the
+   goals, MoonMatch finds the creators, MoonSearch vets them, MoonScore
+   prices the phases and MoonWriter drafts the brief. MoonLive and
+   MoonLearning come later — one when an approved ad goes out, the other
+   when the results come back. */
 export const BUILD_TASKS: BuildTask[] = [
-  { key: "markets", note: "Setting the campaign goals and the markets to run in", produces: "The markets Phase 1 runs in" },
-  { key: "audience", note: "Reading your audience off your own channels", produces: "Who the creators will be talking to" },
-  { key: "creators", note: "Matching creators whose audience is in your markets", produces: "The creators who fit your brand" },
-  { key: "safety", note: "Vetting every match for brand and fraud risk", produces: "Competitors excluded, overlaps declared" },
-  { key: "pricing", note: "Sizing the warm-up crew against the $1,000 Phase 1 budget", produces: "Who the warm-up briefs, and the sales HeyMoon guarantees" },
-  { key: "brief", note: "Drafting the brief from your own product copy", produces: "What every creator must say, and must not say" },
-  { key: "ladder", note: "Laying out Phases 2 and 3 behind the warm-up", produces: "The whole campaign: three phases, one at a time" },
+  { key: "markets", agent: "MoonShot AI", role: "Intake", note: "Setting the campaign goals and the markets to run in", produces: "The markets Phase 1 runs in" },
+  { key: "audience", agent: "MoonMatch AI", role: "Matching", note: "Reading your audience off your own channels", produces: "Who the creators will be talking to" },
+  { key: "creators", agent: "MoonMatch AI", role: "Matching", note: "Matching creators whose audience is in your markets", produces: "The creators who fit your brand" },
+  { key: "safety", agent: "MoonSearch AI", role: "Safety", note: "Vetting every match for brand and fraud risk", produces: "Competitors excluded, overlaps declared" },
+  { key: "pricing", agent: "MoonScore AI", role: "Optimization", note: "Sizing the warm-up crew against the $1,000 Phase 1 budget", produces: "Who the warm-up briefs, and the sales HeyMoon guarantees" },
+  { key: "brief", agent: "MoonWriter AI", role: "Creative", note: "Drafting the brief from your own product copy", produces: "What every creator must say, and must not say" },
+  { key: "ladder", agent: "MoonScore AI", role: "Optimization", note: "Laying out Phases 2 and 3 behind the warm-up", produces: "The whole campaign: three phases, one at a time" },
 ];
 
 const buildTask = (key: string) => BUILD_TASKS.find((t) => t.key === key)!;
@@ -634,8 +655,8 @@ function planBuild(read: BrandRead, strategy?: StrategyKey) {
     {
       task: buildTask("creators"), weight: 6,
       apply: (p) => {
-        /* Two counts, two fields. The pool is everyone HeyMoon
-           matched and HeyMoon cleared; the crew is the subset the
+        /* Two counts, two fields. The pool is everyone MoonMatch AI
+           matched and MoonSearch AI cleared; the crew is the subset the
            fixed warm-up budget pays for. They used to be one field with
            the pool spelled out inside its sentence, which meant every
            edit that rewrote the sentence silently dropped the pool and
@@ -643,11 +664,11 @@ function planBuild(read: BrandRead, strategy?: StrategyKey) {
         const poolSize = matchedPool(read, markets, meta.pick).length;
         p.pool = S(
           poolSize,
-          `HeyMoon matched ${poolSize} creators to your brand and your markets, and HeyMoon cleared every one of them. The warm-up briefs the ${crewSeeds.length} best value of those, because ${fmtUSD(PHASE1_BUDGET)} buys ${crewSeeds.length}. The rest are what Phases 2 and 3 are for.`,
+          `MoonMatch AI matched ${poolSize} creators to your brand and your markets, and MoonSearch AI cleared every one of them. The warm-up briefs the ${crewSeeds.length} best value of those, because ${fmtUSD(PHASE1_BUDGET)} buys ${crewSeeds.length}. The rest are what Phases 2 and 3 are for.`,
           [
             ev("p-pool", "platform", "the matched pool", `${CREATORS.filter((c) => !c.competing).length} creators available in your category; ${CREATORS.filter((c) => c.competing).length} excluded for publishing for a competitor.`),
             ev("p-cut", "policy", "the cut", `A creator with under ${Math.round(MIN_MARKET_FIT * 100)}% of their audience in your markets is not shortlisted.`),
-            ev("p-cap", "policy", "the cap", `A phase shortlist holds at most ${POOL_MAX}. Past that HeyMoon is vouching for people nobody looked at twice.`),
+            ev("p-cap", "policy", "the cap", `A phase shortlist holds at most ${POOL_MAX}. Past that MoonSearch AI is vouching for people nobody looked at twice.`),
           ]
         );
         p.creators = S(
@@ -711,14 +732,14 @@ async function* propose_plan(i: { read: BrandRead; strategy?: StrategyKey }, ctx
   let done = 0;
   const total = steps.length;
   const acc = { ...base };
-  yield chunk({ ...acc }, "Starting from your store details", 0, total);
+  yield chunk({ ...acc }, `${steps[0].task.agent} · Starting from your store details`, 0, total);
 
   for (const st of steps) {
     if (ctx.signal.aborted) throw new Cancelled();
     await settle(costOf(`${id}:${st.task.key}`, st.weight), ctx.signal);
     st.apply(acc);
     done += 1;
-    yield chunk({ ...acc }, st.task.note, done, total);
+    yield chunk({ ...acc }, `${st.task.agent} · ${st.task.note}`, done, total);
   }
   return acc;
 }
@@ -735,12 +756,12 @@ async function* match_creators(i: { plan: Plan; limit?: number }, ctx: RunContex
   const crew = shortlist(read, markets, CREW_BUDGET, meta.pick);
 
   const out: CreatorMatch[] = [];
-  yield chunk([], `Scanning ${CREATORS.length} creators against your markets`, 0, crew.length);
+  yield chunk([], `MoonMatch AI · Scanning ${CREATORS.length} creators against your markets`, 0, crew.length);
   for (const c of crew) {
     if (ctx.signal.aborted) throw new Cancelled();
     await settle(costOf(`m:${i.plan.id}:${c.id}`, 2), ctx.signal);
     out.push(toMatch(c, read, markets, rpv));
-    yield chunk([...out], `Matched ${out.length} of ${crew.length}`, out.length, crew.length);
+    yield chunk([...out], `MoonMatch AI · Matched ${out.length} of ${crew.length}`, out.length, crew.length);
   }
   return out;
 }
@@ -819,7 +840,7 @@ function edit_plan(i: { plan: Plan; patch: PlanPatch; because: string; by: "agen
   }
   if (patch.dropCreatorIds?.length) crewIds = crewIds.filter((id) => !patch.dropCreatorIds!.includes(id));
   /* Named additions are checked against the pool, not just appended.
-     The pool is what HeyMoon matched and HeyMoon cleared, so
+     The pool is what MoonMatch AI matched and MoonSearch AI cleared, so
      anything outside it is either publishing for a competitor or has
      too little of its audience in these markets — and a brand naming
      one by hand used to walk both of those checks. The card's claim
@@ -908,7 +929,7 @@ function edit_plan(i: { plan: Plan; patch: PlanPatch; because: string; by: "agen
        change how many creators fit them, and attributing the recount
        to them read as though they had picked the number. */
     setBy: "agent",
-    why: `HeyMoon matched ${poolSize} creators inside ${fmtMarkets(markets)}, and HeyMoon cleared every one of them. The warm-up briefs the ${crewSeeds.length} best value of those.`,
+    why: `MoonMatch AI matched ${poolSize} creators inside ${fmtMarkets(markets)}, and MoonSearch AI cleared every one of them. The warm-up briefs the ${crewSeeds.length} best value of those.`,
   };
   next.creators = {
     ...plan.creators,

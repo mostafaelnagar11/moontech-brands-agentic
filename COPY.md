@@ -2,10 +2,12 @@
 
 Read this before writing or changing a single sentence the brand sees.
 
-**This file now sits under `heymoon-copy-changes-before-after.md`.** Where the
-two disagree, that spec wins and this file is wrong — it has already been
-corrected once, at rule 9, which used to forbid the exact sentence the spec
-now requires.
+**This file sits under `heymoon-copy-changes-before-after.md`.** Where the two
+disagree, that spec wins and this file is wrong — it has already been corrected
+once, at rule 9, which used to forbid the exact sentence the spec now requires.
+
+**One exception, decided after the spec landed: the agents are named.** The
+spec's G1 said no agent names anywhere brand-facing. It is overruled. See 9b.
 
 The review call landed on one thing: the copy reads like an essay. It is
 correct, it is honest, and it is exhausting. Sentences arrive with three
@@ -136,19 +138,28 @@ speaking about what it just did.
 | our agents read your store | HeyMoon reads your store |
 | below that we will not commit | below that HeyMoon will not commit |
 
-### 9b. No names, ever
+### 9b. Name the agent that did the work
 
-No part of HeyMoon is named anywhere a brand can see. Not in a progress row,
-not in an evidence line, not as a byline on a compliance check, not in a column
-of the activity log. Which part did the work is a fact about our architecture.
+The seven agents are named, and G1 in the spec is overruled on this point.
+MoonShot AI, MoonMatch AI, MoonSearch AI, MoonWriter AI, MoonLive AI,
+MoonScore AI, MoonLearning AI.
 
-The progress card therefore carries a verb and an output: *Reading your
-catalogue*, *Reading your prices*, *Learning your voice*, *Finding your
-markets*. The Autonomy page lists the pipeline by **stage**, not by name.
+Name the one that is actually working. "We checked" is not a check, and "the
+agent did it" is not an answer a brand can argue with — "MoonScore AI moved
+$340 between two live ads" is. That is why the roster is one row per agent, why
+every evidence row opens with *MoonShot AI read this off the home page*, why
+every compliance check carries a byline, and why the activity log has an Agent
+column.
 
-This is enforced in the data, not only in the components: `ReadTask`,
-`BuildTask`, `RosterTask` and `ActivityEntry` no longer carry an `agent` field,
-so there is nothing for a future component to render.
+Two things the naming does **not** license. Never say how many agents exist —
+the roster heading counts the ones working, derived from the task list, and a
+brand asking about their store has not asked for a staffing chart. And never
+recite the pipeline in a message; the roster card under it does that job in a
+form people can scan.
+
+`ReadTask`, `BuildTask`, `RosterTask` and `ActivityEntry` each carry an `agent`
+field, and the components read it. A row with no agent still renders: a missing
+attribution is a gap in the data, not a reason to drop the row.
 
 ### 9c. "Sales", not revenue, return or ROAS
 

@@ -98,7 +98,7 @@ export function InboxView() {
       group: "money",
       icon: Lightning,
       title: `${phaseTitle(ready.phaseNo)} is unlocked and not started`,
-      note: "you press Start. HeyMoon never moves money",
+      note: "you press Start. No agent moves money",
       value: fmtUSD(withVat(ready.budget)),
       hero: true,
       /* The Start button lives in the campaign view, beside the numbers

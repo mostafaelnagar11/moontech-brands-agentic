@@ -181,8 +181,8 @@ export function CreatorGrid({
 /* as a loading state, when this is a commercial decision the card      */
 /* states in words instead.                                             */
 /*                                                                     */
-/* The crew is a SUBSET, and the card says so. HeyMoon matches a   */
-/* pool to the brand and HeyMoon vets it, and then the fixed      */
+/* The crew is a SUBSET, and the card says so. MoonMatch AI matches a  */
+/* pool to the brand and MoonSearch AI vets it, and then the fixed      */
 /* $1,000 warm-up briefs however many of that pool it pays for. Showing */
 /* the crew without the pool would make the plan look smaller than the  */
 /* match actually is, and would hide what Phases 2 and 3 are for.       */
@@ -190,7 +190,7 @@ export function CreatorGrid({
 
 export function CreatorSummary({ creators, matched }: {
   creators: CreatorMatch[];
-  /** How many HeyMoon found in total. Defaults to the crew itself,
+  /** How many MoonMatch AI found in total. Defaults to the crew itself,
       for callers that only hold the briefed ones. */
   matched?: number;
 }) {
@@ -271,7 +271,7 @@ export function CreatorSummary({ creators, matched }: {
       <p className="mt-3 flex items-start gap-2 rounded-control bg-neutral-50 px-2.5 py-2 text-[11px] leading-4 text-ink-soft">
         <LockSimple size={12} weight="fill" className="mt-0.5 shrink-0 text-ink-faint" aria-hidden />
         <span>
-          HeyMoon found {subset ? `all ${pool}` : "them"} and HeyMoon vetted every one for brand and fraud
+          MoonMatch AI found {subset ? `all ${pool}` : "them"} and MoonSearch AI vetted every one for brand and fraud
           risk.{" "}
           {subset
             ? `The ${fmtUSD(PHASE1_BUDGET)} warm-up briefs the ${crew} best value of them, and the rest of the pool is what Phases 2 and 3 are for. `

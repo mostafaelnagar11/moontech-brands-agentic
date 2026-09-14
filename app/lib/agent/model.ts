@@ -76,7 +76,7 @@ export function marketFit(c: CreatorSeed, markets: string[]): number {
    behind a guarantee is a favour, not a campaign, and a brand cannot
    tell whether a crew of three is a careful match or all we had. The
    ceiling is the other half of the same argument — past thirteen a
-   shortlist stops being a shortlist, and HeyMoon is vouching for
+   shortlist stops being a shortlist, and MoonSearch AI is vouching for
    people nobody looked at twice.
 
    Only the ceiling is enforced. POOL_MIN is a target the ROSTER has to

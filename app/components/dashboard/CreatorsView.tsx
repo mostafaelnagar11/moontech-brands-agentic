@@ -4,7 +4,7 @@
  *
  * Same shape: a queue on the left, one profile on the right, and three
  * tabs — waiting, liked, passed. A like or a pass is a SIGNAL and never
- * a booking: it shapes who HeyMoon brings next, and the page says
+ * a booking: it shapes who MoonMatch AI brings next, and the page says
  * so rather than implying the brand just hired someone.
  *
  * Four things are deliberately different from the original, all of them
@@ -119,7 +119,7 @@ export function CreatorsView() {
     return ["Fashion", "Luxury", "Beauty"];
   }, [plan?.brandName]);
 
-  /* Everyone HeyMoon would let through. A creator publishing for
+  /* Everyone MoonSearch AI would let through. A creator publishing for
      a competitor never reaches the queue — that is a safety call, not a
      taste one, and it is not the brand's to make. */
   const pool = useMemo(() => CREATORS.filter((c) => !c.competing), []);
@@ -329,7 +329,7 @@ function Profile({
         {status === "liked" && (
           <div className="mt-5 flex flex-wrap items-center gap-3 rounded-control border border-good/25 bg-good/[0.05] px-3.5 py-2.5">
             <p className="min-w-0 flex-1 text-meta text-good-deep">
-              Liked. HeyMoon will bring you more profiles like hers.
+              Liked. MoonMatch AI will bring you more profiles like hers.
             </p>
             <button onClick={onPass} className="shrink-0 text-[11px] font-semibold text-ink-soft hover:underline">
               Pass instead
@@ -341,7 +341,7 @@ function Profile({
           <div className="mt-5 rounded-control border border-hairline bg-neutral-50 px-3.5 py-2.5">
             <div className="flex flex-wrap items-center gap-3">
               <p className="min-w-0 flex-1 text-meta text-ink-soft">
-                Passed. HeyMoon will ease off profiles like hers.
+                Passed. MoonMatch AI will ease off profiles like hers.
               </p>
               <button onClick={onUndo} className="shrink-0 text-[11px] font-semibold text-brand hover:underline">
                 Undo

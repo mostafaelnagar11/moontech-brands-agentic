@@ -428,21 +428,36 @@ export function BriefBlock({ plan }: { plan: Plan }) {
 /* like it is working for you. The same roster serves the read          */
 /* (READ_TASKS) and the plan build (BUILD_TASKS).                       */
 /*                                                                     */
-/* One row per task, and no row carries a name. The brand is buying     */
-/* sales from HeyMoon, not a cast list, and a column of internal names  */
-/* is a fact about our architecture rather than about their store.      */
-/* Headings say the work, never how many things are doing it.           */
+/* One row per AGENT, not per task. Each name appears once, with the    */
+/* tasks it owns collapsed behind it, so the card reads as a crew       */
+/* working rather than as a checklist ticking.                          */
 /* ------------------------------------------------------------------ */
 
 export interface RosterTask {
   key: string;
+  agent: string;
+  role: string;
   note: string;
   produces: string;
 }
 
+/** Who is actually in a task list. HeyMoon runs seven agents, but only
+    the ones a given stage needs are put to work, so no heading may say
+    how many there are — it asks the list. */
+export const agentsIn = (tasks: RosterTask[]) => Array.from(new Set(tasks.map((t) => t.agent)));
+
 const NUMBER_WORD = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
 /** Small counts read better as words in a sentence than as digits. */
 export const countWord = (n: number) => NUMBER_WORD[n] ?? String(n);
+
+/** "Four agents on your store" — the count is derived, never typed, so
+    adding an agent to READ_TASKS or BUILD_TASKS moves the heading with
+    it rather than leaving a number that used to be true. */
+export function rosterTitle(tasks: RosterTask[], tail: string) {
+  const n = agentsIn(tasks).length;
+  const w = countWord(n);
+  return `${w[0].toUpperCase()}${w.slice(1)} agent${n === 1 ? "" : "s"} ${tail}`;
+}
 
 export function TaskRoster({ tasks, done, live, title, framed = true }: {
   tasks: RosterTask[];
@@ -455,8 +470,14 @@ export function TaskRoster({ tasks, done, live, title, framed = true }: {
   const finished = new Set(done);
   /* Tasks are listed in the order the work runs, so the first one not yet
      done is the one being worked on right now. Everything after it is
-     waiting. */
+     waiting, however many agents that spans. */
   const activeKey = live ? tasks.find((t) => !finished.has(t.key))?.key : undefined;
+  /* One row per agent, not per task — each name once, with the tasks it
+     owns collapsed into a count. */
+  const byAgent = tasks.reduce<Record<string, { role: string; tasks: RosterTask[] }>>((acc, t) => {
+    (acc[t.agent] ??= { role: t.role, tasks: [] }).tasks.push(t);
+    return acc;
+  }, {});
 
   const body = (
     <>
@@ -465,33 +486,45 @@ export function TaskRoster({ tasks, done, live, title, framed = true }: {
         {title}
       </p>
       <ul className="divide-y divide-hairline">
-        {tasks.map((task) => {
-          const isDone = finished.has(task.key);
-          const current = task.key === activeKey;
-          const line = isDone
-            ? null
+        {Object.entries(byAgent).map(([name, a]) => {
+          const doneHere = a.tasks.filter((t) => finished.has(t.key));
+          const current = a.tasks.find((t) => t.key === activeKey);
+          const allDone = doneHere.length === a.tasks.length;
+          const line = allDone
+            ? a.tasks.map((t) => t.produces).join(" · ")
             : current
-            ? `${task.note}…`
+            ? `${current.note}…`
+            : doneHere.length > 0
+            ? doneHere.map((t) => t.produces).join(" · ")
             : live
             ? "Waiting to start"
             : "Did not get to this";
           return (
-            <li key={task.key} className="flex items-start gap-3 px-4 py-2.5">
-              {/* State, not identity. What a brand wants from this
+            <li key={name} className="flex items-start gap-3 px-4 py-2.5">
+              {/* State, not identity. The initial in this circle was
+                  the same letter for six of the seven agents, so it
+                  identified nothing and read as an avatar for a person
+                  who does not exist. What a brand wants from this
                   column is which row is moving: a ring that turns while
-                  the work runs, a tick when it is finished, and an
+                  an agent works, a tick when it is finished, and an
                   empty outline for the ones still queued. */}
               <span
                 aria-hidden
                 className={`mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full ${
-                  isDone ? "bg-good/15 text-good-deep" : current ? "" : "border border-dashed border-black/15"
+                  allDone ? "bg-good/15 text-good-deep" : current ? "" : "border border-dashed border-black/15"
                 }`}
               >
-                {isDone ? <Check size={12} weight="bold" /> : current ? <span className="working-ring h-4 w-4" /> : null}
+                {allDone ? <Check size={12} weight="bold" /> : current ? <span className="working-ring h-4 w-4" /> : null}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-meta font-semibold text-ink">{task.produces}</span>
-                {line && <span className="mt-0.5 block truncate text-[11px] text-ink-soft">{line}</span>}
+                <span className="flex flex-wrap items-baseline gap-x-2">
+                  <span className="text-meta font-semibold text-ink">{name}</span>
+                  <span className="text-[11px] text-ink-faint">{a.role}</span>
+                </span>
+                <span className="mt-0.5 block truncate text-[11px] text-ink-soft">{line}</span>
+              </span>
+              <span className="shrink-0 pt-0.5 text-[11px] tabular-nums text-ink-faint">
+                {doneHere.length}/{a.tasks.length}
               </span>
             </li>
           );
@@ -513,7 +546,7 @@ export function AgentRoster({ read, live }: { read: BrandRead; live?: boolean })
       tasks={READ_TASKS}
       done={read.done}
       live={running}
-      title={running ? "Reading your store" : "Read your store"}
+      title={rosterTitle(READ_TASKS, running ? "on your store" : "read your store")}
       framed={false}
     />
   );
@@ -528,11 +561,14 @@ export function AgentRoster({ read, live }: { read: BrandRead; live?: boolean })
 /* not an empty one.                                                    */
 /* ------------------------------------------------------------------ */
 
-/* The four things the brand watches arrive while HeyMoon is still
-   reading. A row that has not landed shows the work as a verb; the
-   moment its layer is done, the verb is replaced by the finding
-   itself. No attribution on either side of that swap: which part of
-   HeyMoon did the reading is our business, not the store's. */
+/* The four things the brand watches arrive while the read is running.
+   A row that has not landed shows the work as a verb; the moment its
+   layer is done, the verb is replaced by the finding itself.
+
+   These four are the FINDINGS. Who is finding them is the roster
+   underneath, which names the agents actually on this store. The two
+   answer different questions and the card carries both: what have you
+   learned about me, and who is doing the learning. */
 const PROGRESS_ROWS: { k: ReadLayerKey; label: string; verb: string }[] = [
   { k: "category", label: "Catalogue", verb: "Reading your catalogue" },
   { k: "priceBand", label: "Prices", verb: "Reading your prices" },
@@ -576,6 +612,9 @@ export function ReadBlock({ read, live }: { read: BrandRead | null; live: boolea
             </div>
           ))}
         </dl>
+        {/* Who is on it, under what they have found. One row per agent,
+            ticking as each finishes its own tasks. */}
+        <AgentRoster read={read} live />
       </Card>
     );
   }
@@ -923,7 +962,7 @@ export function ChecklistBlock() {
     },
     {
       label: "Creators briefed",
-      detail: "Each one has the brief, the products and their own tracking code.",
+      detail: "MoonWriter AI gave each one the brief, the products and their own tracking code.",
       done: paid,
     },
     {

@@ -5,15 +5,14 @@ decision, each is reversible, and each says what I chose and why. The first two
 are the ones you named.
 
 **Renamed to HeyMoon, 14 Sep.** The brand is HeyMoon, the wordmark is
-"HeyMoon.AI", and the copy now follows
-`heymoon-copy-changes-before-after.md`. Two of its rules cut across entries
-below: **G1** removes every agent name from anything a brand can see, and
-**G2** makes "sales" the only word for the money a brand earns. Entries written
-before that date still say MoonTech, and still name MoonShot, MoonMatch,
-MoonSearch, MoonWriter, MoonLive, MoonScore and MoonLearning, because that is
-what was on screen when the decision was taken. The reasoning stands; the names
-no longer ship. Question 14 below is the one that G1 changed rather than
-recorded — see it for what the Autonomy page lost.
+"HeyMoon.AI", and the copy follows `heymoon-copy-changes-before-after.md`. Its
+**G2** cuts across entries below: "sales" is the only word for the money a
+brand earns. Entries written before that date still say MoonTech where they
+record why a decision was taken at the time.
+
+Its **G1** — no agent names anywhere brand-facing — was applied and then
+**overruled the same day**. The seven agents are named again. Question 14
+records what the round trip settled.
 
 **Rebuilt as one chat surface, 10 Sep.** Every route except the landing is
 gone. The conversation is the product and the panel is the only other place a
@@ -561,17 +560,20 @@ inside it, which is what the panel already is.
 
 Five things the copy spec created or exposed. None of them is mine to settle.
 
-**The Autonomy page has no names left, and that was its subject.** G1 says no
-agent names anywhere brand-facing. The Autonomy page existed to show which of
-the seven agents holds which permission, so applying G1 there is not a copy
-edit, it removes the page's content. What it shows now is the same pipeline by
-**stage** — Intake, Matching, Safety, Creative, Activation, Optimization,
-Learning — with the same two locks on activation and optimization, the same
-three fixed-at-Never rules and the same table of adjustable ones. That keeps
-the question a brand actually comes here with ("what can this do without me?")
-and drops the one only we were asking. If the seven names are a deliberate part
-of what a brand is buying, G1 needs an exception written for this page, and
-that exception has to say why a name is worth showing here and nowhere else.
+**G1 is overruled: the agents are named. ANSWERED.** Applying it removed the
+Autonomy page's whole subject — that page exists to show which of the seven
+agents holds which permission — and with it the roster's one-row-per-agent
+grouping, every evidence attribution, every compliance byline and the activity
+log's Agent column. Asked directly, the call was to put them back, so the names
+are live again everywhere they used to be.
+
+What did **not** come back, and should not: the opening paragraph that
+introduced the cast before the work started. The spec's length rule stands, and
+an earlier instruction on this project already said not to recite how many
+agents there are. The roster card under that one-line opening says who is
+working, in a form a brand can scan, which is what the paragraph was reaching
+for. Naming the agent that did a thing and reciting the org chart are different
+moves; the first is back, the second stays gone.
 
 **Phase 1 guarantees 1x in the build, and the spec's examples assume 5x.**
 `PHASE1_ROAS = 1` in `app/lib/agent/tools.ts`, so the warm-up promises $1,000

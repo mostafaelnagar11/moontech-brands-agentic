@@ -79,7 +79,8 @@ export function PlanCard({
   const multiple = budget > 0 ? Math.round((target / budget) * 10) / 10 : 0;
   /* Two different counts, and the row used to show the wrong one. The
      crew is who the fixed warm-up budget pays for; the pool is everyone
-     matched and cleared, which is what the rest of the ladder draws on. */
+     MoonMatch AI matched and MoonSearch AI cleared, which is what the
+     rest of the ladder draws on. */
   const crew = plan.creators.value.length;
   const pool = plan.pool.value || crew;
   /* The products the campaign is actually pointed at: the bestsellers
@@ -177,7 +178,7 @@ export function PlanCard({
                 <img key={c.id} src={c.avatar} alt="" loading="lazy" className="h-6 w-6 rounded-full bg-brand-100 object-cover ring-2 ring-white" />
               ))}
             </span>
-            {/* "Matched" is the whole pool, not the crew the warm-up pays
+            {/* "Matched" is the pool MoonMatch AI found, not the crew the warm-up pays
                 for. The row used to say "matched" and show the crew,
                 which read as though the whole match were three people.
                 The crew follows it as the subset it is, so the two

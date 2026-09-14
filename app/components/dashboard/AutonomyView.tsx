@@ -1,10 +1,10 @@
 "use client";
 
-/* What runs on your campaign, and what each step may do alone, as a
- * settings page rather than as an explanation.
+/* Who the agents are, and what each may do alone, as a settings page
+ * rather than as an explanation.
  *
- * What this replaces: a pipeline where every step carried a full
- * sentence of job description, an intro paragraph counting the steps
+ * What this replaces: a pipeline where every agent carried a full
+ * sentence of job description, an intro paragraph counting the agents
  * that need you, a paragraph on the learning loop, and eleven rules
  * each rendered as its own card with a paragraph of detail above a
  * control. Eleven cards is not a settings screen, it is an essay with
@@ -12,12 +12,8 @@
  * what can this thing do without me right now — was a count you had
  * to make yourself by reading every card.
  *
- * The steps are named by what they do, never by which part of HeyMoon
- * does them. A column of internal names is a fact about our
- * architecture rather than about the brand's store.
- *
  * So: the distribution is four figures at the top, the pipeline is one
- * line per step, and the rules are a table with the control in a
+ * line per agent, and the rules are a table with the control in a
  * column. The reasoning behind each rule is not deleted, it moves
  * behind "Why", because a settings table is scanned and a rule is only
  * read on the day you disagree with it.
@@ -56,33 +52,33 @@ const CONSEQUENCE: Record<AutonomyLevel, string> = {
   never: "I will not raise this at all, even when it would help.",
 };
 
-/* Every step HeyMoon runs, in the order it runs. `job` is one line
-   rather than one sentence: a dashboard row is read at a glance or not
-   at all. `needsYou` is filled in only for the two steps that cannot
-   finish alone, activation because it publishes and optimization
-   because the next phase costs money. Both match the locked rules
-   below rather than restating them. */
-const PIPELINE: { stage: string; job: string; needsYou?: string }[] = [
-  { stage: "Intake", job: "Sets what the campaign is for." },
-  { stage: "Matching", job: "Finds creators whose audience is yours." },
-  { stage: "Safety", job: "Vets every match for brand risk and fraud." },
-  { stage: "Creative", job: "Writes the brief and the ad copy." },
+/* The seven agents HeyMoon runs, in the order they run in. `job` is one
+   line rather than one sentence: a dashboard row is read at a glance or
+   not at all. `needsYou` is filled in only for the two that cannot
+   finish alone, MoonLive AI because it publishes and MoonScore AI
+   because the next phase costs money. Both match the locked rules below
+   rather than restating them. */
+const PIPELINE: { agent: string; stage: string; job: string; needsYou?: string }[] = [
+  { agent: "MoonShot AI", stage: "Intake", job: "Sets what the campaign is for." },
+  { agent: "MoonMatch AI", stage: "Matching", job: "Finds creators whose audience is yours." },
+  { agent: "MoonSearch AI", stage: "Safety", job: "Vets every match for brand risk and fraud." },
+  { agent: "MoonWriter AI", stage: "Creative", job: "Writes the brief and the ad copy." },
   {
-    stage: "Activation",
+    agent: "MoonLive AI", stage: "Activation",
     job: "Launches across the channels creators post on.",
     needsYou: "Publishes only a draft you approved. No setting changes this.",
   },
   {
-    stage: "Optimization",
+    agent: "MoonScore AI", stage: "Optimization",
     job: "Moves budget to whatever is converting.",
     needsYou: "Starting a phase, and any new money with it, is yours to confirm.",
   },
-  { stage: "Learning", job: "Feeds results back into the next campaign." },
+  { agent: "MoonLearning AI", stage: "Learning", job: "Feeds results back into the next campaign." },
 ];
 
-/* Counted from the list rather than typed, so locking a third step
-   moves the chip with it. */
-const LOCKED_STEPS = PIPELINE.filter((p) => p.needsYou).length;
+/* Counted from the list rather than typed, so marking a third agent
+   "always yours" moves the chip with it. */
+const LOCKED_AGENTS = PIPELINE.filter((p) => p.needsYou).length;
 
 export function AutonomyView() {
   const go = useGo();
@@ -121,29 +117,30 @@ export function AutonomyView() {
       </div>
 
       {/* ── The pipeline ─────────────────────────────────────────────
-          One line per step at dashboard width: stage, job, and the lock
-          on the two that cannot finish alone. Below sm the job wraps
-          under the stage rather than being squeezed. */}
+          One line per agent at dashboard width: name, stage, job, and
+          the lock on the two that cannot finish alone. Below sm the job
+          wraps under the name rather than being squeezed. */}
       <Section
-        title="What runs on your campaign, in order"
+        title="The agents, in the order they run"
         aside={
           <span className="inline-flex items-center gap-1 rounded-pill border border-danger/25 bg-danger/[0.07] px-2.5 py-1 text-[11px] font-semibold text-danger">
             <LockSimple size={11} weight="fill" aria-hidden />
-            {LOCKED_STEPS} can never finish alone
+            {LOCKED_AGENTS} can never finish alone
           </span>
         }
       >
         <Surface>
           <ol className="divide-y divide-hairline">
             {PIPELINE.map((p, i) => (
-              <li key={p.stage} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5">
+              <li key={p.agent} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5">
                 <span
                   aria-hidden
                   className="w-3 shrink-0 text-[11px] font-semibold tabular-nums text-ink-faint"
                 >
                   {i + 1}
                 </span>
-                <span className="shrink-0 rounded-pill border border-hairline bg-canvas px-2 py-0.5 text-center text-[10px] font-semibold uppercase tracking-[0.1em] text-ink-faint sm:w-[116px]">
+                <span className="shrink-0 text-body font-medium text-ink sm:w-[128px]">{p.agent}</span>
+                <span className="shrink-0 rounded-pill border border-hairline bg-canvas px-1.5 py-0.5 text-center text-[10px] font-semibold uppercase tracking-[0.1em] text-ink-faint sm:w-[104px]">
                   {p.stage}
                 </span>
                 <span className="min-w-0 flex-1 basis-full text-meta text-ink-soft sm:basis-0 sm:truncate">
@@ -164,14 +161,14 @@ export function AutonomyView() {
             <Detail summary="What the two locks mean, and how the loop closes">
               <ul className="space-y-1">
                 {PIPELINE.filter((p) => p.needsYou).map((p) => (
-                  <li key={p.stage}>
-                    <span className="font-semibold text-ink">{p.stage}.</span> {p.needsYou}
+                  <li key={p.agent}>
+                    <span className="font-semibold text-ink">{p.agent}.</span> {p.needsYou}
                   </li>
                 ))}
                 <li>
-                  <span className="font-semibold text-ink">Learning.</span> Feeds every campaign result
-                  back into matching, creative and optimization, so each new campaign starts better
-                  informed than the last.
+                  <span className="font-semibold text-ink">MoonLearning AI.</span> Feeds every campaign
+                  result back into MoonMatch AI, MoonWriter AI and MoonScore AI, so each new campaign
+                  starts better informed than the last.
                 </li>
               </ul>
             </Detail>

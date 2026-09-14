@@ -16,10 +16,11 @@
    - Each brand has its own ladder. Nothing totals across brands.
    - `rev` and `roas` are PER PHASE, never run-cumulative.
 
-   What is new here: every ad carries three compliance checks that say
-   what was checked and what was found, with no byline on any of them,
-   and every autonomous action is logged in `store.ts` with a reason and
-   an undo. */
+   What is new here: every ad carries a compliance read that is SIGNED
+   by the agent that ran it — MoonShot AI on the catalogue, MoonSearch
+   AI on brand and fraud risk, MoonWriter AI on the brief it wrote
+   itself — and every autonomous action is logged, in `store.ts`, with
+   the agent that took it, a reason and an undo. */
 
 import { rng } from "../agent/rng";
 import type { AdRecord, Evidence, Sourced } from "../agent/types";
@@ -164,8 +165,8 @@ interface AdSeed {
   /** Why the agent reached that verdict, in its own words. */
   reasoning: string;
   /** Overrides for the brief checks; omitted means all clean. `by` is
-      the agent that raised it — a risk is HeyMoon's, a miss
-      against the brief is HeyMoon's. */
+      the agent that raised it — a risk is MoonSearch AI's, a miss
+      against the brief is MoonWriter AI's. */
   issue?: { label: string; detail: string; by: string };
   views?: number; revenue?: number;
 }
@@ -185,7 +186,7 @@ const SEEDS: AdSeed[] = [
     format: "Reel", platform: "Instagram", img: "/creators/olafarahat/p1.jpg",
     submitted: "5h ago", track: "MT-P2-1152", state: "waiting", verdict: "approve-with-note",
     reasoning: "Clean against the brief, but the tote is your first bestseller and she also publishes for Farfetch. The overlap is declared and allowed under your guidelines, and there is no competing product in frame. Worth knowing rather than worth holding.",
-    issue: { by: "HeyMoon", label: "Overlap logged, not blocked", detail: "Ola Farahat also publishes for Farfetch. Allowed under your guidelines; no competing product appears in this draft." },
+    issue: { by: "MoonSearch AI", label: "Overlap logged, not blocked", detail: "Ola Farahat also publishes for Farfetch. Allowed under your guidelines; no competing product appears in this draft." },
   },
   {
     id: "ad-3", campaignId: "phase-2", creatorId: 9,
@@ -200,7 +201,7 @@ const SEEDS: AdSeed[] = [
     format: "Video", platform: "TikTok", img: "/creators/mais.mustafa/p1.jpg",
     submitted: "14h ago", track: "MT-P2-1163", state: "waiting", verdict: "hold",
     reasoning: "The brief asks for the discount code on screen for at least five seconds. In this cut it appears for two, in the last frame, over a busy background. Everything else is on brief. A re-cut with the code held longer is a small ask and I would rather ask than let it run underperforming.",
-    issue: { by: "HeyMoon", label: "Code visible for 2s, brief asks for 5s", detail: "The code appears at 0:41 over a moving background and is gone by 0:43. Attribution on this phase runs entirely through that code." },
+    issue: { by: "MoonWriter AI", label: "Code visible for 2s, brief asks for 5s", detail: "The code appears at 0:41 over a moving background and is gone by 0:43. Attribution on this phase runs entirely through that code." },
   },
   {
     id: "ad-5", campaignId: "phase-2", creatorId: 1,
@@ -222,35 +223,35 @@ const SEEDS: AdSeed[] = [
     product: "Pearl Mesh Clutch", caption: "The pearl mesh clutch on camera rather than on a plinth, with the code and piece number on screen.",
     format: "Reel", platform: "Instagram", img: "/ads/palm-ounass-clutch.jpg", video: "/ads/palm-ounass-clutch.mp4",
     submitted: "6d ago", track: "MT-P2-V01", state: "live", verdict: "approve",
-    reasoning: "Approved by you on 24 Feb; HeyMoon published it the same day.", views: 61_400, revenue: 3_180,
+    reasoning: "Approved by you on 24 Feb; MoonLive AI published it the same day.", views: 61_400, revenue: 3_180,
   },
   {
     id: "ad-live-2", campaignId: "phase-2", creatorId: 2,
     product: "Ounass Beauty Edit", caption: "Full face using nothing outside the Ounass beauty edit. Shade names as she goes.",
     format: "Story", platform: "Instagram", img: "/ads/memz-ounass-story.jpg", video: "/ads/memz-ounass-story.mp4",
     submitted: "5d ago", track: "MT-P2-V02", state: "live", verdict: "approve",
-    reasoning: "Approved by you on 25 Feb; HeyMoon published it the same day.", views: 38_900, revenue: 2_240,
+    reasoning: "Approved by you on 25 Feb; MoonLive AI published it the same day.", views: 38_900, revenue: 2_240,
   },
   {
     id: "ad-live-3", campaignId: "phase-2", creatorId: 10,
     product: "Ounass Luxury Haul", caption: "What actually arrived from the haul, unpacked in one take and rated out loud.",
     format: "Video", platform: "TikTok", img: "/ads/noon-ounass-tiktok.jpg", video: "/ads/noon-ounass-tiktok.mp4",
     submitted: "4d ago", track: "MT-P2-V03", state: "live", verdict: "approve",
-    reasoning: "Approved by you on 26 Feb; HeyMoon published it the same day.", views: 104_200, revenue: 4_010,
+    reasoning: "Approved by you on 26 Feb; MoonLive AI published it the same day.", views: 104_200, revenue: 4_010,
   },
   {
     id: "ad-live-4", campaignId: "phase-2", creatorId: 7,
     product: "Ounass Exclusive, The Resort Ritual", caption: "Walking the Resort Ritual edit on site, gift sets first, with the code on screen.",
     format: "Story", platform: "Instagram", img: "/ads/cosmo-ounass-story.jpg", video: "/ads/cosmo-ounass-story.mp4",
     submitted: "3d ago", track: "MT-P2-V04", state: "live", verdict: "approve",
-    reasoning: "Approved by you on 27 Feb; HeyMoon published it the same day.", views: 44_700, revenue: 1_910,
+    reasoning: "Approved by you on 27 Feb; MoonLive AI published it the same day.", views: 44_700, revenue: 1_910,
   },
   {
     id: "ad-live-5", campaignId: "phase-2", creatorId: 9,
     product: "Linen Blazer, Chalk", caption: "The linen blazer after a full day in 38 degrees. Creases and all.",
     format: "Post", platform: "Instagram", img: "/creators/paola.elsitt/p3.jpg",
     submitted: "6d ago", track: "MT-P2-1119", state: "live", verdict: "approve",
-    reasoning: "Approved by you on 24 Feb; HeyMoon published it the same day.", views: 52_300, revenue: 1_270,
+    reasoning: "Approved by you on 24 Feb; MoonLive AI published it the same day.", views: 52_300, revenue: 1_270,
   },
   /* ── Declined ── */
   {
@@ -258,17 +259,19 @@ const SEEDS: AdSeed[] = [
     product: "Printed Cut-Out Co-Ord", caption: "The printed co-ord in real sun and real wind. Chain-detail close-ups so you can judge it.",
     format: "Reel", platform: "Instagram", img: "/creators/olafarahat/p2.jpg",
     submitted: "3d ago", track: "MT-P2-1186", state: "declined", verdict: "approve",
-    reasoning: "You declined this on 1 Mar for tone. HeyMoon publishes only a draft you have approved, so nothing went out, and a decline can be reopened.",
+    reasoning: "You declined this on 1 Mar for tone. MoonLive AI publishes only a draft you have approved, so nothing went out, and a decline can be reopened.",
   },
 ];
 
-/** The three checks that run on every draft before it reaches the
-    brand, plus HeyMoon's own verdict against the brief.
+/** The three checks that run on every draft before it reaches the brand,
+    plus the agent's own read against the brief.
 
-    No check carries a byline. Every one of them is HeyMoon, so a name
-    in front of each row is a word the brand reads three times and
-    learns nothing from. What a check has to say is what was checked
-    and what it found.
+    Every check names the agent that ran it, because "we checked" is not
+    a check. MoonShot AI holds your catalogue, so matching the product to
+    it is its job. MoonSearch AI vets creators for brand and fraud risk,
+    so disclosure, competitors and declared overlaps are its call.
+    MoonWriter AI wrote the brief, so anything measured against the brief
+    is its verdict rather than anyone else's.
 
     Two checks are constant; the third is derived from the creator's
     declared conflict, so the panel carries a real advisory rather than
@@ -276,14 +279,14 @@ const SEEDS: AdSeed[] = [
 function checksFor(seed: AdSeed) {
   const c = creatorById(seed.creatorId);
   const base = [
-    { label: "Product matched to your catalogue", detail: `${seed.product}, in stock, price synced`, clean: true },
-    { label: "Paid partnership disclosed", detail: `Label set on the ad · tracking code ${seed.track}`, clean: true },
+    { label: "Product matched to your catalogue", detail: `MoonShot AI · ${seed.product}, in stock, price synced`, clean: true },
+    { label: "Paid partnership disclosed", detail: `MoonSearch AI · Label set on the ad · tracking code ${seed.track}`, clean: true },
   ];
   const third = seed.issue
-    ? { label: seed.issue.label, detail: seed.issue.detail, clean: false }
+    ? { label: seed.issue.label, detail: `${seed.issue.by} · ${seed.issue.detail}`, clean: false }
     : c.conflict
-    ? { label: "Overlap logged, not blocked", detail: `${c.name}: ${c.conflict}. Allowed under your guidelines.`, clean: false }
-    : { label: "Inside your brand guidelines", detail: "No competing brand in her last 90 days", clean: true };
+    ? { label: "Overlap logged, not blocked", detail: `MoonSearch AI · ${c.name}: ${c.conflict}. Allowed under your guidelines.`, clean: false }
+    : { label: "Inside your brand guidelines", detail: "MoonSearch AI · No competing brand in her last 90 days", clean: true };
   return [...base, third];
 }
 
@@ -309,9 +312,9 @@ export const ADS: AdRecord[] = SEEDS.map((seed) => {
       verdict: seed.verdict,
       reasoning: s(
         seed.reasoning,
-        "HeyMoon read this draft against the brief it wrote for this phase. Publishing is never its call: an ad goes out only when you approve it, and HeyMoon is what puts it live.",
+        "MoonWriter AI read this draft against the brief it wrote for this phase. Publishing is never its call: an ad goes out only when you approve it, and MoonLive AI is what puts it live.",
         [
-          ev(`brief-${seed.id}`, "policy", "your Phase 2 brief", "Written by HeyMoon · Product named in the first 3s · code on screen 5s · editorial register · Reel or short video."),
+          ev(`brief-${seed.id}`, "policy", "your Phase 2 brief", "Written by MoonWriter AI · Product named in the first 3s · code on screen 5s · editorial register · Reel or short video."),
           ev(`draft-${seed.id}`, "creator", `${c.name}'s draft`, `Submitted ${seed.submitted} · tracking code ${seed.track}.`),
         ]
       ),
