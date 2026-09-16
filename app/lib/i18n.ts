@@ -39,11 +39,15 @@ export const STR: Dict = {
   /* L2, L3. Line 2 carries the accent colour. */
   "landing.h1a": { en: "A campaign in fifteen seconds.", ar: "حملة في 15 ثانية." },
   "landing.h1b": { en: "Sales, guaranteed.", ar: "ومبيعات مضمونة." },
-  /* L4, first half. Its last three sentences are the chips below. */
+  /* L4, first half. It used to sit under the headline; the hero is
+     tighter without it, so it now introduces the three cards, which is
+     what the sentence actually describes. Its last three sentences are
+     the chips under the field. */
   "landing.sub": {
     en: "Paste your store link. HeyMoon builds a complete creator campaign around what you sell, and guarantees the sales.",
     ar: "ألصق رابط متجرك، وتبني لك هاي مون حملة مؤثرين كاملة حول ما تبيعه، وتضمن لك المبيعات.",
   },
+  "landing.cardsT": { en: "One link. The whole campaign.", ar: "رابط واحد. والحملة كاملة." },
   "landing.no1": { en: "No forms to fill in", ar: "لا نماذج تملؤها" },
   "landing.no2": { en: "No brief to write", ar: "لا بريف تكتبه" },
   "landing.no3": { en: "No agency to manage", ar: "لا وكالة تتابعها" },
@@ -94,6 +98,56 @@ export const STR: Dict = {
   },
   "landing.threePhasesAt": { en: "across three phases, at", ar: "عبر ثلاث مراحل، بمعدل" },
   "landing.signature": { en: "HeyMoon.AI, a Saudi company", ar: "HeyMoon.AI، شركة سعودية" },
+
+  /* The run, as four steps that advance on their own. Each one names
+     the agent doing the work, because a brand that is about to spend
+     money is owed the name of what is spending it. */
+  "landing.runT": { en: "From a link to a live campaign.", ar: "من رابط إلى حملة تعمل." },
+  "landing.runD": {
+    en: "Four steps. You decide at two of them, and nothing goes out without you.",
+    ar: "أربع خطوات. تقرر أنت في اثنتين منها، ولا شيء يُنشر بدونك.",
+  },
+  "landing.r1t": { en: "Paste your store link", ar: "ألصق رابط متجرك" },
+  "landing.r1d": {
+    en: "HeyMoon reads the catalogue, the prices, the voice and the markets it already ships to.",
+    ar: "تقرأ هاي مون الكتالوج والأسعار والنبرة والأسواق التي تشحن إليها بالفعل.",
+  },
+  "landing.r2t": { en: "The plan arrives, priced", ar: "تصل الخطة مُسعّرة" },
+  "landing.r2d": {
+    en: "Markets, creators, products and the brief, with the sales figure it guarantees. Change anything.",
+    ar: "الأسواق وصنّاع المحتوى والمنتجات والموجز، مع رقم المبيعات المضمون. غيّر ما تشاء.",
+  },
+  "landing.r3t": { en: "You start Phase 1", ar: "تبدأ المرحلة الأولى" },
+  "landing.r3d": {
+    en: "One payment, the same for every brand. Nothing after it is charged or committed.",
+    ar: "دفعة واحدة، نفسها لكل علامة تجارية. ولا شيء بعدها يُخصم أو يُلتزم به.",
+  },
+  "landing.r4t": { en: "Drafts wait on your approval", ar: "المسودات تنتظر موافقتك" },
+  "landing.r4d": {
+    en: "Every creator's work reaches you before it reaches anyone else. Nothing publishes on its own.",
+    ar: "يصلك عمل كل صانع محتوى قبل أن يصل إلى غيرك. ولا شيء يُنشر من تلقاء نفسه.",
+  },
+
+  /* The seven, by name and by the stage each one runs. */
+  "landing.agentsT": { en: "Seven agents run the campaign.", ar: "سبعة وكلاء يديرون الحملة." },
+  "landing.agentsD": {
+    en: "Each one owns a stage, and each one signs the work it did.",
+    ar: "لكل واحد منهم مرحلة، ويوقّع كل منهم العمل الذي أنجزه.",
+  },
+  "landing.stage.intake": { en: "Intake", ar: "الاستقبال" },
+  "landing.stage.matching": { en: "Matching", ar: "المطابقة" },
+  "landing.stage.safety": { en: "Safety", ar: "السلامة" },
+  "landing.stage.creative": { en: "Creative", ar: "الإبداع" },
+  "landing.stage.activation": { en: "Activation", ar: "التفعيل" },
+  "landing.stage.optimization": { en: "Optimization", ar: "التحسين" },
+  "landing.stage.learning": { en: "Learning", ar: "التعلّم" },
+
+  /* The stores it connects to, after payment and read-only. */
+  "landing.storesT": { en: "Connects to the store you already have.", ar: "يرتبط بالمتجر الذي لديك بالفعل." },
+  "landing.storesD": {
+    en: "One tap, after you pay. It reads the orders that use a creator's code, and nothing else.",
+    ar: "نقرة واحدة بعد الدفع. يقرأ الطلبات التي تستخدم كود صانع المحتوى، ولا شيء غير ذلك.",
+  },
 
   /* The close, and the colophon. */
   "landing.closeH2": { en: "Paste your store link.", ar: "ألصق رابط متجرك." },

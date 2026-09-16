@@ -132,3 +132,48 @@ export function GuaranteePanel({ revenue, budget, roas, label, note }: {
     </div>
   );
 }
+
+/** Checkout, cropped at the total: what pressing the button commits to. */
+export function MockPay({ total, vat, budget }: { total: string; vat: string; budget: string }) {
+  return (
+    <div aria-hidden className="absolute inset-x-6 top-7 sm:inset-x-8">
+      <div className="overflow-hidden rounded-[16px] bg-white shadow-[0_2px_4px_rgba(25,18,52,0.05),0_20px_40px_-16px_rgba(25,18,52,0.22)] ring-1 ring-ink/[0.06]">
+        <div className="px-4 pb-4 pt-4">
+          <p className="text-[11px] text-ink/45">Due today</p>
+          <p className="num mt-1 text-[30px] font-semibold leading-none tracking-[-0.03em] text-ink">{total}</p>
+          <p className="num mt-2 text-[11px] text-ink/45">{budget} + {vat} VAT</p>
+          <div className="mt-4 flex items-center gap-2 rounded-[10px] bg-ink/[0.04] px-3 py-2">
+            <span className="h-4 w-6 rounded-[3px] bg-ink/15" />
+            <span className="num text-[11px] text-ink/60">•••• 4629</span>
+          </div>
+          <div className="mt-3 rounded-[10px] bg-ink py-2.5 text-center text-[12px] font-semibold text-white">Pay {total}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** A draft waiting on the brand: nothing goes out without a decision. */
+export function MockDraft({ avatar }: { avatar?: string }) {
+  return (
+    <div aria-hidden className="absolute inset-x-6 top-7 sm:inset-x-8">
+      <div className="overflow-hidden rounded-[16px] bg-white shadow-[0_2px_4px_rgba(25,18,52,0.05),0_20px_40px_-16px_rgba(25,18,52,0.22)] ring-1 ring-ink/[0.06]">
+        <div className="flex items-center gap-2.5 px-4 py-3">
+          {avatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={avatar} alt="" className="h-7 w-7 rounded-full object-cover" />
+          ) : (
+            <span className="h-7 w-7 rounded-full bg-ink/10" />
+          )}
+          <span className="flex-1 text-[11px] font-medium text-ink">Draft, waiting on you</span>
+          <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[10px] font-semibold text-brand">Reel</span>
+        </div>
+        <div className="mx-4 h-[74px] rounded-[10px] bg-gradient-to-br from-ink/[0.07] to-ink/[0.03]" />
+        <div className="flex gap-2 p-4">
+          <span className="flex-1 rounded-[9px] border border-ink/10 py-2 text-center text-[11px] font-medium text-ink/55">Decline</span>
+          <span className="flex-1 rounded-[9px] bg-ink py-2 text-center text-[11px] font-semibold text-white">Approve</span>
+        </div>
+      </div>
+    </div>
+  );
+}

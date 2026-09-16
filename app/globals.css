@@ -62,6 +62,10 @@ input, textarea, select { font: inherit; }
   filter: blur(52px);
 }
 
+/* The open step's timer, which is really the timer. */
+@keyframes run-fill { from { width: 0% } to { width: 100% } }
+@media (prefers-reduced-motion: reduce) { .hm-grad-rule { animation: none !important; width: 100% !important } }
+
 /* A card's media area: a soft tint for a product mock to float on. */
 .hm-media { background: linear-gradient(150deg, #EFEAFB 0%, #FBFAFD 45%, #FDEEF5 100%); }
 

@@ -32,16 +32,23 @@ import { useRouter } from "next/navigation";
 import { Check, Globe, Lock, Storefront } from "@phosphor-icons/react";
 import { Wordmark } from "./components/Wordmark";
 import { LangToggle } from "./components/DirSync";
-import { MockField, MockPhases, MockPlan, GuaranteePanel } from "./components/landing/Mocks";
+import { MockDraft, MockField, MockPay, MockPhases, MockPlan, GuaranteePanel } from "./components/landing/Mocks";
+import { Run } from "./components/landing/Run";
 import { EXAMPLES, FIXTURES, normaliseUrl } from "./lib/mock/reads";
 import { readIdFor, rememberRead } from "./lib/agent/registry";
 import { ladderTotals, planFor } from "./lib/agent/tools";
 import { AGENTS } from "./lib/agent/agents";
-import { fmtUSD } from "./lib/mock/campaigns";
+import { VAT_RATE, fmtUSD } from "./lib/mock/campaigns";
 import type { BrandRead, ReadLayerKey } from "./lib/agent/types";
 import { SHORT_MARKET } from "./lib/landing";
 import { useT } from "./lib/i18n";
 import { useReveal } from "./lib/useReveal";
+
+/* The stage each agent owns, in roster order. */
+const STAGES = [
+  "landing.stage.intake", "landing.stage.matching", "landing.stage.safety", "landing.stage.creative",
+  "landing.stage.activation", "landing.stage.optimization", "landing.stage.learning",
+] as const;
 
 const ALL_LAYERS: ReadLayerKey[] = [
   "identity", "category", "socials", "priceBand", "voice", "markets", "bestsellers", "seasonality", "eligibility",
@@ -170,6 +177,9 @@ export default function Landing() {
   const { read, plan } = useDemo();
   const reveal1 = useReveal<HTMLDivElement>(0.1);
   const reveal2 = useReveal<HTMLDivElement>(0.1);
+  const reveal3 = useReveal<HTMLElement>(0.08);
+  const reveal4 = useReveal<HTMLElement>(0.1);
+  const reveal5 = useReveal<HTMLElement>(0.2);
 
   const markets = plan.markets.value.map((c) => SHORT_MARKET[c] ?? c);
   const rungs = plan.ladder.value;
@@ -211,16 +221,12 @@ export default function Landing() {
             <span {...rise(140)} className={`${rise(140).className} hm-grad-text block`}>{t("landing.h1b")}</span>
           </h1>
 
-          <p {...rise(210)} className={`${rise(210).className} mt-6 max-w-[50ch] text-[17px] leading-[1.6] text-ink/55 sm:text-[18px]`}>
-            {t("landing.sub")}
-          </p>
-
-          <div {...rise(280)} className={`${rise(280).className} relative mt-10 flex w-full justify-center`}>
+          <div {...rise(210)} className={`${rise(210).className} relative mt-11 flex w-full justify-center`}>
             <div aria-hidden className="hm-glow pointer-events-none absolute inset-x-0 -inset-y-10" />
             <StoreField id="store-top" autoFocus />
           </div>
 
-          <ul {...rise(350)} className={`${rise(350).className} mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[13px] text-ink/50`}>
+          <ul {...rise(280)} className={`${rise(280).className} mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[13px] text-ink/50`}>
             {["landing.no1", "landing.no2", "landing.no3"].map((k) => (
               <li key={k} className="flex items-center gap-1.5">
                 <Check size={12} weight="bold" aria-hidden className="text-brand/70" />
@@ -233,6 +239,12 @@ export default function Landing() {
 
       {/* ── Three cards, each one a picture of the product. ────────── */}
       <section id="how" ref={reveal1} className="mx-auto w-full max-w-[1120px] px-5 pb-8 sm:px-8">
+        <div className="reveal mx-auto mb-12 max-w-[620px] text-center">
+          <h2 className="text-[clamp(28px,3.4vw,40px)] font-semibold leading-[1.1] tracking-[-0.035em] text-ink rtl:leading-[1.25] rtl:tracking-normal">
+            {t("landing.cardsT")}
+          </h2>
+          <p className="mx-auto mt-4 max-w-[50ch] text-[16px] leading-[1.6] text-ink/55">{t("landing.sub")}</p>
+        </div>
         <ul className="reveal grid gap-5 lg:grid-cols-3">
           <Card title={t("landing.c1t")} body={t("landing.c1d")}>
             <MockField url={read.url} />
@@ -244,6 +256,28 @@ export default function Landing() {
             <MockPhases rungs={rungs} />
           </Card>
         </ul>
+      </section>
+
+      {/* ── How it runs: four steps, one panel, on a timer. ───────── */}
+      <section ref={reveal3} className="mx-auto w-full max-w-[1120px] px-5 py-24 sm:px-8 sm:py-32">
+        <div className="reveal">
+          <div className="max-w-[620px]">
+            <h2 className="text-[clamp(28px,3.4vw,40px)] font-semibold leading-[1.1] tracking-[-0.035em] text-ink rtl:leading-[1.25] rtl:tracking-normal">
+              {t("landing.runT")}
+            </h2>
+            <p className="mt-4 max-w-[50ch] text-[16px] leading-[1.6] text-ink/55">{t("landing.runD")}</p>
+          </div>
+          <div className="mt-14">
+            <Run
+              steps={[
+                { key: "read", title: t("landing.r1t"), body: t("landing.r1d"), agent: AGENTS[0], panel: <MockField url={read.url} /> },
+                { key: "plan", title: t("landing.r2t"), body: t("landing.r2d"), agent: AGENTS[1], panel: <MockPlan plan={plan} markets={markets} /> },
+                { key: "pay", title: t("landing.r3t"), body: t("landing.r3d"), agent: AGENTS[5], panel: <MockPay total={fmtUSD(Math.round(plan.budget.value * (1 + VAT_RATE)))} vat={fmtUSD(Math.round(plan.budget.value * VAT_RATE))} budget={fmtUSD(plan.budget.value)} /> },
+                { key: "draft", title: t("landing.r4t"), body: t("landing.r4d"), agent: AGENTS[3], panel: <MockDraft avatar={plan.creators.value[0]?.avatar} /> },
+              ]}
+            />
+          </div>
+        </div>
       </section>
 
       {/* ── The guarantee. The one dark object on the page. ────────── */}
@@ -266,6 +300,47 @@ export default function Landing() {
             label={t("plan.target")}
             note={t("landing.threePhasesAt")}
           />
+        </div>
+      </section>
+
+      {/* ── The seven, by name and stage. ─────────────────────────── */}
+      <section ref={reveal4} className="mx-auto w-full max-w-[1120px] px-5 pb-24 sm:px-8 sm:pb-32">
+        <div className="reveal grid gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-center lg:gap-16">
+          <div>
+            <h2 className="max-w-[16ch] text-[clamp(28px,3.4vw,40px)] font-semibold leading-[1.1] tracking-[-0.035em] text-ink rtl:leading-[1.25] rtl:tracking-normal">
+              {t("landing.agentsT")}
+            </h2>
+            <p className="mt-4 max-w-[44ch] text-[16px] leading-[1.6] text-ink/55">{t("landing.agentsD")}</p>
+          </div>
+          <ol className="overflow-hidden rounded-[20px] bg-white ring-1 ring-ink/[0.06] shadow-[0_1px_2px_rgba(25,18,52,0.04),0_24px_48px_-32px_rgba(25,18,52,0.20)]">
+            {AGENTS.map((name, i) => (
+              <li
+                key={name}
+                className={`flex items-center gap-4 px-5 py-3.5 sm:px-6 ${i > 0 ? "border-t border-ink/[0.06]" : ""}`}
+              >
+                <span className="num w-5 shrink-0 text-[12px] font-semibold text-ink/25">{String(i + 1).padStart(2, "0")}</span>
+                <span className="min-w-0 flex-1 truncate text-[15px] font-semibold text-ink">{name}</span>
+                <span className="shrink-0 text-[13px] text-ink/45">{t(STAGES[i])}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* ── The stores it connects to. ────────────────────────────── */}
+      <section ref={reveal5} className="border-y border-ink/[0.06] bg-white/60">
+        <div className="reveal mx-auto flex w-full max-w-[1120px] flex-col gap-8 px-5 py-14 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-[520px]">
+            <h2 className="text-[clamp(22px,2.4vw,28px)] font-semibold leading-[1.2] tracking-[-0.03em] text-ink rtl:tracking-normal">
+              {t("landing.storesT")}
+            </h2>
+            <p className="mt-2.5 text-[15px] leading-[1.6] text-ink/55">{t("landing.storesD")}</p>
+          </div>
+          <ul className="flex flex-wrap gap-2.5">
+            {["Salla", "Zid", "Shopify", "Magento"].map((p) => (
+              <li key={p} className="rounded-[12px] bg-white px-4 py-2.5 text-[15px] font-semibold text-ink ring-1 ring-ink/[0.07]">{p}</li>
+            ))}
+          </ul>
         </div>
       </section>
 
