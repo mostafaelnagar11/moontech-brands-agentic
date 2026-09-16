@@ -34,6 +34,7 @@ import { Wordmark } from "./components/Wordmark";
 import { LangToggle } from "./components/DirSync";
 import { MockDraft, MockField, MockPay, MockPhases, MockPlan, GuaranteePanel } from "./components/landing/Mocks";
 import { Run } from "./components/landing/Run";
+import { Constellation } from "./components/landing/Constellation";
 import { EXAMPLES, FIXTURES, normaliseUrl } from "./lib/mock/reads";
 import { readIdFor, rememberRead } from "./lib/agent/registry";
 import { ladderTotals, planFor } from "./lib/agent/tools";
@@ -44,11 +45,15 @@ import { SHORT_MARKET } from "./lib/landing";
 import { useT } from "./lib/i18n";
 import { useReveal } from "./lib/useReveal";
 
-/* The stage each agent owns, in roster order. */
-const STAGES = [
-  "landing.stage.intake", "landing.stage.matching", "landing.stage.safety", "landing.stage.creative",
-  "landing.stage.activation", "landing.stage.optimization", "landing.stage.learning",
-] as const;
+/* The store platforms the product connects to. `src` is filled in as
+   each brand's mark lands in public/platforms; a cell with none renders
+   the name instead, so the row is never half-built. */
+const PLATFORMS: { name: string; src?: string }[] = [
+  { name: "Salla" },
+  { name: "Zid" },
+  { name: "Shopify", src: "/platforms/shopify.png" },
+  { name: "Magento", src: "/platforms/magento.png" },
+];
 
 const ALL_LAYERS: ReadLayerKey[] = [
   "identity", "category", "socials", "priceBand", "voice", "markets", "bestsellers", "seasonality", "eligibility",
@@ -104,7 +109,14 @@ function StoreField({ id, autoFocus = false }: { id: string; autoFocus?: boolean
       onSubmit={(e) => { e.preventDefault(); submit(); }}
       noValidate
       className={`relative w-full max-w-[580px] overflow-hidden rounded-[24px] bg-white text-start shadow-[0_2px_4px_rgba(25,18,52,0.04),0_20px_44px_-18px_rgba(25,18,52,0.22),0_56px_90px_-48px_rgba(25,18,52,0.30)] ring-1 transition duration-150 ${
-        invalid ? "ring-danger" : "ring-ink/[0.08] focus-within:ring-2 focus-within:ring-brand/50"
+        /* No focus ring on the card at all. `focus-within` drew a purple
+           stroke around the whole thing the moment it was tapped, and
+           `:focus-visible` does not help here: a text input matches it
+           on a mouse click too, by spec, so both fire for someone who
+           never needed the hint. The caret is the input's own focus
+           affordance, and the two buttons inside keep the global
+           focus-visible outline from globals.css. */
+        invalid ? "ring-danger" : "ring-ink/[0.08]"
       }`}
     >
       <label htmlFor={id} className="sr-only">Your store link</label>
@@ -122,7 +134,12 @@ function StoreField({ id, autoFocus = false }: { id: string; autoFocus?: boolean
           autoComplete="off"
           spellCheck={false}
           inputMode="url"
-          className="h-full w-full bg-transparent pe-5 ps-[52px] text-left text-[18px] tracking-[-0.01em] text-ink outline-none placeholder:text-ink/35 sm:text-[19px]"
+          /* `outline-none` alone is not enough: globals.css draws a
+             brand outline on :focus-visible for everything, and a text
+             input matches that on a mouse click too, so a purple line
+             appeared under the row. The caret is this field's focus
+             affordance; the buttons beside it keep the global one. */
+          className="h-full w-full bg-transparent pe-5 ps-[52px] text-left text-[18px] tracking-[-0.01em] text-ink outline-none focus-visible:outline-none placeholder:text-ink/35 sm:text-[19px]"
         />
       </div>
       <div className="flex h-[60px] items-center justify-between gap-3 border-t border-ink/[0.06] bg-[#FBFAFC] pe-2.5 ps-2.5">
@@ -303,27 +320,18 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── The seven, by name and stage. ─────────────────────────── */}
+      {/* ── The seven, as a system you can see. ───────────────────── */}
       <section ref={reveal4} className="mx-auto w-full max-w-[1120px] px-5 pb-24 sm:px-8 sm:pb-32">
-        <div className="reveal grid gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-center lg:gap-16">
-          <div>
-            <h2 className="max-w-[16ch] text-[clamp(28px,3.4vw,40px)] font-semibold leading-[1.1] tracking-[-0.035em] text-ink rtl:leading-[1.25] rtl:tracking-normal">
-              {t("landing.agentsT")}
-            </h2>
-            <p className="mt-4 max-w-[44ch] text-[16px] leading-[1.6] text-ink/55">{t("landing.agentsD")}</p>
+        <div className="reveal overflow-hidden rounded-[26px] bg-[#141229] px-6 py-14 ring-1 ring-white/[0.08] sm:px-12 sm:py-16">
+          <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
+            <div>
+              <h2 className="max-w-[16ch] text-[clamp(28px,3.4vw,40px)] font-semibold leading-[1.1] tracking-[-0.035em] text-white rtl:leading-[1.25] rtl:tracking-normal">
+                {t("landing.agentsT")}
+              </h2>
+              <p className="mt-4 max-w-[42ch] text-[16px] leading-[1.6] text-white/55">{t("landing.agentsD")}</p>
+            </div>
+            <Constellation />
           </div>
-          <ol className="overflow-hidden rounded-[20px] bg-white ring-1 ring-ink/[0.06] shadow-[0_1px_2px_rgba(25,18,52,0.04),0_24px_48px_-32px_rgba(25,18,52,0.20)]">
-            {AGENTS.map((name, i) => (
-              <li
-                key={name}
-                className={`flex items-center gap-4 px-5 py-3.5 sm:px-6 ${i > 0 ? "border-t border-ink/[0.06]" : ""}`}
-              >
-                <span className="num w-5 shrink-0 text-[12px] font-semibold text-ink/25">{String(i + 1).padStart(2, "0")}</span>
-                <span className="min-w-0 flex-1 truncate text-[15px] font-semibold text-ink">{name}</span>
-                <span className="shrink-0 text-[13px] text-ink/45">{t(STAGES[i])}</span>
-              </li>
-            ))}
-          </ol>
         </div>
       </section>
 
@@ -336,9 +344,20 @@ export default function Landing() {
             </h2>
             <p className="mt-2.5 text-[15px] leading-[1.6] text-ink/55">{t("landing.storesD")}</p>
           </div>
-          <ul className="flex flex-wrap gap-2.5">
-            {["Salla", "Zid", "Shopify", "Magento"].map((p) => (
-              <li key={p} className="rounded-[12px] bg-white px-4 py-2.5 text-[15px] font-semibold text-ink ring-1 ring-ink/[0.07]">{p}</li>
+          {/* The platforms, in their own marks, on the page itself. The
+              cells used to be a bordered grid, which framed four logos
+              that are already four different shapes and read as a table
+              of contents. No strokes: just the marks, evenly spaced. */}
+          <ul className="flex flex-wrap items-center gap-x-10 gap-y-7 sm:gap-x-12">
+            {PLATFORMS.map((p) => (
+              <li key={p.name} className="flex h-8 items-center">
+                {p.src ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={p.src} alt={p.name} className="max-h-[26px] w-auto object-contain" loading="lazy" />
+                ) : (
+                  <span className="text-[19px] font-semibold tracking-[-0.02em] text-ink/70">{p.name}</span>
+                )}
+              </li>
             ))}
           </ul>
         </div>

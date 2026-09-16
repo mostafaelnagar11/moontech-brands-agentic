@@ -18,12 +18,22 @@
  */
 
 import type { Plan } from "../../lib/agent/types";
+
+/* Every mock sits centred in its media area.
+ *
+ * They were pinned to the top so they would run off the bottom edge,
+ * on the theory that a cropped interface reads as a screen that keeps
+ * going. In practice it just left a pool of empty gradient under each
+ * one, in the short card areas and the tall panel alike. Centred, the
+ * tint reads as a mount around the object rather than as space the
+ * object failed to fill. */
+const FRAME = "absolute inset-x-6 top-1/2 -translate-y-1/2 sm:inset-x-8";
 import { fmtUSD } from "../../lib/mock/campaigns";
 
 /** The field, as the brand first meets it: a link typed, a cursor. */
 export function MockField({ url }: { url: string }) {
   return (
-    <div aria-hidden className="absolute inset-x-6 top-7 sm:inset-x-8">
+    <div aria-hidden className={FRAME}>
       <div className="rounded-[18px] bg-white p-5 shadow-[0_2px_4px_rgba(25,18,52,0.05),0_20px_40px_-16px_rgba(25,18,52,0.22)] ring-1 ring-ink/[0.06]">
         <p dir="ltr" className="flex items-center text-[19px] tracking-[-0.01em] text-ink">
           <span className="num">{url}</span>
@@ -33,7 +43,7 @@ export function MockField({ url }: { url: string }) {
         </p>
         <div className="mt-6 flex items-center justify-between">
           <span className="h-7 w-7 rounded-full bg-ink/[0.05]" />
-          <span className="rounded-[9px] bg-ink px-3.5 py-2 text-[12px] font-semibold text-white">See the plan</span>
+          <span className="rounded-[9px] bg-ink px-3.5 py-2 text-[12px] font-semibold text-white">Build</span>
         </div>
       </div>
     </div>
@@ -43,7 +53,7 @@ export function MockField({ url }: { url: string }) {
 /** The plan card, cropped: what a brand is shown before paying. */
 export function MockPlan({ plan, markets }: { plan: Plan; markets: string[] }) {
   return (
-    <div aria-hidden className="absolute inset-x-6 top-7 sm:inset-x-8">
+    <div aria-hidden className={FRAME}>
       <div className="overflow-hidden rounded-[16px] bg-white shadow-[0_2px_4px_rgba(25,18,52,0.05),0_20px_40px_-16px_rgba(25,18,52,0.22)] ring-1 ring-ink/[0.06]">
         <div className="flex items-center justify-between border-b border-ink/[0.06] px-4 py-2.5">
           <span className="text-[11px] font-semibold text-ink">Phase 1 · Warm-up</span>
@@ -77,7 +87,7 @@ export function MockPlan({ plan, markets }: { plan: Plan; markets: string[] }) {
 export function MockPhases({ rungs }: { rungs: { phaseNo: number; budget: number; multiple: number }[] }) {
   const widths = ["38%", "68%", "100%"];
   return (
-    <div aria-hidden className="absolute inset-x-6 top-8 sm:inset-x-8">
+    <div aria-hidden className={FRAME}>
       <div className="rounded-[16px] bg-white p-4 shadow-[0_2px_4px_rgba(25,18,52,0.05),0_20px_40px_-16px_rgba(25,18,52,0.22)] ring-1 ring-ink/[0.06]">
         {rungs.map((r, i) => (
           <div key={r.phaseNo} className={i > 0 ? "mt-3.5" : ""}>
@@ -136,7 +146,7 @@ export function GuaranteePanel({ revenue, budget, roas, label, note }: {
 /** Checkout, cropped at the total: what pressing the button commits to. */
 export function MockPay({ total, vat, budget }: { total: string; vat: string; budget: string }) {
   return (
-    <div aria-hidden className="absolute inset-x-6 top-7 sm:inset-x-8">
+    <div aria-hidden className={FRAME}>
       <div className="overflow-hidden rounded-[16px] bg-white shadow-[0_2px_4px_rgba(25,18,52,0.05),0_20px_40px_-16px_rgba(25,18,52,0.22)] ring-1 ring-ink/[0.06]">
         <div className="px-4 pb-4 pt-4">
           <p className="text-[11px] text-ink/45">Due today</p>
@@ -156,7 +166,7 @@ export function MockPay({ total, vat, budget }: { total: string; vat: string; bu
 /** A draft waiting on the brand: nothing goes out without a decision. */
 export function MockDraft({ avatar }: { avatar?: string }) {
   return (
-    <div aria-hidden className="absolute inset-x-6 top-7 sm:inset-x-8">
+    <div aria-hidden className={FRAME}>
       <div className="overflow-hidden rounded-[16px] bg-white shadow-[0_2px_4px_rgba(25,18,52,0.05),0_20px_40px_-16px_rgba(25,18,52,0.22)] ring-1 ring-ink/[0.06]">
         <div className="flex items-center gap-2.5 px-4 py-3">
           {avatar ? (
