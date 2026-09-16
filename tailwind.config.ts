@@ -17,8 +17,14 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
         ar: ["var(--font-ar)", "var(--font-geist-sans)", "system-ui", "sans-serif"],
+        /* The landing's one serif voice: headlines and a pull quote,
+           never a number, never a control. Swapped for the Arabic
+           family under [dir="rtl"] in globals.css. */
+        display: ["var(--font-display)", "Georgia", "serif"],
       },
       colors: {
+        /* The landing page's ground. Warm, not grey. */
+        paper: "#FCFBF8",
         /* The brand purple and its ramp. `brand` is the only purple a
            control may be painted in; the ramp exists for gradients and
            tints, not for buttons. */
@@ -43,9 +49,14 @@ const config: Config = {
         rail: "#FAFAFA",
         track: "#EFEBFA",
       },
-      borderColor: { hairline: "rgba(0,0,0,0.06)" },
+      /* `hairline` inside cards and between rows; `rule` is the landing's
+         heavier line for the masthead and section tops. */
+      borderColor: { hairline: "rgba(0,0,0,0.06)", rule: "rgba(25,18,52,0.14)" },
       boxShadow: {
         card: "0 1px 2px rgba(16,12,40,0.04)",
+        /* A sheet of paper lifted off the desk: short contact shadow
+           plus a long, faint one. */
+        sheet: "0 1px 2px rgba(25,18,52,0.04), 0 24px 48px -28px rgba(25,18,52,0.14)",
         float: "0 4px 20px rgba(16,12,40,0.07)",
         pop: "0 24px 60px -20px rgba(25,18,52,0.35)",
         dock: "0 12px 40px -12px rgba(25,18,52,0.28)",
@@ -70,6 +81,7 @@ const config: Config = {
         "bar-reveal": { from: { transform: "scaleX(0)" }, to: { transform: "scaleX(1)" } },
         "toast-up": { from: { opacity: "0", transform: "translateY(12px)" }, to: { opacity: "1", transform: "translateY(0)" } },
         "layer-in": { from: { opacity: "0", transform: "translateY(10px)" }, to: { opacity: "1", transform: "translateY(0)" } },
+        rise: { from: { opacity: "0", transform: "translateY(12px)" }, to: { opacity: "1", transform: "translateY(0)" } },
         "skeleton": { "0%,100%": { opacity: "1" }, "50%": { opacity: "0.45" } },
         "caret": { "0%,100%": { opacity: "1" }, "50%": { opacity: "0" } },
         "dock-in": { from: { opacity: "0", transform: "translateY(16px) scale(0.98)" }, to: { opacity: "1", transform: "translateY(0) scale(1)" } },
@@ -82,6 +94,7 @@ const config: Config = {
         "toast-up": "toast-up 0.34s cubic-bezier(0.34,1.56,0.64,1) both",
         "layer-in": "layer-in 0.42s cubic-bezier(0.22,1,0.36,1) both",
         skeleton: "skeleton 1.3s ease-in-out infinite",
+        rise: "rise 0.5s ease-out both",
         caret: "caret 1s step-end infinite",
         "dock-in": "dock-in 0.28s cubic-bezier(0.22,1,0.36,1) both",
         "spin-slow": "spin-slow 3s linear infinite",

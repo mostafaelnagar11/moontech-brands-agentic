@@ -24,110 +24,88 @@ export const STR: Dict = {
 
      The Arabic below is a first pass in the same register as the English,
      pending the Arabic copywriter. */
+  /* ── Landing ──────────────────────────────────────────────────
+     Every string here is from heymoon-copy-changes-before-after, IDs
+     L1 to L17, which is the source of truth for this page. Where the
+     spec's three promises (L9 to L14) are made concrete by a section,
+     the promise IS that section's heading and body rather than being
+     repeated as a separate card.
+
+     The Arabic remains a first pass for the Arabic copywriter. */
+
+  /* L1. The note says keep the uppercase as STYLING, so the string is
+     sentence case and the CSS lifts it. */
   "landing.eyebrow": { en: "HeyMoon.AI for Brands", ar: "HeyMoon.AI للعلامات التجارية" },
+  /* L2, L3. Line 2 carries the accent colour. */
   "landing.h1a": { en: "A campaign in fifteen seconds.", ar: "حملة في 15 ثانية." },
   "landing.h1b": { en: "Sales, guaranteed.", ar: "ومبيعات مضمونة." },
+  /* L4, first half. Its last three sentences are the chips below. */
   "landing.sub": {
-    en: "Paste your store link. HeyMoon builds the campaign and guarantees the sales.",
-    ar: "ألصق رابط متجرك. تبني هاي مون الحملة وتضمن لك المبيعات.",
+    en: "Paste your store link. HeyMoon builds a complete creator campaign around what you sell, and guarantees the sales.",
+    ar: "ألصق رابط متجرك، وتبني لك هاي مون حملة مؤثرين كاملة حول ما تبيعه، وتضمن لك المبيعات.",
   },
-  /* The three "no"s from the old subhead, kept as their own row under
-     the field. They are the fastest thing on the page to read and the
-     thing a brand who has used an agency reacts to first. */
   "landing.no1": { en: "No forms to fill in", ar: "لا نماذج تملؤها" },
   "landing.no2": { en: "No brief to write", ar: "لا بريف تكتبه" },
   "landing.no3": { en: "No agency to manage", ar: "لا وكالة تتابعها" },
-  "landing.v1t": {
-    en: "See everything. Before you pay anything.",
-    ar: "شاهد كل شيء. قبل أن تدفع أي شيء.",
-  },
-  "landing.v1d": { en: "Markets, creators, products and the brief, priced on one card.", ar: "الأسواق وصنّاع المحتوى والمنتجات والموجز، مُسعّرة على بطاقة واحدة." },
-  "landing.v2t": {
-    en: "Miss the number? HeyMoon pays the difference.",
-    ar: "لم يتحقق الرقم؟ تدفع هاي مون الفرق.",
-  },
-  "landing.v2d": { en: "Every phase carries a sales figure, in writing, before you pay.", ar: "كل مرحلة تحمل رقم مبيعات مكتوبًا قبل أن تدفع." },
-  "landing.placeholder": { en: "yourstore.com", ar: "متجرك.com" },
+  /* L5, L6, L7. */
+  "landing.placeholder": { en: "yourstore.com", ar: "yourstore.com" },
   "landing.cta": { en: "See the plan", ar: "عرض الخطة" },
-  "landing.free": { en: "Free. No account needed.", ar: "مجانًا. وبدون حساب." },
   "landing.reading": { en: "Reading", ar: "جارٍ القراءة" },
+  "landing.free": { en: "Free. No account needed.", ar: "مجانًا. وبدون حساب." },
+  "landing.try": { en: "Try a sample store", ar: "جرّب متجرًا نموذجيًا" },
+  "landing.invalid": { en: "Paste a store link, like yourstore.com.", ar: "ألصق رابط متجر، مثل yourstore.com." },
+  /* L15, L16. */
   "landing.nothing": {
     en: "Nothing is charged. Nothing is published. Not until you say so.",
     ar: "لا يُخصم أي مبلغ. ولا يُنشر أي محتوى. ولا شيء قبل موافقتك.",
   },
-  /* The line under the trust note. HeyMoon is the company behind the
-     agents, and the page says so once, quietly, at the bottom. */
   "landing.credit": {
     en: "Built by AI. Backed by HeyMoon.AI, a Saudi company.",
     ar: "مبني بالذكاء الاصطناعي. ومدعوم من HeyMoon.AI، شركة سعودية.",
   },
 
-  /* The field's own affordances. `domain` is what the typed link is
-     understood to be, shown back live, so the parsing is visible before
-     anything is submitted. */
-  "landing.try": { en: "Or try one of these", ar: "أو جرّب أحد هذه المتاجر" },
-  "landing.domain": { en: "Reading", ar: "سنقرأ" },
-
-  /* The nav. Anchors into this page, and the one way into the product. */
-  "landing.nav.how": { en: "How it works", ar: "كيف تعمل" },
-  "landing.nav.guarantee": { en: "The guarantee", ar: "الضمان" },
-  "landing.nav.phases": { en: "Phases", ar: "المراحل" },
-  "landing.nav.dashboard": { en: "Dashboard", ar: "لوحة التحكم" },
-
-  /* Section headings are two keys each: the plain part and the phrase
-     set in the brand ramp. Splitting them keeps the colour where the
-     copywriter put it in either language. */
-  "landing.s2a": { en: "One link.", ar: "رابط واحد." },
-  "landing.s2b": { en: "The whole campaign.", ar: "والحملة كاملة." },
-  "landing.s2sub": { en: "Three steps. The money is only in the second.", ar: "ثلاث خطوات. والدفع في الثانية فقط." },
-  "landing.s3a": { en: "Built before you pay.", ar: "تُبنى قبل أن تدفع." },
-  "landing.s3b": { en: "Guaranteed after.", ar: "ومضمونة بعده." },
-  "landing.s3sub": { en: "Every number below is HeyMoon's own plan for a real store.", ar: "كل رقم أدناه من خطة هاي مون الفعلية لمتجر حقيقي." },
-  "landing.payToday": { en: "You pay today", ar: "تدفع اليوم" },
-  "landing.guaranteed": { en: "guaranteed", ar: "مضمونة" },
-  "landing.threePhases": { en: "across all three phases", ar: "عبر المراحل الثلاث" },
-  "landing.readIn": { en: "Read in fifteen seconds", ar: "قُرئ في 15 ثانية" },
+  /* The proof that the fifteen seconds is real: what HeyMoon read off
+     the demo store, and which agent read each line. */
+  "landing.readH2": { en: "The store, read in fifteen seconds.", ar: "المتجر، مقروء في 15 ثانية." },
   "landing.catalogue": { en: "Catalogue", ar: "الكتالوج" },
   "landing.prices": { en: "Prices", ar: "الأسعار" },
+  "landing.voice": { en: "Voice", ar: "النبرة" },
+
+  /* L9 and L10: the promise, and the plan card that keeps it. */
+  "landing.v1t": { en: "See everything. Before you pay anything.", ar: "شاهد كل شيء. قبل أن تدفع أي شيء." },
+  "landing.v1d": {
+    en: "The whole campaign, built and priced before you approve it: the markets, the creators, the budget and the brief.",
+    ar: "الحملة كاملة، مبنية ومُسعّرة قبل أن توافق عليها: الأسواق وصنّاع المحتوى والميزانية والموجز.",
+  },
   "landing.products": { en: "Products", ar: "المنتجات" },
-  "landing.draft": { en: "Draft", ar: "مسودة" },
-  "landing.matched": { en: "matched", ar: "مطابَق" },
-  "landing.inWarmup": { en: "in the warm-up", ar: "في التهيئة" },
-  "landing.today": { en: "today", ar: "اليوم" },
-  "landing.offered80": { en: "offered at 80%", ar: "تُعرض عند 80%" },
-  "landing.f4t": { en: "Nothing moves without you", ar: "لا شيء يتحرك بدونك" },
-  "landing.f4d": { en: "Money, publishing and signing are fixed at never. No setting turns them on.", ar: "المال والنشر والتوقيع ثابتة على «أبدًا». ولا إعداد يفعّلها." },
-  "landing.never": { en: "Never", ar: "أبدًا" },
+  "landing.inWarmup": { en: "in the warm-up", ar: "في الإحماء" },
+  "landing.inWriting": { en: "Sales guaranteed in writing", ar: "مبيعات مضمونة كتابيًا" },
 
-  /* The stores it connects to. Names only; they are the product's. */
-  "landing.storesTitle": { en: "Connects to the store you already have", ar: "يرتبط بالمتجر الذي لديك بالفعل" },
-  "landing.storesSub": {
-    en: "One tap, after you pay. It reads the orders that use a creator's code, and nothing else.",
-    ar: "نقرة واحدة بعد الدفع. يقرأ الطلبات التي تستخدم كود صانع المحتوى، ولا شيء غير ذلك.",
+  /* L13 and L14: the promise, and the ladder that keeps it. */
+  "landing.v3t": { en: "Start small. Scale on results.", ar: "ابدأ صغيرًا. وتوسّع على النتائج." },
+  "landing.v3d": {
+    en: "Your first campaign is $1,000, the same for every brand. The next is offered only when this one reaches 80% of its target.",
+    ar: "حملتك الأولى بـ 1,000 دولار، وهي نفسها لكل علامة تجارية. ولا تُعرض التالية إلا عندما تبلغ هذه 80% من هدفها.",
   },
+  "landing.about": { en: "about", ar: "نحو" },
+  "landing.offeredAt": { en: "Offered at 80%", ar: "تُعرض عند 80%" },
 
-  /* Footer columns. */
-  "landing.foot.product": { en: "Product", ar: "المنتج" },
-  "landing.foot.company": { en: "Company", ar: "الشركة" },
-  "landing.foot.start": { en: "Start a campaign", ar: "ابدأ حملة" },
-  "landing.foot.lang": { en: "Language", ar: "اللغة" },
-  "landing.s1t": { en: "Paste your store link", ar: "ألصق رابط متجرك" },
-  "landing.s1d": { en: "It reads your catalogue, prices, voice and markets.", ar: "تقرأ كتالوجك وأسعارك وأسلوبك وأسواقك." },
-  "landing.s2t": { en: "Change anything, then start Phase 1", ar: "غيّر ما تشاء، ثم ابدأ المرحلة الأولى" },
-  "landing.s2d": { en: "The whole plan on one card, priced before you approve.", ar: "الخطة كاملة على بطاقة واحدة، مُسعّرة قبل موافقتك." },
-  "landing.s3t": { en: "Connect your store", ar: "اربط متجرك" },
-  "landing.s3d": { en: "One tap. Every creator's orders count against the guarantee.", ar: "نقرة واحدة. وتُحتسب طلبات كل صانع محتوى مقابل الضمان." },
-
-  /* The ladder. Numbers that move with the plan are not quoted here:
-     the landing says the SHAPE, the conversation quotes the figures. */
-  "landing.ladderTitle": { en: "Three phases. You start one.", ar: "ثلاث مراحل. تبدأ بواحدة." },
-  "landing.ladderSub": {
-    en: "Only Phase 1 is due today. Each phase after it is offered on results, and you decide then.",
-    ar: "المرحلة الأولى وحدها مستحقة اليوم. وكل مرحلة بعدها تُعرض على النتائج، وتقرر أنت حينها.",
+  /* L11 and L12: the promise, and the figures it applies to. */
+  "landing.v2t": { en: "Miss the number? HeyMoon pays the difference.", ar: "لم يتحقق الرقم؟ تدفع هاي مون الفرق." },
+  "landing.v2d": {
+    en: "Every campaign comes with a sales figure, in writing, before you pay. If your sales come in under it, the shortfall is HeyMoon's to cover, not yours.",
+    ar: "كل حملة تأتي برقم مبيعات مكتوب قبل أن تدفع. وإذا جاءت مبيعاتك أقل منه، فالفرق على هاي مون لا عليك.",
   },
+  "landing.wholePlan": { en: "Whole plan", ar: "الخطة كاملة" },
+  "landing.at": { en: "at", ar: "بمعدل" },
+  "landing.signature": { en: "HeyMoon.AI, a Saudi company", ar: "HeyMoon.AI، شركة سعودية" },
+  "landing.adAlt": { en: "A campaign post, shown in real use", ar: "منشور من حملة، معروض في استخدام حقيقي" },
 
-  /* The last thing on the page is the first thing on it. */
-  "landing.ctaTitle": { en: "Paste your link. See the plan.", ar: "ألصق رابطك. وشاهد الخطة." },
+  /* The close, and the colophon. */
+  "landing.closeH2": { en: "Paste your store link.", ar: "ألصق رابط متجرك." },
+  "landing.nav.dashboard": { en: "Dashboard", ar: "لوحة التحكم" },
+  "landing.foot.agents": { en: "Agents", ar: "الوكلاء" },
+
 
   /* Read */
   "read.title": { en: "What I found", ar: "ما وجدناه" },

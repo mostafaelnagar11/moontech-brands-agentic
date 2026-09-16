@@ -33,6 +33,7 @@ import {
   type AutonomyRule,
 } from "../../lib/store";
 import { useGo } from "../../lib/surface";
+import { AGENTS } from "../../lib/agent/agents";
 import { Detail, Section, Surface, Tile } from "./kit";
 
 /* Least trust first, so the control reads as a dial rather than as
@@ -59,21 +60,21 @@ const CONSEQUENCE: Record<AutonomyLevel, string> = {
    because the next phase costs money. Both match the locked rules below
    rather than restating them. */
 const PIPELINE: { agent: string; stage: string; job: string; needsYou?: string }[] = [
-  { agent: "MoonShot AI", stage: "Intake", job: "Sets what the campaign is for." },
-  { agent: "MoonMatch AI", stage: "Matching", job: "Finds creators whose audience is yours." },
-  { agent: "MoonSearch AI", stage: "Safety", job: "Vets every match for brand risk and fraud." },
-  { agent: "MoonWriter AI", stage: "Creative", job: "Writes the brief and the ad copy." },
+  { agent: AGENTS[0], stage: "Intake", job: "Sets what the campaign is for." },
+  { agent: AGENTS[1], stage: "Matching", job: "Finds creators whose audience is yours." },
+  { agent: AGENTS[2], stage: "Safety", job: "Vets every match for brand risk and fraud." },
+  { agent: AGENTS[3], stage: "Creative", job: "Writes the brief and the ad copy." },
   {
-    agent: "MoonLive AI", stage: "Activation",
+    agent: AGENTS[4], stage: "Activation",
     job: "Launches across the channels creators post on.",
     needsYou: "Publishes only a draft you approved. No setting changes this.",
   },
   {
-    agent: "MoonScore AI", stage: "Optimization",
+    agent: AGENTS[5], stage: "Optimization",
     job: "Moves budget to whatever is converting.",
     needsYou: "Starting a phase, and any new money with it, is yours to confirm.",
   },
-  { agent: "MoonLearning AI", stage: "Learning", job: "Feeds results back into the next campaign." },
+  { agent: AGENTS[6], stage: "Learning", job: "Feeds results back into the next campaign." },
 ];
 
 /* Counted from the list rather than typed, so marking a third agent

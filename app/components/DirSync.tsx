@@ -26,7 +26,7 @@ export function DirSync() {
 }
 
 /** The toggle itself, used on the landing page, the read and the thread. */
-export function LangToggle({ className = "" }: { className?: string }) {
+export function LangToggle({ className = "", plain = false }: { className?: string; plain?: boolean }) {
   const locale = useLocale();
   return (
     <button
@@ -34,7 +34,12 @@ export function LangToggle({ className = "" }: { className?: string }) {
         const next = locale === "ar" ? "en" : "ar";
         import("../lib/store").then((m) => m.setLocale(next));
       }}
-      className={`inline-flex items-center gap-2 rounded-control border border-hairline bg-white px-3 py-2 text-meta font-medium text-ink-soft transition hover:bg-neutral-50 ${className}`}
+      className={
+        plain
+          /* A text link, for the landing's masthead: no box, no border. */
+          ? `text-[14px] font-medium text-ink/70 transition hover:text-ink ${className}`
+          : `inline-flex items-center gap-2 rounded-control border border-hairline bg-white px-3 py-2 text-meta font-medium text-ink-soft transition hover:bg-neutral-50 ${className}`
+      }
       lang={locale === "ar" ? "en" : "ar"}
     >
       {locale === "ar" ? "English" : "العربية"}

@@ -33,78 +33,55 @@ input, textarea, select { font: inherit; }
 [lang="ar"], [lang="ar"] body { font-family: var(--font-ar), var(--font-geist-sans), system-ui, sans-serif; }
 
 /* ══════════════════════════════════════════════════════════════════
-   The landing hero's aurora
+   The landing page's masthead register
    ══════════════════════════════════════════════════════════════════
 
-   A painted wash, not a tint. The reference for this page runs fully
-   saturated colour behind a white card and lets the card pop against
-   it; a gradient nobody notices is a gradient that does not do that
-   job. Six radial blobs in the brand's own family, blurred into one
-   another, fading to the page at the top and the bottom edges.
+   Warm paper, one serif, one purple, two rule weights, every number in
+   tabular figures. The serif is a Latin face, so the Arabic page sets
+   the same class in its own family, upright: the accent line is carried
+   by colour there, not by italics. */
+[dir="rtl"] .font-display { font-family: var(--font-ar), var(--font-geist-sans), system-ui, sans-serif; font-style: normal; }
 
-   The two warm hues are HERO-ONLY accents. Nothing else in the product
-   uses them; they exist so the wash has a second temperature the way
-   an aurora does. They are variables so design can swap them in one
-   place without touching the layout. */
-:root {
-  --aurora-1: #4D2FB0;   /* brand */
-  --aurora-2: #7C5CE0;   /* brand-500 */
-  --aurora-3: #A78BFA;   /* brand-300 */
-  --aurora-4: #F0559D;   /* rose, hero only */
-  --aurora-5: #FF8A5B;   /* coral, hero only */
-}
-.aurora {
-  position: absolute;
-  inset: -18% -12% -10% -12%;
-  pointer-events: none;
-  /* Centred low on purpose. The heading sits on the near-white top and
-     only the card sits on colour: that is what makes the card the
-     brightest thing on the screen and keeps the heading legible. */
-  background:
-    radial-gradient(42% 26% at 50% 46%, var(--aurora-2) 0%, transparent 70%),
-    radial-gradient(58% 30% at 14% 56%, var(--aurora-1) 0%, transparent 70%),
-    radial-gradient(58% 30% at 86% 56%, var(--aurora-1) 0%, transparent 70%),
-    radial-gradient(50% 28% at 50% 64%, var(--aurora-4) 0%, transparent 70%),
-    radial-gradient(34% 22% at 50% 71%, var(--aurora-5) 0%, transparent 70%),
-    radial-gradient(72% 28% at 50% 86%, var(--aurora-3) 0%, transparent 72%);
-  filter: blur(46px) saturate(1.15);
-  will-change: transform;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .aurora { animation: aurora-drift 22s ease-in-out infinite alternate; }
-}
-@keyframes aurora-drift {
-  from { transform: translate3d(0, 0, 0) scale(1); }
-  to   { transform: translate3d(0, -2.5%, 0) scale(1.04); }
-}
-/* Fine grain over the wash, so the blur reads as paint rather than as
-   a screen glow. Soft-light keeps it out of the card. */
-.grain {
-  position: absolute; inset: 0; pointer-events: none;
-  opacity: 0.16; mix-blend-mode: soft-light;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0.9 0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
-  background-size: 160px 160px;
-}
-/* The page shows through at the top, so the nav sits on white, and the
-   wash hands over to the page colour at the bottom. */
-.aurora-fade {
-  position: absolute; inset: 0; pointer-events: none;
-  background:
-    linear-gradient(to bottom, #FCFBF8 0%, rgba(252,251,248,0.75) 22%, transparent 44%),
-    linear-gradient(to top, #FCFBF8 0%, rgba(252,251,248,0.7) 8%, transparent 26%);
+/* A fine dot lattice, masked to a soft oval. This is the page's only
+   texture: it is measured rather than painted, which is what makes a
+   surface read as engineered instead of decorated. */
+.lattice {
+  background-image: radial-gradient(circle at 1px 1px, rgba(25,18,52,0.075) 1px, transparent 0);
+  background-size: 28px 28px;
+  -webkit-mask-image: radial-gradient(58% 46% at 50% 38%, #000 0%, rgba(0,0,0,0.35) 55%, transparent 100%);
+  mask-image: radial-gradient(58% 46% at 50% 38%, #000 0%, rgba(0,0,0,0.35) 55%, transparent 100%);
 }
 
-/* A phrase inside a heading, in the brand ramp. */
-.grad-text {
-  background: linear-gradient(90deg, #4D2FB0 0%, #7C5CE0 55%, #A78BFA 100%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
+/* The one glow on the page, directly under the field, so the card sits
+   in a pool of its own light rather than on a painted background. */
+.field-glow {
+  background: radial-gradient(46% 42% at 50% 50%, rgba(77,47,176,0.16), transparent 72%);
+  filter: blur(36px);
 }
-/* The hero's second line. It sits nearer the wash than any section
-   heading does, so it runs ink to brand and never reaches the pale end
-   of the ramp, which disappeared into the violet behind it. */
-.grad-text-deep {
-  background: linear-gradient(90deg, #191234 0%, #3F2596 60%, #4D2FB0 100%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
+
+/* A lit top edge. One hairline of brand across the top of a surface
+   reads as a real material catching light; a full border does not. */
+.edge-lit { position: relative; }
+.edge-lit::before {
+  content: ""; position: absolute; inset-inline: 0; top: 0; height: 1px; z-index: 1;
+  background: linear-gradient(90deg, transparent, rgba(77,47,176,0.45), transparent);
+}
+
+/* Every digit on the landing, in both locales: Geist, tabular, and
+   left to right, so $1,000, 3.5x and 80% never reorder inside Arabic. */
+.num { font-family: var(--font-geist-sans), system-ui, sans-serif; font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; }
+
+/* Motion is one attribute. `useReveal` sets data-in the first time a
+   fifth of the element is on screen; these two classes are the only
+   things that read it. */
+.reveal { opacity: 0; transform: translateY(8px); transition: opacity .4s ease-out, transform .4s cubic-bezier(.2,.8,.2,1); }
+.reveal[data-in], [data-in] .reveal { opacity: 1; transform: none; }
+.rule-draw { transform: scaleX(0); transform-origin: 0 50%; transition: transform .6s cubic-bezier(.2,.8,.2,1); }
+[dir="rtl"] .rule-draw { transform-origin: 100% 50%; }
+.rule-draw[data-in], [data-in] .rule-draw { transform: scaleX(1); }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .rule-draw { transform: none; transition: none; }
 }
 
 /* ══════════════════════════════════════════════════════════════════

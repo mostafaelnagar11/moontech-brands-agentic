@@ -1610,3 +1610,11 @@ export function underwritingNote(u: Underwriting, plan: Plan, r: Repair): string
     r.headline,
   ].join(" ");
 }
+
+/** Everyone the plan's markets match and MoonSearch AI clears, in
+    plan order. The landing page credits these people by face, niche
+    and market, so it reads the real pool rather than filtering the
+    roster itself and drifting from what the plan builder decided. */
+export function poolFor(read: BrandRead, markets: string[]): CreatorSeed[] {
+  return matchedPool(read, markets);
+}
