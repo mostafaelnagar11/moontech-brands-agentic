@@ -55,7 +55,6 @@ export type ThreadItem =
      qualifying the brand. */
   | { id: string; kind: "ladder"; at: number }
   /* Store integration, shown AFTER payment. */
-  | { id: string; kind: "integration"; at: number }
   /* Plan done, payment done, connection next — the three steps as one card. */
   | { id: string; kind: "checklist"; at: number }
   /* The confidence in one budget-and-multiple pair, shown beside the
@@ -280,6 +279,23 @@ export interface State {
      a SIGNAL — it shapes who MoonMatch AI brings next — and never a
      hire or a rejection, so nothing here books or cancels anyone. */
   creatorSignals: Record<number, CreatorSignal>;
+  /* Who is paying. Null until the brand verifies an email, which is
+     asked for at the payment gate and nowhere earlier: everything up
+     to that point — the read, the plan, the two numbers — is free and
+     needs no account, and asking for one sooner would put a form in
+     front of the thing that sells the product. Not a campaign field:
+     one account can build several. */
+  account: Account | null;
+}
+
+/** A verified email, and nothing else. There is no password: the code
+    sent to the address is the proof, so there is no secret for HeyMoon
+    to hold or for a brand to lose. */
+export interface Account {
+  email: string;
+  /** When the code was accepted. Set by the caller, never by the store,
+      so nothing here is non-deterministic. */
+  verifiedAt: number;
 }
 
 /** The thread a conversation starts on before it has a campaign. */
@@ -315,6 +331,7 @@ function initial(): State {
     dashboardView: "home",
     readFocus: null,
     drill: { level: "list", phaseId: null },
+    account: null,
   };
 }
 
@@ -617,6 +634,13 @@ export const markPaid = () =>
     return { campaigns: { ...s.campaigns, [id]: { ...c, paid: true, phases } } };
   });
 
+/** The brand verified an email. Called once the code has been accepted,
+    with the caller's clock: the store stays deterministic. */
+export const signIn = (email: string, verifiedAt: number) =>
+  set(() => ({ account: { email, verifiedAt } }));
+
+export const signOut = () => set(() => ({ account: null }));
+
 export const connectStore = (which: StorePlatform) =>
   set((s) => (s.activeCampaignId ? patchCampaignIn(s, s.activeCampaignId, { connectedStore: which }) : {}));
 
@@ -792,6 +816,7 @@ export const clearReadFocus = () => set({ readFocus: null });
 export const usePaid = () =>
   useStore((s) => (s.activeCampaignId ? s.campaigns[s.activeCampaignId]?.paid ?? false : false));
 export const useActivePlan = () => useStore((s) => (s.activePlanId ? s.plans[s.activePlanId] ?? null : null));
+export const useAccount = () => useStore((s) => s.account);
 export const useLocale = () => useStore((s) => s.locale);
 export const useAutonomy = () => useStore((s) => s.autonomy);
 export const useActivity = () => useStore((s) => s.activity);

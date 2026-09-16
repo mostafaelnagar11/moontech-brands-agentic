@@ -1056,7 +1056,12 @@ const SYSTEMS = [
   "Something else",
 ] as const;
 
-export function IntegrationBlock({ onConnect }: { onConnect: (k: StorePlatform) => void }) {
+export function IntegrationBlock({ onConnect, compact = false }: {
+  onConnect: (k: StorePlatform) => void;
+  /** Inside the dashboard's alert, which already carries the heading
+      and the reason. The block keeps only the part you act on. */
+  compact?: boolean;
+}) {
   const connected = useStore((s) => (s.activeCampaignId ? s.campaigns[s.activeCampaignId]?.connectedStore ?? null : null));
   const [other, setOther] = useState(false);
   const [sent, setSent] = useState(false);
@@ -1162,15 +1167,23 @@ export function IntegrationBlock({ onConnect }: { onConnect: (k: StorePlatform) 
     );
   }
 
+  const Shell = compact
+    ? ({ children }: { children: React.ReactNode }) => <div>{children}</div>
+    : ({ children }: { children: React.ReactNode }) => <Card className="p-4">{children}</Card>;
+
   return (
-    <Card className="p-4">
-      <p className="text-body font-semibold text-ink">Connect your store</p>
-      <p className="text-[11px] text-ink-faint">One tap. Disconnect any time.</p>
-      <p className="mt-2 text-meta leading-5 text-ink-soft">
-        Your plan was built from what is public about your store, so this step does not decide whether you qualify. The{" "}
-        {fmtUSD(PHASE1_BUDGET)} warm-up is already yours. Connecting is how HeyMoon counts the sales each creator earns
-        you, which is what the guarantee is measured against.
-      </p>
+    <Shell>
+      {!compact && (
+        <>
+          <p className="text-body font-semibold text-ink">Connect your store</p>
+          <p className="text-[11px] text-ink-faint">One tap. Disconnect any time.</p>
+          <p className="mt-2 text-meta leading-5 text-ink-soft">
+            Your plan was built from what is public about your store, so this step does not decide whether you qualify. The{" "}
+            {fmtUSD(PHASE1_BUDGET)} warm-up is already yours. Connecting is how HeyMoon counts the sales each creator earns
+            you, which is what the guarantee is measured against.
+          </p>
+        </>
+      )}
 
       {!other ? (
         <>
@@ -1286,7 +1299,7 @@ export function IntegrationBlock({ onConnect }: { onConnect: (k: StorePlatform) 
         </p>
       </div>
       <p className="mt-2 text-[11px] leading-4 text-ink-faint">HeyMoon.AI is a Saudi company.</p>
-    </Card>
+    </Shell>
   );
 }
 

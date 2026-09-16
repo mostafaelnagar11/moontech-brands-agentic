@@ -28,6 +28,7 @@
    than leaving the brand to wonder why. */
 
 import { Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { SignInSheet } from "../components/SignInSheet";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   BUILD_TASKS, PHASE1_BUDGET, ladderTotals, marketName, repair, suggestPlanShape,
@@ -41,7 +42,7 @@ import {
 } from "../lib/agent/model";
 import { useStream } from "../lib/agent/useStream";
 import {
-  activePlanLive, activeThread, claimOnce, connectStore, correctRead, markPaid, openPanel,
+  activePlanLive, activeThread, claimOnce, correctRead, markPaid, openPanel, useAccount,
   push, putApproval, putCampaign, putFunding, putPlan, putRead, threadIsEmpty,
   useActivePlan, useAds, useCampaigns, useActiveThreadId, useLivePhase, usePaid, usePhaseRequested,
   useStore, type PanelView,
@@ -58,8 +59,8 @@ import { PanelHost } from "../components/chat/PanelHost";
 import { AgentTurn, BlockRow, UserTurn } from "../components/chat/Turn";
 import {
   AdCardBlock, ApprovalBlock, BriefBlock, ChangesBlock, ChecklistBlock, ConfidenceBar, ConfidenceBlock,
-  CreatorBlock, FundingBlock, IntegrationBlock, LadderBlock, PlanBlock, ReadBlock, ReceiptBlock,
-  RejectedBlock, ReportBlock, TaskRoster, countWord, rosterTitle, type StorePlatform,
+  CreatorBlock, FundingBlock, LadderBlock, PlanBlock, ReadBlock, ReceiptBlock,
+  RejectedBlock, ReportBlock, TaskRoster, countWord, rosterTitle,
 } from "../components/blocks";
 import { PlanCard } from "../components/PlanCard";
 
@@ -79,13 +80,14 @@ const touchesLocked = (p: PlanPatch) =>
    locked, so they are about what happens now. */
 const WHY_CHIP = `Why is it ${fmtUSD(PHASE1_BUDGET)}?`;
 const PRE_CHIPS = ["Kuwait only", "Women 25 to 45", "Guarantee 8x instead", WHY_CHIP];
-/* After payment there is exactly one thing left to do, and it is not
-   looking at a dashboard: until the store is connected there is nothing
-   for a dashboard to count. Offering it early sends a brand to an empty
-   room and puts the step that makes the guarantee measurable behind a
-   chip they have already walked past. */
+/* After payment there is exactly one thing left to do, and it is now
+   ON the dashboard: the connect step moved there, because a task with
+   no deadline does not belong in a thread that scrolls away. So the
+   dashboard leads for a brand who has not connected yet — it is where
+   the step is — and sits second once there is a running phase to look
+   at instead. */
 const POST_CHIPS = ["What happens next?", "Go to the dashboard"];
-const POST_CHIPS_UNCONNECTED = ["What happens next?"];
+const POST_CHIPS_UNCONNECTED = ["Go to the dashboard", "What happens next?"];
 
 /* The brand never reads a staffing chart. What the agents are called,
    how many of them there are and which one found what is our business;
@@ -160,6 +162,8 @@ function ChatInner() {
   const funding = useStore((s) => s.funding);
   const approvals = useStore((s) => s.approvals);
   const connected = useStore((s) => (s.activeCampaignId ? s.campaigns[s.activeCampaignId]?.connectedStore ?? null : null));
+  const account = useAccount();
+  const [signInOpen, setSignIn] = useState(false);
   /* The chips the thread offers once Phase 1 is paid for. */
   const postChips = connected ? POST_CHIPS : POST_CHIPS_UNCONNECTED;
   const ads = useAds();
@@ -390,23 +394,6 @@ function ChatInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [readUrl]);
 
-  /** The last step, and only after the phase is paid for. It exists to
-      measure the guarantee, not to qualify the brand. */
-  const onConnect = (k: StorePlatform) => {
-    connectStore(k);
-    push({ kind: "user", text: `Connected ${k[0].toUpperCase() + k.slice(1)}` });
-    ask(
-      "Done. Your store is connected, your creators are briefed, and the first drafts arrive within 48 hours. " +
-      "From here MoonLive AI publishes every ad you approve and MoonScore AI moves the budget to whatever converts. " +
-      "You'll hear from me when there's something to see, or something to decide.",
-      /* POST_CHIPS, not `postChips`. This closure was built on the
-         render BEFORE `connectStore` ran, so `connected` is still null
-         in it and the dashboard chip would be withheld at the exact
-         moment it becomes the right next step. */
-      POST_CHIPS
-    );
-  };
-
   /** Payment, offered as a confirmation the brand presses. Refused once
       the phase is paid: the request id is the same both times, and a
       second one would read as an invitation to pay twice. */
@@ -420,6 +407,18 @@ function ChatInner() {
       say("The payment is already open below. Confirm it there, or say “not yet”.");
       return;
     }
+    /* Money cannot move for nobody. This is the first and only point in
+       the whole flow that needs an account, so it is the first and only
+       point that asks for one — the sheet opens over the thread and the
+       payment card is what it opens onto. */
+    if (!account) { setSignIn(true); return; }
+    showFunding();
+  };
+
+  /** The payment card itself, split out so the sign-in sheet can call it
+      the moment it closes. */
+  const showFunding = () => {
+    if (!plan) return;
     const req = tools.request_funding({ plan, phaseNo: 1 });
     putFunding(req);
     /* Every figure — the total, the VAT, what Phase 1 guarantees against
@@ -625,7 +624,7 @@ function ChatInner() {
         "The first drafts arrive within 48 hours, and MoonLive AI puts nothing out until you approve it."
       );
     return (
-      "Connect your store below so the sales can be counted. " +
+      "Connect your store on the dashboard so the sales can be counted. " +
       "MoonWriter AI briefs your creators today, and the first drafts arrive within 48 hours."
     );
   };
@@ -1186,10 +1185,10 @@ function ChatInner() {
                 push({ kind: "receipt", requestId: req.id });
                 push({ kind: "checklist" });
                 say(
-                  "One step left. Connect your store so the guarantee can be measured. " +
-                  "This comes after payment on purpose: it's for counting your sales, not for qualifying you."
+                  "One step left, and it is waiting for you on the dashboard: connect your store so the guarantee " +
+                  "can be measured. It comes after payment on purpose, because it is for counting your sales rather " +
+                  "than for qualifying you."
                 );
-                push({ kind: "integration" });
                 setAsking({ q: "What happens next?", options: postChips });
               }}
               onCancelled={() =>
@@ -1239,8 +1238,6 @@ function ChatInner() {
         return plan ? (
           <BlockRow key={item.id}><LadderBlock plan={plan} onStart={paid ? undefined : openFunding} paid={paid} /></BlockRow>
         ) : null;
-      case "integration":
-        return <BlockRow key={item.id}><IntegrationBlock onConnect={onConnect} /></BlockRow>;
       case "checklist":
         return <BlockRow key={item.id}><ChecklistBlock /></BlockRow>;
       case "score":
@@ -1394,6 +1391,18 @@ function ChatInner() {
         busy={!!stop}
         onStop={stop ?? undefined}
         stopLabel={t("thread.stop")}
+      />
+
+      {/* The gate at the payment, and the only one in the flow. It
+          closes onto the card the brand was reaching for. */}
+      <SignInSheet
+        open={signInOpen}
+        onClose={() => setSignIn(false)}
+        onVerified={(email) => {
+          setSignIn(false);
+          push({ kind: "user", text: `Signed in as ${email}` });
+          showFunding();
+        }}
       />
     </ChatShell>
   );

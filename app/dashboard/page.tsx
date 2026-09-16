@@ -39,6 +39,7 @@ import { AutonomyView } from "../components/dashboard/AutonomyView";
 import { DashboardSidebar, NAV } from "../components/dashboard/Sidebar";
 import { DashboardTopbar } from "../components/dashboard/Topbar";
 import { DashboardAssistant } from "../components/dashboard/Assistant";
+import { ConnectAlert } from "../components/dashboard/ConnectAlert";
 import {
   campaignLabel, setDashboardView, showCampaignList, useActiveCampaign, useAds, useDashboardView,
   useCampaigns, useDrill, usePaid,
@@ -174,6 +175,10 @@ export default function DashboardPage() {
               assistant ? "hidden md:block" : "block"
             }`}
           >
+            {/* Above every view, not inside one: the store is connected
+                once for the account, so the ask does not belong to the
+                page that happens to be open. */}
+            {anyCampaign && paid && !camp?.connectedStore && <ConnectAlert />}
             {!anyCampaign && <EmptyDashboard />}
             {anyCampaign && view === "home" && <HomeView />}
             {anyCampaign && view === "campaign" && <CampaignView />}
