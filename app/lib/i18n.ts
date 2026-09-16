@@ -28,9 +28,15 @@ export const STR: Dict = {
   "landing.h1a": { en: "A campaign in fifteen seconds.", ar: "حملة في 15 ثانية." },
   "landing.h1b": { en: "Sales, guaranteed.", ar: "ومبيعات مضمونة." },
   "landing.sub": {
-    en: "Paste your store link. HeyMoon builds a complete creator campaign around what you sell, and guarantees the sales. Sell less, and it pays you the difference. No forms to fill in. No brief to write. No agency to manage.",
-    ar: "ألصق رابط متجرك، وتبني لك هاي مون حملة مؤثرين كاملة حول ما تبيعه، وتضمن لك المبيعات. وإذا بعت أقل، تدفع لك هاي مون الفرق. لا نماذج تملؤها. لا بريف تكتبه. لا وكالة تتابعها.",
+    en: "Paste your store link. HeyMoon builds the whole campaign around what you sell, and guarantees the sales.",
+    ar: "ألصق رابط متجرك. تبني هاي مون الحملة كاملة حول ما تبيعه، وتضمن لك المبيعات.",
   },
+  /* The three "no"s from the old subhead, kept as their own row under
+     the field. They are the fastest thing on the page to read and the
+     thing a brand who has used an agency reacts to first. */
+  "landing.no1": { en: "No forms to fill in", ar: "لا نماذج تملؤها" },
+  "landing.no2": { en: "No brief to write", ar: "لا بريف تكتبه" },
+  "landing.no3": { en: "No agency to manage", ar: "لا وكالة تتابعها" },
   "landing.v1t": {
     en: "See everything. Before you pay anything.",
     ar: "شاهد كل شيء. قبل أن تدفع أي شيء.",
@@ -69,6 +75,59 @@ export const STR: Dict = {
     en: "Built by AI. Backed by HeyMoon.AI, a Saudi company.",
     ar: "مبني بالذكاء الاصطناعي. ومدعوم من HeyMoon.AI، شركة سعودية.",
   },
+
+  /* The field's own affordances. `domain` is what the typed link is
+     understood to be, shown back live, so the parsing is visible before
+     anything is submitted. */
+  "landing.try": { en: "Or try one of these", ar: "أو جرّب أحد هذه المتاجر" },
+  "landing.domain": { en: "Reading", ar: "سنقرأ" },
+  "landing.safe": { en: "Nothing is charged", ar: "لا يُخصم أي مبلغ" },
+
+  /* How it works. A sequence, unlike the three promises, so it is
+     numbered. */
+  "landing.hiwTitle": { en: "How it works", ar: "كيف تعمل" },
+  "landing.hiwSub": {
+    en: "Three steps, and the money is only in the second one.",
+    ar: "ثلاث خطوات، والدفع في الثانية منها فقط.",
+  },
+  "landing.s1t": { en: "Paste your store link", ar: "ألصق رابط متجرك" },
+  "landing.s1d": {
+    en: "HeyMoon reads your catalogue, your prices, how you write and where you ship, then builds the whole campaign on it.",
+    ar: "تقرأ هاي مون كتالوجك وأسعارك وطريقة كتابتك وأماكن شحنك، ثم تبني الحملة كاملة عليها.",
+  },
+  "landing.s2t": { en: "Change anything, then start Phase 1", ar: "غيّر ما تشاء، ثم ابدأ المرحلة الأولى" },
+  "landing.s2d": {
+    en: "Markets, products, creators, the brief. All of it priced and on screen before you approve it.",
+    ar: "الأسواق والمنتجات وصنّاع المحتوى والموجز. كلها مُسعّرة وأمامك قبل أن توافق.",
+  },
+  "landing.s3t": { en: "Connect your store", ar: "اربط متجرك" },
+  "landing.s3d": {
+    en: "One tap, after you pay, so every order a creator brings in is counted against the guarantee.",
+    ar: "نقرة واحدة بعد الدفع، ليُحتسب كل طلب يجلبه صانع محتوى مقابل الضمان.",
+  },
+
+  /* The three promises already above get a heading once they are a
+     section rather than a footnote. */
+  "landing.promisesTitle": { en: "What HeyMoon promises", ar: "ما تضمنه لك هاي مون" },
+
+  /* The ladder. Numbers that move with the plan are not quoted here:
+     the landing says the SHAPE, the conversation quotes the figures. */
+  "landing.ladderTitle": { en: "Three phases. You start one.", ar: "ثلاث مراحل. تبدأ بواحدة." },
+  "landing.ladderSub": {
+    en: "Only Phase 1 is due today. Each phase after it is offered on results, and you decide then.",
+    ar: "المرحلة الأولى وحدها مستحقة اليوم. وكل مرحلة بعدها تُعرض على النتائج، وتقرر أنت حينها.",
+  },
+  "landing.p1t": { en: "Phase 1 · Warm-up", ar: "المرحلة 1 · التهيئة" },
+  "landing.p1d": { en: "Starts today. The same price for every brand.", ar: "تبدأ اليوم. نفس السعر لكل علامة تجارية." },
+  "landing.p2t": { en: "Phase 2 · Scale", ar: "المرحلة 2 · التوسّع" },
+  "landing.p2d": { en: "Offered when Phase 1 reaches 80% of its target.", ar: "تُعرض عندما تبلغ المرحلة الأولى 80% من هدفها." },
+  "landing.p3t": { en: "Phase 3 · Peak", ar: "المرحلة 3 · الذروة" },
+  "landing.p3d": { en: "Offered when Phase 2 reaches 80% of its target.", ar: "تُعرض عندما تبلغ المرحلة الثانية 80% من هدفها." },
+  "landing.phase1Price": { en: "due today", ar: "مستحقة اليوم" },
+  "landing.later": { en: "not charged, not committed", ar: "غير مدفوعة وغير ملتزم بها" },
+
+  /* The last thing on the page is the first thing on it. */
+  "landing.ctaTitle": { en: "Paste your link. See the plan.", ar: "ألصق رابطك. وشاهد الخطة." },
 
   /* Read */
   "read.title": { en: "What I found", ar: "ما وجدناه" },
