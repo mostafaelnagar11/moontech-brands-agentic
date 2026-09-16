@@ -29,13 +29,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Check, Globe, Lock, Storefront } from "@phosphor-icons/react";
+import { Check, Globe, Lock } from "@phosphor-icons/react";
 import { Wordmark } from "./components/Wordmark";
 import { LangToggle } from "./components/DirSync";
 import { MockField, MockPay, MockPhases, MockPlan, MockCurve, GuaranteePanel, RoasDial } from "./components/landing/Mocks";
 import { Run } from "./components/landing/Run";
 import { Constellation } from "./components/landing/Constellation";
-import { EXAMPLES, FIXTURES, normaliseUrl } from "./lib/mock/reads";
+import { FIXTURES, normaliseUrl } from "./lib/mock/reads";
 import { readIdFor, rememberRead } from "./lib/agent/registry";
 import { ladderTotals, planFor } from "./lib/agent/tools";
 import { ROAS_MAX, ROAS_MIN } from "./lib/agent/model";
@@ -136,7 +136,6 @@ function StoreField({ id, autoFocus = false }: { id: string; autoFocus?: boolean
   const [url, setUrl] = useState("");
   const [going, setGoing] = useState(false);
   const [invalid, setInvalid] = useState(false);
-  const [pick, setPick] = useState(0);
   const [focused, setFocused] = useState(false);
   const [still, setStill] = useState(true);
   const input = useRef<HTMLInputElement>(null);
@@ -177,18 +176,12 @@ function StoreField({ id, autoFocus = false }: { id: string; autoFocus?: boolean
     router.push(`/c?read=${encodeURIComponent(u)}`);
   };
 
-  const tryOne = () => {
-    setUrl(EXAMPLES[pick % EXAMPLES.length].url);
-    setInvalid(false);
-    setPick((p) => p + 1);
-    input.current?.focus();
-  };
-
   return (
-    <form
+    <div className="w-full max-w-[580px]">
+      <form
       onSubmit={(e) => { e.preventDefault(); submit(); }}
       noValidate
-      className={`relative w-full max-w-[580px] overflow-hidden rounded-[24px] bg-white text-start shadow-[0_2px_4px_rgba(25,18,52,0.04),0_20px_44px_-18px_rgba(25,18,52,0.22),0_56px_90px_-48px_rgba(25,18,52,0.30)] ring-1 transition duration-150 ${
+      className={`relative w-full overflow-hidden rounded-[24px] bg-white text-start shadow-[0_2px_4px_rgba(25,18,52,0.04),0_20px_44px_-18px_rgba(25,18,52,0.22),0_56px_90px_-48px_rgba(25,18,52,0.30)] ring-1 transition duration-150 ${
         /* No focus ring on the card at all. `focus-within` drew a purple
            stroke around the whole thing the moment it was tapped, and
            `:focus-visible` does not help here: a text input matches it
@@ -202,7 +195,7 @@ function StoreField({ id, autoFocus = false }: { id: string; autoFocus?: boolean
       <label htmlFor={id} className="sr-only">Your store link</label>
       {/* The one element that never mirrors: a domain is typed left to
           right in every language. */}
-      <div dir="ltr" className="relative h-[70px]">
+      <div dir="ltr" className="relative h-[76px]">
         <Globe size={19} aria-hidden className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-ink/30" />
         <input
           ref={input}
@@ -221,7 +214,7 @@ function StoreField({ id, autoFocus = false }: { id: string; autoFocus?: boolean
              input matches that on a mouse click too, so a purple line
              appeared under the row. The caret is this field's focus
              affordance; the buttons beside it keep the global one. */
-          className="h-full w-full bg-transparent pe-5 ps-[52px] text-left text-[18px] tracking-[-0.01em] text-ink outline-none focus-visible:outline-none placeholder:text-ink/35 sm:text-[19px]"
+          className="h-full w-full bg-transparent pe-[108px] ps-[52px] text-left text-[18px] tracking-[-0.01em] text-ink outline-none focus-visible:outline-none placeholder:text-ink/35 sm:text-[19px]"
         />
         {/* The hint sits over the input rather than in its placeholder
             so it can carry a caret. It never takes a click: the input
@@ -232,30 +225,37 @@ function StoreField({ id, autoFocus = false }: { id: string; autoFocus?: boolean
             {!focused && <span className="ms-[2px] inline-block h-[22px] w-px motion-safe:animate-caret bg-ink/45" />}
           </p>
         )}
-      </div>
-      <div className="flex h-[60px] items-center justify-between gap-3 border-t border-ink/[0.06] bg-[#FBFAFC] pe-2.5 ps-2.5">
-        <div className="flex min-w-0 items-center gap-2">
-          <button
-            type="button"
-            onClick={tryOne}
-            aria-label={t("landing.try")}
-            title={t("landing.try")}
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink/45 transition hover:bg-brand-100 hover:text-brand"
-          >
-            <Storefront size={15} aria-hidden />
-          </button>
-          <p className={`truncate text-[12px] sm:text-[13px] ${invalid ? "text-danger" : "text-ink/50"}`} role={invalid ? "alert" : undefined}>
-            {invalid ? t("landing.invalid") : t("landing.free")}
-          </p>
-        </div>
+
+        {/* The button rides in the field rather than under it. The
+            second tier it used to sit on carried one line of microcopy
+            and a rule to hold it up, and once the line went the rule
+            was dividing nothing from nothing. One row is also the truer
+            shape: this is a text box with a button, and the two-tier
+            card was drawing a form around it.
+
+            The shop icon beside it loaded a sample store into the
+            field. It was the only thing in the hero that named a real
+            shop, it needed a tooltip to explain itself, and a demo does
+            not need an affordance: typing any of the fixture domains
+            still works. */}
         <button
           type="submit"
-          className="h-10 shrink-0 rounded-[12px] bg-ink px-5 text-[14px] font-semibold text-white transition-colors hover:bg-ink/85"
+          className="absolute end-2.5 top-1/2 h-11 shrink-0 -translate-y-1/2 rounded-[12px] bg-ink px-5 text-[14px] font-semibold text-white transition-colors hover:bg-ink/85"
         >
           {going ? t("landing.reading") : t("landing.cta")}
         </button>
       </div>
-    </form>
+      </form>
+
+      {/* The one thing the row below still had to say. It only appears
+          when there is something wrong, under the field rather than
+          inside it, so a clean field stays a clean field. */}
+      {invalid && (
+        <p role="alert" className="mt-3 text-center text-[13px] text-danger">
+          {t("landing.invalid")}
+        </p>
+      )}
+    </div>
   );
 }
 
