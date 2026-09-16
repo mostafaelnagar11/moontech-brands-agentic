@@ -1406,9 +1406,9 @@ function ChatInner() {
       <SignInSheet
         open={signInOpen}
         onClose={() => setSignIn(false)}
-        onVerified={(email) => {
+        onVerified={(name) => {
           setSignIn(false);
-          push({ kind: "user", text: `Signed in as ${email}` });
+          push({ kind: "user", text: `Signed in as ${name}` });
           showFunding();
         }}
       />

@@ -35,7 +35,7 @@ import {
   fmtUSD, pace, phasePct, phaseTitle, UNLOCK_AT, type Phase, type PhaseStatus,
 } from "../../lib/mock/campaigns";
 import {
-  campaignLabel, openPhase, useActiveCampaign, useAds, useCampaignPhases, useCampaigns,
+  campaignLabel, openPhase, useAccount, useActiveCampaign, useAds, useCampaignPhases, useCampaigns,
   useLivePhase, useReadyPhase, type Campaign,
 } from "../../lib/store";
 import { useGo } from "../../lib/surface";
@@ -504,6 +504,7 @@ type DateFilter = typeof DATE_FILTERS[number];
 
 export function HomeView() {
   const go = useGo();
+  const account = useAccount();
   const campaigns = useCampaigns();
   const campaign = useActiveCampaign();
   const phases = useCampaignPhases();
@@ -577,7 +578,9 @@ export function HomeView() {
       {/* Welcome banner */}
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
         <div>
-          <h2 className="text-[20px] font-semibold tracking-tight text-ink sm:text-[24px]">Welcome back, Mostafa</h2>
+          <h2 className="text-[20px] font-semibold tracking-tight text-ink sm:text-[24px]">
+            {account ? `Welcome back, ${account.firstName}` : "Welcome back"}
+          </h2>
           <p className="mt-1 text-body text-ink-faint" suppressHydrationWarning>
             {label} ·{" "}
             {new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}

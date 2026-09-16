@@ -196,7 +196,7 @@ export function ReceiptBlock({ req }: { req: FundingRequest }) {
           <span>· {req.method.brand} ••••{req.method.last4}</span>
         </div>
         <p className="mt-1.5 text-body text-ink-soft">
-          <span className="font-semibold text-ink">Receipt:</span> Sent to your email.
+          <span className="font-semibold text-ink">Receipt:</span> Texted to you, and kept on this campaign.
         </p>
       </div>
     </Card>

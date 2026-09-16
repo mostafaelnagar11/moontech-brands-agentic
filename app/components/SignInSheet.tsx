@@ -11,16 +11,23 @@
  *
  * The two screens are the ones the current web app already has, kept
  * beat for beat so a brand who has signed in to HeyMoon before is not
- * learning a new flow inside a new product: work email, then Continue,
+ * learning a new flow inside a new product: details, then Continue,
  * then six boxes under a countdown with the demo code printed below
- * them. What changed is the copy, which follows this product's rules —
- * sentence case, no exclamation marks — and the sign-up line, which is
- * a sentence rather than a link, because with an emailed code there is
+ * them. What changed is the copy, which follows this product's rules,
+ * sentence case and no exclamation marks, and the sign-up line, which
+ * is a sentence rather than a link, because with a texted code there is
  * no separate sign-up to link to. The code IS the account.
+ *
+ * What the first screen asks for is a name and a phone rather than a
+ * work email. In the Gulf the owner's number is already the account on
+ * Salla and on Zid, it is the thing they answer inside the hour, and it
+ * is how an engineer reaches them when a connection needs a person. The
+ * name is there because everything after this is addressed to someone:
+ * the dashboard greets them by it and the drafts are waiting on them.
  */
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, EnvelopeSimple } from "@phosphor-icons/react";
+import { ArrowLeft, ChatCircleDots } from "@phosphor-icons/react";
 import { Sheet } from "./ui";
 import { Wordmark } from "./Wordmark";
 import { signIn } from "../lib/store";
@@ -29,48 +36,68 @@ import { hash } from "../lib/agent/rng";
 const LEN = 6;
 const EXPIRES_IN = 60;
 
-/* Deliberately loose. It is checking that a person typed an address
-   rather than policing which addresses exist — the code that arrives
-   there is what actually proves the account. */
-const LOOKS_LIKE_EMAIL = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim());
+/* The markets this product sells into, and Saudi first because that is
+   where HeyMoon is. Not a world list: a select with two hundred rows in
+   it is a worse control than a short one that covers everybody who can
+   actually use the product today. */
+const DIAL_CODES = [
+  { code: "+966", name: "Saudi Arabia" },
+  { code: "+971", name: "United Arab Emirates" },
+  { code: "+965", name: "Kuwait" },
+  { code: "+974", name: "Qatar" },
+  { code: "+973", name: "Bahrain" },
+  { code: "+968", name: "Oman" },
+  { code: "+20", name: "Egypt" },
+];
 
-/* The demo code, derived from the address rather than drawn at random:
-   the same email always gets the same six digits, so a screenshot, a
+/* Deliberately loose. It is checking that a person typed a number
+   rather than policing which numbers exist, because the code that
+   arrives there is what actually proves the account. */
+const digitsOf = (v: string) => v.replace(/\D/g, "");
+const LOOKS_LIKE_PHONE = (v: string) => digitsOf(v).length >= 7;
+
+/* The demo code, derived from the number rather than drawn at random:
+   the same phone always gets the same six digits, so a screenshot, a
    walkthrough and a test all agree, and nothing here is one of the
    non-deterministic calls this codebase keeps out of its logic. */
-const demoCodeFor = (email: string) =>
-  String(Math.abs(hash(email.trim().toLowerCase())) % 1_000_000).padStart(LEN, "0");
+const demoCodeFor = (dial: string, phone: string) =>
+  String(Math.abs(hash(`${dial}${digitsOf(phone)}`)) % 1_000_000).padStart(LEN, "0");
 
 const mmss = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
 export function SignInSheet({ open, onClose, onVerified }: {
   open: boolean;
   onClose: () => void;
-  /** Runs after the sheet closes, with the verified address. */
-  onVerified: (email: string) => void;
+  /** Runs after the sheet closes, with the name that was verified. */
+  onVerified: (name: string) => void;
 }) {
-  const [step, setStep] = useState<"email" | "code">("email");
-  const [email, setEmail] = useState("");
+  const [step, setStep] = useState<"details" | "code">("details");
+  const [first, setFirst] = useState("");
+  const [last, setLast] = useState("");
+  const [dial, setDial] = useState(DIAL_CODES[0].code);
+  const [phone, setPhone] = useState("");
   const [digits, setDigits] = useState<string[]>(Array(LEN).fill(""));
   const [busy, setBusy] = useState(false);
   const [wrong, setWrong] = useState(false);
   const [left, setLeft] = useState(EXPIRES_IN);
   const boxes = useRef<(HTMLInputElement | null)[]>([]);
-  const emailBox = useRef<HTMLInputElement>(null);
+  const firstBox = useRef<HTMLInputElement>(null);
 
-  const code = demoCodeFor(email);
+  const code = demoCodeFor(dial, phone);
   const typed = digits.join("");
   const expired = left <= 0;
+  const shown = `${dial} ${digitsOf(phone)}`;
+  const ready = !!first.trim() && !!last.trim() && LOOKS_LIKE_PHONE(phone);
 
   /* Every open is a fresh attempt. A sheet that reopens holding the
      half-typed code from a run the brand abandoned looks broken. */
   useEffect(() => {
     if (!open) return;
-    setStep("email");
+    setStep("details");
     setDigits(Array(LEN).fill(""));
     setBusy(false);
     setWrong(false);
-    const t = setTimeout(() => emailBox.current?.focus(), 120);
+    const t = setTimeout(() => firstBox.current?.focus(), 120);
     return () => clearTimeout(t);
   }, [open]);
 
@@ -85,7 +112,7 @@ export function SignInSheet({ open, onClose, onVerified }: {
   }, [step]);
 
   const sendCode = () => {
-    if (!LOOKS_LIKE_EMAIL(email) || busy) return;
+    if (!ready || busy) return;
     setBusy(true);
     setTimeout(() => { setBusy(false); setStep("code"); }, 850);
   };
@@ -108,8 +135,11 @@ export function SignInSheet({ open, onClose, onVerified }: {
         boxes.current[0]?.focus();
         return;
       }
-      signIn(email.trim(), Date.now());
-      onVerified(email.trim());
+      signIn(
+        { firstName: first.trim(), lastName: last.trim(), dialCode: dial, phone: digitsOf(phone) },
+        Date.now()
+      );
+      onVerified(`${first.trim()} ${last.trim()}`);
     }, 700);
   };
 
@@ -155,45 +185,86 @@ export function SignInSheet({ open, onClose, onVerified }: {
   return (
     <Sheet open={open} onClose={onClose} labelledBy="signin-title">
       <div className="px-6 pb-7 pt-6 sm:px-8 sm:pb-8">
-        {step === "email" ? (
+        {step === "details" ? (
           <>
             <Wordmark size="lg" />
             <h2 id="signin-title" className="mt-6 text-[24px] font-semibold tracking-[-0.03em] text-ink">
               Let&apos;s get started
             </h2>
-            <p className="mt-1.5 text-body text-ink-soft">Enter your work email to sign in</p>
+            <p className="mt-1.5 text-body text-ink-soft">HeyMoon texts a code to confirm it is you</p>
 
             <form onSubmit={(e) => { e.preventDefault(); sendCode(); }} noValidate className="mt-6">
-              <label htmlFor="signin-email" className="mb-2 block text-eyebrow font-semibold uppercase tracking-[0.12em] text-ink-faint">
-                Work email
+              <div className="grid grid-cols-2 gap-3">
+                {([
+                  { id: "signin-first", label: "First name", v: first, set: setFirst, ref: firstBox, ac: "given-name" },
+                  { id: "signin-last", label: "Last name", v: last, set: setLast, ref: undefined, ac: "family-name" },
+                ] as const).map((f) => (
+                  <div key={f.id}>
+                    <label htmlFor={f.id} className="mb-2 block text-eyebrow font-semibold uppercase tracking-[0.12em] text-ink-faint">
+                      {f.label}
+                    </label>
+                    <input
+                      ref={f.ref}
+                      id={f.id}
+                      value={f.v}
+                      onChange={(e) => f.set(e.target.value)}
+                      autoComplete={f.ac}
+                      spellCheck={false}
+                      className="w-full rounded-control border-2 border-black/[0.1] bg-white px-4 py-3 text-body text-ink outline-none transition placeholder:text-ink-faint focus:border-brand"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <label htmlFor="signin-phone" className="mb-2 mt-4 block text-eyebrow font-semibold uppercase tracking-[0.12em] text-ink-faint">
+                Phone number
               </label>
-              <input
-                ref={emailBox}
-                id="signin-email"
-                type="email"
+              {/* The code and the number are one control with a seam in
+                  it, not two fields: they are one answer, and a select
+                  sitting apart from the box it belongs to invites a
+                  brand to fill in only half of it. Always ltr, because a
+                  phone number is dialled left to right in every
+                  language. */}
+              <div
                 dir="ltr"
-                inputMode="email"
-                autoComplete="email"
-                spellCheck={false}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@yourstore.com"
-                className="w-full rounded-control border-2 border-brand/50 bg-white px-4 py-3 text-body text-ink outline-none transition placeholder:text-ink-faint focus:border-brand"
-              />
+                className="flex items-stretch overflow-hidden rounded-control border-2 border-black/[0.1] bg-white transition focus-within:border-brand"
+              >
+                <select
+                  aria-label="Country code"
+                  value={dial}
+                  onChange={(e) => setDial(e.target.value)}
+                  className="num shrink-0 border-e border-black/[0.08] bg-transparent py-3 ps-4 pe-2 text-body font-semibold text-ink outline-none"
+                >
+                  {DIAL_CODES.map((c) => (
+                    <option key={c.code} value={c.code}>{c.code}</option>
+                  ))}
+                </select>
+                <input
+                  id="signin-phone"
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel-national"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="50 123 4567"
+                  className="num w-full min-w-0 bg-transparent px-3 py-3 text-body text-ink outline-none placeholder:font-normal placeholder:text-ink-faint"
+                />
+              </div>
+
               <button
                 type="submit"
-                disabled={!LOOKS_LIKE_EMAIL(email) || busy}
+                disabled={!ready || busy}
                 className={`${wide} mt-4 bg-brand text-white hover:bg-brand-hover disabled:bg-neutral-100 disabled:text-ink-faint`}
               >
                 {busy ? "Sending the code" : "Continue"}
               </button>
             </form>
 
-            {/* A sentence, not a link. With an emailed code there is no
+            {/* A sentence, not a link. With a texted code there is no
                 separate sign-up screen to send anyone to: the first
-                code an address accepts is what creates the account. */}
+                code a number accepts is what creates the account. */}
             <p className="mt-5 text-center text-meta text-ink-soft">
-              No account yet? The same email makes one.
+              No account yet? The same number makes one.
             </p>
             <p className="mt-2 text-center text-[11px] leading-4 text-ink-faint">
               By continuing you agree to the HeyMoon terms and privacy policy.
@@ -203,21 +274,21 @@ export function SignInSheet({ open, onClose, onVerified }: {
           <>
             <button
               type="button"
-              onClick={() => setStep("email")}
-              aria-label="Back to the email"
+              onClick={() => setStep("details")}
+              aria-label="Back to your details"
               className="grid h-9 w-9 place-items-center rounded-control border border-hairline bg-white text-ink-soft transition hover:bg-neutral-50"
             >
               <ArrowLeft size={15} weight="bold" aria-hidden className="rtl:rotate-180" />
             </button>
 
             <span aria-hidden className="mt-5 grid h-11 w-11 place-items-center rounded-control bg-brand-100 text-brand">
-              <EnvelopeSimple size={19} weight="fill" />
+              <ChatCircleDots size={19} weight="fill" />
             </span>
             <h2 id="signin-title" className="mt-4 text-[24px] font-semibold tracking-[-0.03em] text-ink">
-              Check your inbox
+              Check your phone
             </h2>
             <p className="mt-1.5 text-body text-ink-soft">
-              HeyMoon sent a 6 digit code to <span dir="ltr" className="font-semibold text-ink">{email.trim()}</span>
+              HeyMoon sent a 6 digit code to <span dir="ltr" className="num font-semibold text-ink">{shown}</span>
             </p>
 
             <div dir="ltr" className="mt-5 flex gap-2" onPaste={paste}>
@@ -262,7 +333,7 @@ export function SignInSheet({ open, onClose, onVerified }: {
             </button>
 
             {/* The current app prints the demo code under the boxes, so
-                this does too. No email leaves a prototype. */}
+                this does too. No message leaves a prototype. */}
             <p className="mt-4 text-center text-meta text-ink-faint">
               Demo code: <span className="num font-semibold tracking-[0.08em] text-ink-soft">{code}</span>
             </p>

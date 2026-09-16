@@ -288,15 +288,30 @@ export interface State {
   account: Account | null;
 }
 
-/** A verified email, and nothing else. There is no password: the code
-    sent to the address is the proof, so there is no secret for HeyMoon
-    to hold or for a brand to lose. */
+/** A name and a verified number. There is no password: the code sent
+    to the phone is the proof, so there is no secret for HeyMoon to hold
+    or for a brand to lose.
+
+    A phone rather than an email because of where this sells. In the
+    Gulf a shop owner's number is the account on Salla and on Zid, it is
+    the thing they answer within the hour, and it is how an engineer
+    reaches them when a connection needs a person. */
 export interface Account {
-  email: string;
+  firstName: string;
+  lastName: string;
+  /** Dialling code, with the plus: "+966". */
+  dialCode: string;
+  /** Digits only, no code and no spaces. */
+  phone: string;
   /** When the code was accepted. Set by the caller, never by the store,
       so nothing here is non-deterministic. */
   verifiedAt: number;
 }
+
+/** "Mostafa Elnagar". */
+export const accountName = (a: Account) => `${a.firstName} ${a.lastName}`.trim();
+/** "+966 512345678", the way it is shown back to the brand. */
+export const accountPhone = (a: Account) => `${a.dialCode} ${a.phone}`;
 
 /** The thread a conversation starts on before it has a campaign. */
 export const FIRST_THREAD = "t-1";
@@ -320,7 +335,7 @@ const AUTONOMY_KEY = "mtab_autonomy";
  *
  * The version suffix is a kill switch: change the shape of anything
  * below and old saved state is dropped rather than half-read. */
-const STATE_KEY = "mtab_state_v1";
+const STATE_KEY = "mtab_state_v2";
 const KEPT = [
   "campaigns", "campaignOrder", "activeCampaignId",
   "reads", "plans", "activePlanId",
@@ -704,10 +719,10 @@ export const markPaid = () =>
     return { campaigns: { ...s.campaigns, [id]: { ...c, paid: true, phases } } };
   });
 
-/** The brand verified an email. Called once the code has been accepted,
-    with the caller's clock: the store stays deterministic. */
-export const signIn = (email: string, verifiedAt: number) =>
-  set(() => ({ account: { email, verifiedAt } }));
+/** The brand verified a number. Called once the code has been
+    accepted, with the caller's clock: the store stays deterministic. */
+export const signIn = (a: Omit<Account, "verifiedAt">, verifiedAt: number) =>
+  set(() => ({ account: { ...a, verifiedAt } }));
 
 export const connectStore = (which: StorePlatform, campaignId?: string) =>
   set((s) => {
