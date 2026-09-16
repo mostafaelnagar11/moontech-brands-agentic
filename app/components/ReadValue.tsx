@@ -6,6 +6,7 @@
    the conversation, and as a full page — and the two must never show the
    same finding differently. */
 
+import type { ReactNode } from "react";
 import type { BrandRead, ReadLayerKey, Sourced } from "../lib/agent/types";
 import { fmtCount } from "../lib/mock/campaigns";
 
@@ -17,7 +18,18 @@ export function srcFor(read: BrandRead, k: ReadLayerKey): Sourced<unknown> | und
   return (read as unknown as Record<string, Sourced<unknown> | undefined>)[k];
 }
 
-export function ReadValue({ read, k, compact = false }: { read: BrandRead; k: ReadLayerKey; compact?: boolean }) {
+/** The tree itself, as a plain function rather than a component.
+ 
+    `TypeOn` writes a finding out one character at a time by walking the
+    elements it is given, and an unrendered `<ReadValue />` is one opaque
+    node with no text in it — the walk would find a single leaf and the
+    whole finding would appear in one tick. Anything that needs to look
+    INSIDE the value asks for this; anything that just wants to draw it
+    uses the component below.
+ 
+    Safe to call directly because there are no hooks in here and never
+    can be: it is a switch over a value that has already been read. */
+export function readValueTree(read: BrandRead, k: ReadLayerKey, compact = false): ReactNode {
   switch (k) {
     case "category":
       return <p className="text-body text-ink">{read.category!.value}</p>;
@@ -116,4 +128,8 @@ export function ReadValue({ read, k, compact = false }: { read: BrandRead; k: Re
     default:
       return null;
   }
+}
+
+export function ReadValue({ read, k, compact = false }: { read: BrandRead; k: ReadLayerKey; compact?: boolean }) {
+  return <>{readValueTree(read, k, compact)}</>;
 }

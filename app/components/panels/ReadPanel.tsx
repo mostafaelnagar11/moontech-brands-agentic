@@ -23,15 +23,11 @@ import { Check, CheckCircle, Info, PencilSimple, Plus, WarningCircle } from "@ph
 import { READ_TASKS } from "../../lib/agent/tools";
 import type { BrandRead, Correction, ReadLayerKey } from "../../lib/agent/types";
 
-/* Which agent found a layer. The evidence is attributed to the agent
-   that gathered it, so the panel reads as work done rather than as a
-   list of citations. */
-const agentFor = (k: ReadLayerKey) => READ_TASKS.find((t) => t.key === k)?.agent ?? "An agent";
 import { useT } from "../../lib/i18n";
 import { clearReadFocus, correctRead, useReadFocus, useStore } from "../../lib/store";
 import { EvidenceRow } from "../Evidence";
 import { READ_ORDER, ReadValue, srcFor } from "../ReadValue";
-import { RejectedBlock, TaskRoster, rosterTitle } from "../blocks";
+import { RejectedBlock, TaskRoster, agentForLayer, rosterTitle } from "../blocks";
 import { Btn, Card } from "../ui";
 
 /* Which agent found a layer. The evidence is attributed to the agent
@@ -217,7 +213,7 @@ function Layer({ readId, k, read }: { readId: string; k: ReadLayerKey; read: Bra
       {openEv && src && (
         <div className="mt-2 rounded-control border border-brand/15 bg-brand/[0.03] p-2.5">
           <p className="text-[11px] font-semibold text-ink">
-            {agentFor(k)} read this off {src.evidence[0]?.label ?? "your store"}:
+            {agentForLayer(k)} read this off {src.evidence[0]?.label ?? "your store"}:
           </p>
           <p className="mt-0.5 text-meta leading-5 text-ink-soft">{src.why}</p>
           <ul className="mt-1 divide-y divide-hairline">

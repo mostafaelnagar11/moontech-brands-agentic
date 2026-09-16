@@ -18,7 +18,8 @@ import { UNLOCK_AT, fmtUSD, phaseTitle } from "../lib/mock/campaigns";
 import { confirmFunding, cancelFunding, focusReadLayer, openPanel, usePhaseRequested, setAdState, setApprovalState, useAds, usePaid, useStore } from "../lib/store";
 import { Btn, Card, Eyebrow, Pill } from "./ui";
 import { EvidenceRow, Figure } from "./Evidence";
-import { READ_ORDER, ReadValue, srcFor } from "./ReadValue";
+import { READ_ORDER, ReadValue, readValueTree, srcFor } from "./ReadValue";
+import { TypeOn } from "./TypeOn";
 import { PHASE1_BUDGET, PHASE1_ROAS, READ_TASKS } from "../lib/agent/tools";
 import { getConfidence, type ConfidenceLevel } from "../lib/agent/model";
 import { PlanCard, ConfidenceMeter } from "./PlanCard";
@@ -446,6 +447,12 @@ export interface RosterTask {
     how many there are — it asks the list. */
 export const agentsIn = (tasks: RosterTask[]) => Array.from(new Set(tasks.map((t) => t.agent)));
 
+/** Which agent owns a layer of the read. Read off READ_TASKS rather
+    than typed, so moving a layer to another agent moves every line
+    that names it — the progress row here and the evidence attribution
+    in the panel. */
+export const agentForLayer = (k: ReadLayerKey) => READ_TASKS.find((t) => t.key === k)?.agent ?? "An agent";
+
 const NUMBER_WORD = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
 /** Small counts read better as words in a sentence than as digits. */
 export const countWord = (n: number) => NUMBER_WORD[n] ?? String(n);
@@ -562,18 +569,19 @@ export function AgentRoster({ read, live }: { read: BrandRead; live?: boolean })
 /* ------------------------------------------------------------------ */
 
 /* The four things the brand watches arrive while the read is running.
-   A row that has not landed shows the work as a verb; the moment its
-   layer is done, the verb is replaced by the finding itself.
+   Each row is one sentence about work in progress — the agent doing it,
+   and what it is doing to THIS store — and the moment the layer lands
+   that sentence is replaced by the finding, written out rather than
+   pasted in. See `TypeOn`.
 
-   These four are the FINDINGS. Who is finding them is the roster
-   underneath, which names the agents actually on this store. The two
-   answer different questions and the card carries both: what have you
-   learned about me, and who is doing the learning. */
-const PROGRESS_ROWS: { k: ReadLayerKey; label: string; verb: string }[] = [
-  { k: "category", label: "Catalogue", verb: "Reading your catalogue" },
-  { k: "priceBand", label: "Prices", verb: "Reading your prices" },
-  { k: "voice", label: "Voice", verb: "Learning your voice" },
-  { k: "markets", label: "Markets", verb: "Finding your markets" },
+   `doing` is the predicate only. The subject is the agent that owns the
+   layer, looked up from READ_TASKS, so a row can never name an agent
+   that is not the one working. */
+const PROGRESS_ROWS: { k: ReadLayerKey; label: string; doing: string }[] = [
+  { k: "category", label: "Catalogue", doing: "is extracting your catalogue" },
+  { k: "priceBand", label: "Prices", doing: "is calculating your median price" },
+  { k: "voice", label: "Voice", doing: "is learning how you write" },
+  { k: "markets", label: "Markets", doing: "is finding your markets" },
 ];
 
 export function ReadBlock({ read, live }: { read: BrandRead | null; live: boolean }) {
@@ -596,16 +604,18 @@ export function ReadBlock({ read, live }: { read: BrandRead | null; live: boolea
           </div>
         </div>
         <dl className="divide-y divide-hairline">
-          {PROGRESS_ROWS.map(({ k, label, verb }) => (
+          {PROGRESS_ROWS.map(({ k, label, doing }) => (
             <div key={k} className="flex items-start gap-3 px-4 py-2.5">
               <dt className="w-[86px] shrink-0 pt-0.5 text-[11px] font-semibold text-ink-faint">{label}</dt>
               <dd className="min-w-0 flex-1">
                 {has(k) ? (
-                  <ReadValue read={read} k={k} compact />
+                  <TypeOn id={`${read.id}:${k}`}>{readValueTree(read, k, true)}</TypeOn>
                 ) : (
-                  <p className="flex items-center gap-2 text-body text-ink-faint">
-                    <span aria-hidden className="working-ring h-3 w-3 shrink-0" />
-                    {verb}…
+                  <p className="flex items-start gap-2 text-body text-ink-faint">
+                    <span aria-hidden className="working-ring mt-1 h-3 w-3 shrink-0" />
+                    <span className="min-w-0">
+                      <span className="font-medium text-ink-soft">{agentForLayer(k)}</span> {doing}…
+                    </span>
                   </p>
                 )}
               </dd>
