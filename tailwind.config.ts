@@ -17,10 +17,6 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
         ar: ["var(--font-ar)", "var(--font-geist-sans)", "system-ui", "sans-serif"],
-        /* The landing's one serif voice: headlines and a pull quote,
-           never a number, never a control. Swapped for the Arabic
-           family under [dir="rtl"] in globals.css. */
-        display: ["var(--font-display)", "Georgia", "serif"],
       },
       colors: {
         /* The landing page's ground. Warm, not grey. */

@@ -33,38 +33,44 @@ input, textarea, select { font: inherit; }
 [lang="ar"], [lang="ar"] body { font-family: var(--font-ar), var(--font-geist-sans), system-ui, sans-serif; }
 
 /* ══════════════════════════════════════════════════════════════════
-   The landing page's masthead register
+   The landing page
    ══════════════════════════════════════════════════════════════════
 
-   Warm paper, one serif, one purple, two rule weights, every number in
-   tabular figures. The serif is a Latin face, so the Arabic page sets
-   the same class in its own family, upright: the accent line is carried
-   by colour there, not by italics. */
-[dir="rtl"] .font-display { font-family: var(--font-ar), var(--font-geist-sans), system-ui, sans-serif; font-style: normal; }
+   Off-white ground, black headings in the interface grotesque, grey
+   body, and ONE accent gradient. The gradient is never a background
+   wash: it appears as a blurred glow behind the field, as a 2px rule,
+   and on a single line of type. Spent that way it reads as a brand;
+   spread across a hero it reads as a template.
 
-/* A fine dot lattice, masked to a soft oval. This is the page's only
-   texture: it is measured rather than painted, which is what makes a
-   surface read as engineered instead of decorated. */
-.lattice {
-  background-image: radial-gradient(circle at 1px 1px, rgba(25,18,52,0.075) 1px, transparent 0);
-  background-size: 28px 28px;
-  -webkit-mask-image: radial-gradient(58% 46% at 50% 38%, #000 0%, rgba(0,0,0,0.35) 55%, transparent 100%);
-  mask-image: radial-gradient(58% 46% at 50% 38%, #000 0%, rgba(0,0,0,0.35) 55%, transparent 100%);
+   There is no display serif here any more. A serif running through the
+   headings made the page read as a magazine rather than as software,
+   which is the note this rebuild answers. */
+
+.hm-grad-text {
+  background: linear-gradient(95deg, #4D2FB0 0%, #7C5CE0 45%, #F0559D 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.hm-grad-rule { background: linear-gradient(90deg, #4D2FB0, #7C5CE0 50%, #F0559D); }
+
+/* The glow under the field. Blurred colour with nothing drawn on it,
+   so the white card sits in light rather than on a painted panel. */
+.hm-glow {
+  background:
+    radial-gradient(38% 60% at 30% 50%, rgba(77,47,176,0.30), transparent 70%),
+    radial-gradient(38% 60% at 70% 50%, rgba(240,85,157,0.22), transparent 70%),
+    radial-gradient(44% 70% at 50% 50%, rgba(124,92,224,0.26), transparent 72%);
+  filter: blur(52px);
 }
 
-/* The one glow on the page, directly under the field, so the card sits
-   in a pool of its own light rather than on a painted background. */
-.field-glow {
-  background: radial-gradient(46% 42% at 50% 50%, rgba(77,47,176,0.16), transparent 72%);
-  filter: blur(36px);
-}
+/* A card's media area: a soft tint for a product mock to float on. */
+.hm-media { background: linear-gradient(150deg, #EFEAFB 0%, #FBFAFD 45%, #FDEEF5 100%); }
 
-/* A lit top edge. One hairline of brand across the top of a surface
-   reads as a real material catching light; a full border does not. */
-.edge-lit { position: relative; }
-.edge-lit::before {
-  content: ""; position: absolute; inset-inline: 0; top: 0; height: 1px; z-index: 1;
-  background: linear-gradient(90deg, transparent, rgba(77,47,176,0.45), transparent);
+/* Inside the dark band, the same light at low strength. */
+.hm-glow-dark {
+  background:
+    radial-gradient(40% 60% at 35% 55%, rgba(124,92,224,0.55), transparent 70%),
+    radial-gradient(38% 58% at 68% 45%, rgba(240,85,157,0.38), transparent 70%);
+  filter: blur(56px);
 }
 
 /* Every digit on the landing, in both locales: Geist, tabular, and
@@ -72,9 +78,8 @@ input, textarea, select { font: inherit; }
 .num { font-family: var(--font-geist-sans), system-ui, sans-serif; font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; }
 
 /* Motion is one attribute. `useReveal` sets data-in the first time a
-   fifth of the element is on screen; these two classes are the only
-   things that read it. */
-.reveal { opacity: 0; transform: translateY(8px); transition: opacity .4s ease-out, transform .4s cubic-bezier(.2,.8,.2,1); }
+   fifth of the element is on screen; these two classes read it. */
+.reveal { opacity: 0; transform: translateY(10px); transition: opacity .5s ease-out, transform .5s cubic-bezier(.2,.8,.2,1); }
 .reveal[data-in], [data-in] .reveal { opacity: 1; transform: none; }
 .rule-draw { transform: scaleX(0); transform-origin: 0 50%; transition: transform .6s cubic-bezier(.2,.8,.2,1); }
 [dir="rtl"] .rule-draw { transform-origin: 100% 50%; }

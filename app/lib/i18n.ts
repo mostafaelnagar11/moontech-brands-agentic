@@ -64,42 +64,36 @@ export const STR: Dict = {
     ar: "مبني بالذكاء الاصطناعي. ومدعوم من HeyMoon.AI، شركة سعودية.",
   },
 
-  /* The proof that the fifteen seconds is real: what HeyMoon read off
-     the demo store, and which agent read each line. */
-  "landing.readH2": { en: "The store, read in fifteen seconds.", ar: "المتجر، مقروء في 15 ثانية." },
-  "landing.catalogue": { en: "Catalogue", ar: "الكتالوج" },
-  "landing.prices": { en: "Prices", ar: "الأسعار" },
-  "landing.voice": { en: "Voice", ar: "النبرة" },
+  /* The three cards. Each is a picture of the product with two lines
+     under it, so the page shows before it tells. Their titles are the
+     spec's three promises, L9, L13 and L11, which head the thing that
+     proves them rather than being printed as a separate row. */
+  "landing.c1t": { en: "HeyMoon reads your store", ar: "تقرأ هاي مون متجرك" },
+  "landing.c1d": {
+    en: "Catalogue, prices, voice and markets. In about fifteen seconds.",
+    ar: "الكتالوج والأسعار والنبرة والأسواق. في نحو 15 ثانية.",
+  },
 
-  /* L9 and L10: the promise, and the plan card that keeps it. */
+
   "landing.v1t": { en: "See everything. Before you pay anything.", ar: "شاهد كل شيء. قبل أن تدفع أي شيء." },
   "landing.v1d": {
     en: "The whole campaign, built and priced before you approve it: the markets, the creators, the budget and the brief.",
     ar: "الحملة كاملة، مبنية ومُسعّرة قبل أن توافق عليها: الأسواق وصنّاع المحتوى والميزانية والموجز.",
   },
-  "landing.products": { en: "Products", ar: "المنتجات" },
-  "landing.inWarmup": { en: "in the warm-up", ar: "في الإحماء" },
-  "landing.inWriting": { en: "Sales guaranteed in writing", ar: "مبيعات مضمونة كتابيًا" },
 
-  /* L13 and L14: the promise, and the ladder that keeps it. */
   "landing.v3t": { en: "Start small. Scale on results.", ar: "ابدأ صغيرًا. وتوسّع على النتائج." },
   "landing.v3d": {
     en: "Your first campaign is $1,000, the same for every brand. The next is offered only when this one reaches 80% of its target.",
     ar: "حملتك الأولى بـ 1,000 دولار، وهي نفسها لكل علامة تجارية. ولا تُعرض التالية إلا عندما تبلغ هذه 80% من هدفها.",
   },
-  "landing.about": { en: "about", ar: "نحو" },
-  "landing.offeredAt": { en: "Offered at 80%", ar: "تُعرض عند 80%" },
 
-  /* L11 and L12: the promise, and the figures it applies to. */
   "landing.v2t": { en: "Miss the number? HeyMoon pays the difference.", ar: "لم يتحقق الرقم؟ تدفع هاي مون الفرق." },
   "landing.v2d": {
     en: "Every campaign comes with a sales figure, in writing, before you pay. If your sales come in under it, the shortfall is HeyMoon's to cover, not yours.",
     ar: "كل حملة تأتي برقم مبيعات مكتوب قبل أن تدفع. وإذا جاءت مبيعاتك أقل منه، فالفرق على هاي مون لا عليك.",
   },
-  "landing.wholePlan": { en: "Whole plan", ar: "الخطة كاملة" },
-  "landing.at": { en: "at", ar: "بمعدل" },
+  "landing.threePhasesAt": { en: "across three phases, at", ar: "عبر ثلاث مراحل، بمعدل" },
   "landing.signature": { en: "HeyMoon.AI, a Saudi company", ar: "HeyMoon.AI، شركة سعودية" },
-  "landing.adAlt": { en: "A campaign post, shown in real use", ar: "منشور من حملة، معروض في استخدام حقيقي" },
 
   /* The close, and the colophon. */
   "landing.closeH2": { en: "Paste your store link.", ar: "ألصق رابط متجرك." },
