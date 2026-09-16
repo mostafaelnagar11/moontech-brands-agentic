@@ -9,23 +9,39 @@
  * earlier — press Start Phase 1 and this opens; verify, and it closes
  * onto the payment card that was always the next thing.
  *
- * There is no password. A code sent to the address is the proof, which
- * means signing up and signing in are the same two steps and neither
- * HeyMoon nor the brand is holding a secret that can be lost. That also
- * removes the "do I already have an account" question: the answer is
- * the same form either way.
+ * The two screens are the ones the current web app already has, kept
+ * beat for beat so a brand who has signed in to HeyMoon before is not
+ * learning a new flow inside a new product: work email, then Continue,
+ * then six boxes under a countdown with the demo code printed below
+ * them. What changed is the copy, which follows this product's rules —
+ * sentence case, no exclamation marks — and the sign-up line, which is
+ * a sentence rather than a link, because with an emailed code there is
+ * no separate sign-up to link to. The code IS the account.
  */
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, CheckCircle, EnvelopeSimple } from "@phosphor-icons/react";
-import { Btn, Sheet } from "./ui";
+import { ArrowLeft, EnvelopeSimple } from "@phosphor-icons/react";
+import { Sheet } from "./ui";
+import { Wordmark } from "./Wordmark";
 import { signIn } from "../lib/store";
+import { hash } from "../lib/agent/rng";
 
 const LEN = 6;
+const EXPIRES_IN = 60;
+
 /* Deliberately loose. It is checking that a person typed an address
    rather than policing which addresses exist — the code that arrives
    there is what actually proves the account. */
 const LOOKS_LIKE_EMAIL = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim());
+
+/* The demo code, derived from the address rather than drawn at random:
+   the same email always gets the same six digits, so a screenshot, a
+   walkthrough and a test all agree, and nothing here is one of the
+   non-deterministic calls this codebase keeps out of its logic. */
+const demoCodeFor = (email: string) =>
+  String(Math.abs(hash(email.trim().toLowerCase())) % 1_000_000).padStart(LEN, "0");
+
+const mmss = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
 export function SignInSheet({ open, onClose, onVerified }: {
   open: boolean;
@@ -37,27 +53,35 @@ export function SignInSheet({ open, onClose, onVerified }: {
   const [email, setEmail] = useState("");
   const [digits, setDigits] = useState<string[]>(Array(LEN).fill(""));
   const [busy, setBusy] = useState(false);
-  const [resent, setResent] = useState(false);
+  const [wrong, setWrong] = useState(false);
+  const [left, setLeft] = useState(EXPIRES_IN);
   const boxes = useRef<(HTMLInputElement | null)[]>([]);
   const emailBox = useRef<HTMLInputElement>(null);
 
+  const code = demoCodeFor(email);
+  const typed = digits.join("");
+  const expired = left <= 0;
+
   /* Every open is a fresh attempt. A sheet that reopens holding the
-     half-typed code from a run the brand abandoned is a sheet that
-     looks broken. */
+     half-typed code from a run the brand abandoned looks broken. */
   useEffect(() => {
     if (!open) return;
     setStep("email");
     setDigits(Array(LEN).fill(""));
     setBusy(false);
-    setResent(false);
+    setWrong(false);
     const t = setTimeout(() => emailBox.current?.focus(), 120);
     return () => clearTimeout(t);
   }, [open]);
 
+  /* The countdown belongs to the code screen and restarts with it, so
+     going back to change the address does not leave a stale clock. */
   useEffect(() => {
     if (step !== "code") return;
+    setLeft(EXPIRES_IN);
     const t = setTimeout(() => boxes.current[0]?.focus(), 120);
-    return () => clearTimeout(t);
+    const id = setInterval(() => setLeft((n) => (n > 0 ? n - 1 : 0)), 1000);
+    return () => { clearTimeout(t); clearInterval(id); };
   }, [step]);
 
   const sendCode = () => {
@@ -66,25 +90,39 @@ export function SignInSheet({ open, onClose, onVerified }: {
     setTimeout(() => { setBusy(false); setStep("code"); }, 850);
   };
 
-  const verify = (code: string) => {
-    if (code.length < LEN || busy) return;
+  const again = () => {
+    setDigits(Array(LEN).fill(""));
+    setWrong(false);
+    setLeft(EXPIRES_IN);
+    boxes.current[0]?.focus();
+  };
+
+  const verify = (entered: string) => {
+    if (entered.length < LEN || busy || expired) return;
     setBusy(true);
     setTimeout(() => {
       setBusy(false);
+      if (entered !== code) {
+        setWrong(true);
+        setDigits(Array(LEN).fill(""));
+        boxes.current[0]?.focus();
+        return;
+      }
       signIn(email.trim(), Date.now());
       onVerified(email.trim());
-    }, 800);
+    }, 700);
   };
 
   /* Whatever arrives at a box is spread from that box onward. One
      character is a keystroke; six are a paste, an autofill from the
      phone's SMS suggestion, or a fast typist whose keys landed before
      React moved the focus. One code path for all of them, because the
-     version that only took the last character dropped five digits out
+     version that kept only the last character dropped five digits out
      of every autofill. */
   const fill = (from: number, raw: string) => {
     const d = raw.replace(/\D/g, "");
     const next = [...digits];
+    setWrong(false);
     if (!d) { next[from] = ""; setDigits(next); return; }
     for (let k = 0; k < d.length && from + k < LEN; k++) next[from + k] = d[k];
     setDigits(next);
@@ -112,28 +150,21 @@ export function SignInSheet({ open, onClose, onVerified }: {
     if (e.key === "ArrowRight" && i < LEN - 1) boxes.current[i + 1]?.focus();
   };
 
+  const wide = "w-full rounded-control py-3 text-body font-semibold transition disabled:cursor-not-allowed";
+
   return (
     <Sheet open={open} onClose={onClose} labelledBy="signin-title">
-      <div className="p-5 sm:p-6">
+      <div className="px-6 pb-7 pt-6 sm:px-8 sm:pb-8">
         {step === "email" ? (
           <>
-            <span aria-hidden className="grid h-10 w-10 place-items-center rounded-full bg-brand-100 text-brand">
-              <EnvelopeSimple size={18} weight="fill" />
-            </span>
-            <h2 id="signin-title" className="mt-3 text-[19px] font-semibold tracking-[-0.02em] text-ink">
-              Your email, before you pay
+            <Wordmark size="lg" />
+            <h2 id="signin-title" className="mt-6 text-[24px] font-semibold tracking-[-0.03em] text-ink">
+              Let&apos;s get started
             </h2>
-            <p className="mt-1.5 text-meta leading-5 text-ink-soft">
-              HeyMoon sends a six digit code to confirm it is you. New here or not, it is the same two steps: there is
-              no password to make or remember.
-            </p>
+            <p className="mt-1.5 text-body text-ink-soft">Enter your work email to sign in</p>
 
-            <form
-              onSubmit={(e) => { e.preventDefault(); sendCode(); }}
-              noValidate
-              className="mt-4"
-            >
-              <label htmlFor="signin-email" className="mb-1 block text-[11px] font-semibold text-ink-soft">
+            <form onSubmit={(e) => { e.preventDefault(); sendCode(); }} noValidate className="mt-6">
+              <label htmlFor="signin-email" className="mb-2 block text-eyebrow font-semibold uppercase tracking-[0.12em] text-ink-faint">
                 Work email
               </label>
               <input
@@ -147,18 +178,25 @@ export function SignInSheet({ open, onClose, onVerified }: {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@yourstore.com"
-                className="w-full rounded-control border border-black/[0.09] bg-white px-3 py-2.5 text-body text-ink outline-none transition focus:border-brand/50 focus:ring-2 focus:ring-brand/10"
+                className="w-full rounded-control border-2 border-brand/50 bg-white px-4 py-3 text-body text-ink outline-none transition placeholder:text-ink-faint focus:border-brand"
               />
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Btn type="submit" disabled={!LOOKS_LIKE_EMAIL(email) || busy}>
-                  {busy ? "Sending the code…" : "Send the code"}
-                </Btn>
-                <Btn type="button" variant="ghost" onClick={onClose}>Not yet</Btn>
-              </div>
+              <button
+                type="submit"
+                disabled={!LOOKS_LIKE_EMAIL(email) || busy}
+                className={`${wide} mt-4 bg-brand text-white hover:bg-brand-hover disabled:bg-neutral-100 disabled:text-ink-faint`}
+              >
+                {busy ? "Sending the code" : "Continue"}
+              </button>
             </form>
 
-            <p className="mt-4 text-[11px] leading-4 text-ink-faint">
-              HeyMoon uses this address for the receipt, the drafts waiting on you and nothing else.
+            {/* A sentence, not a link. With an emailed code there is no
+                separate sign-up screen to send anyone to: the first
+                code an address accepts is what creates the account. */}
+            <p className="mt-5 text-center text-meta text-ink-soft">
+              No account yet? The same email makes one.
+            </p>
+            <p className="mt-2 text-center text-[11px] leading-4 text-ink-faint">
+              By continuing you agree to the HeyMoon terms and privacy policy.
             </p>
           </>
         ) : (
@@ -166,19 +204,23 @@ export function SignInSheet({ open, onClose, onVerified }: {
             <button
               type="button"
               onClick={() => setStep("email")}
-              className="-ms-1 mb-2 inline-flex items-center gap-1.5 rounded-control px-1 py-1 text-meta font-semibold text-ink-soft transition hover:bg-black/[0.04]"
+              aria-label="Back to the email"
+              className="grid h-9 w-9 place-items-center rounded-control border border-hairline bg-white text-ink-soft transition hover:bg-neutral-50"
             >
-              <ArrowLeft size={13} weight="bold" aria-hidden className="rtl:rotate-180" />
-              Use a different email
+              <ArrowLeft size={15} weight="bold" aria-hidden className="rtl:rotate-180" />
             </button>
-            <h2 id="signin-title" className="text-[19px] font-semibold tracking-[-0.02em] text-ink">
-              Enter the code
+
+            <span aria-hidden className="mt-5 grid h-11 w-11 place-items-center rounded-control bg-brand-100 text-brand">
+              <EnvelopeSimple size={19} weight="fill" />
+            </span>
+            <h2 id="signin-title" className="mt-4 text-[24px] font-semibold tracking-[-0.03em] text-ink">
+              Check your inbox
             </h2>
-            <p className="mt-1.5 text-meta leading-5 text-ink-soft">
-              Six digits, sent to <span dir="ltr" className="font-semibold text-ink">{email.trim()}</span>.
+            <p className="mt-1.5 text-body text-ink-soft">
+              HeyMoon sent a 6 digit code to <span dir="ltr" className="font-semibold text-ink">{email.trim()}</span>
             </p>
 
-            <div dir="ltr" className="mt-4 flex gap-2" onPaste={paste}>
+            <div dir="ltr" className="mt-5 flex gap-2" onPaste={paste}>
               {digits.map((d, i) => (
                 <input
                   key={i}
@@ -187,37 +229,42 @@ export function SignInSheet({ open, onClose, onVerified }: {
                   onChange={(e) => fill(i, e.target.value)}
                   onKeyDown={(e) => key(i, e)}
                   onFocus={(e) => e.currentTarget.select()}
-                  maxLength={LEN}
-                  disabled={busy}
+                  disabled={busy || expired}
                   inputMode="numeric"
+                  maxLength={LEN}
                   autoComplete={i === 0 ? "one-time-code" : "off"}
                   aria-label={`Digit ${i + 1} of ${LEN}`}
-                  className="num h-12 w-full min-w-0 rounded-control border border-black/[0.09] bg-white text-center text-[20px] font-semibold text-ink outline-none transition focus:border-brand/60 focus:ring-2 focus:ring-brand/10 disabled:bg-neutral-50"
+                  aria-invalid={wrong || undefined}
+                  className={`num h-14 w-full min-w-0 rounded-control border bg-white text-center text-[22px] font-semibold text-ink outline-none transition focus:ring-2 focus:ring-brand/10 disabled:bg-neutral-50 ${
+                    wrong ? "border-danger" : "border-black/[0.12] focus:border-brand"
+                  }`}
                 />
               ))}
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              <Btn type="button" disabled={digits.join("").length < LEN || busy} onClick={() => verify(digits.join(""))}>
-                {busy ? "Checking…" : "Verify"}
-              </Btn>
-              <button
-                type="button"
-                onClick={() => setResent(true)}
-                className="text-meta font-semibold text-brand transition hover:underline"
-              >
-                Send it again
-              </button>
-              {resent && (
-                <span className="flex items-center gap-1.5 text-meta text-good-deep">
-                  <CheckCircle size={13} weight="fill" aria-hidden />
-                  Sent
-                </span>
+            <p className="mt-3 text-center text-meta text-ink-faint" role={wrong ? "alert" : undefined}>
+              {wrong ? (
+                <span className="font-semibold text-danger">That code is not right. Try again.</span>
+              ) : expired ? (
+                <span className="font-semibold text-danger">The code expired.</span>
+              ) : (
+                <>Code expires in <span className="num font-semibold text-ink-soft">{mmss(left)}</span></>
               )}
-            </div>
+            </p>
 
-            <p className="mt-4 text-[11px] leading-4 text-ink-faint">
-              This is a prototype, so no email is actually sent. Any six digits are accepted.
+            <button
+              type="button"
+              onClick={() => (expired ? again() : verify(typed))}
+              disabled={busy || (!expired && typed.length < LEN)}
+              className={`${wide} mt-4 bg-brand text-white hover:bg-brand-hover disabled:bg-neutral-100 disabled:text-ink-faint`}
+            >
+              {busy ? "Checking" : expired ? "Send a new code" : "Verify code"}
+            </button>
+
+            {/* The current app prints the demo code under the boxes, so
+                this does too. No email leaves a prototype. */}
+            <p className="mt-4 text-center text-meta text-ink-faint">
+              Demo code: <span className="num font-semibold tracking-[0.08em] text-ink-soft">{code}</span>
             </p>
           </>
         )}

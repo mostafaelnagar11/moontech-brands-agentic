@@ -178,7 +178,7 @@ export default function DashboardPage() {
             {/* Above every view, not inside one: the store is connected
                 once for the account, so the ask does not belong to the
                 page that happens to be open. */}
-            {anyCampaign && paid && !camp?.connectedStore && <ConnectAlert />}
+            <ConnectAlert />
             {!anyCampaign && <EmptyDashboard />}
             {anyCampaign && view === "home" && <HomeView />}
             {anyCampaign && view === "campaign" && <CampaignView />}

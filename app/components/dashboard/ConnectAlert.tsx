@@ -20,11 +20,16 @@
 import { useState } from "react";
 import { CaretDown, PlugsConnected } from "@phosphor-icons/react";
 import { IntegrationBlock } from "../blocks";
-import { connectStore } from "../../lib/store";
+import { connectStore, useUnconnected } from "../../lib/store";
 import type { StorePlatform } from "../../lib/store";
 
 export function ConnectAlert() {
   const [open, setOpen] = useState(false);
+  /* The campaign with the step outstanding, which is not always the one
+     on screen: starting a new conversation clears the active campaign,
+     and the step it left behind is still owed. */
+  const owed = useUnconnected();
+  if (!owed) return null;
 
   return (
     <section
@@ -72,7 +77,7 @@ export function ConnectAlert() {
       >
         <div className="overflow-hidden">
           <div className="rounded-card border border-hairline bg-white p-4">
-            <IntegrationBlock compact onConnect={(k: StorePlatform) => connectStore(k)} />
+            <IntegrationBlock compact onConnect={(k: StorePlatform) => connectStore(k, owed.id)} />
           </div>
         </div>
       </div>

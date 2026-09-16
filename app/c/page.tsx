@@ -321,7 +321,6 @@ function ChatInner() {
           ? "A new campaign, then. Paste the store link."
           : "Nothing is planned yet. Paste a store link and I will build a campaign from it.",
       });
-      setAsking({ q: "", options: ["ounass.com", "lunabeauty.ae", "freshgrocer.ae"] });
     }
     /* Keyed on the thread, not on mount. Opening a second conversation
        swaps the thread under this component rather than remounting it,
@@ -1386,8 +1385,17 @@ function ChatInner() {
         onSend={send}
         chips={isTyping ? [] : liveChips(asking?.options ?? defaultChips)}
         onChip={sendText}
-        placeholder={paid ? "Ask me anything about this phase" : "Change anything about the plan"}
-        note={paid ? undefined : NOTE}
+        /* A new thread has no plan to change and nothing to pay for,
+           so it asked to change a plan that did not exist and warned
+           about a payment nobody had been offered. The composer says
+           what this conversation is actually for at each of its three
+           stages. */
+        placeholder={
+          paid ? "Ask me anything about this phase"
+          : plan ? "Change anything about the plan"
+          : "Paste your store link"
+        }
+        note={!plan || paid ? undefined : NOTE}
         busy={!!stop}
         onStop={stop ?? undefined}
         stopLabel={t("thread.stop")}

@@ -15,7 +15,9 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { Bell, List, Sparkle } from "@phosphor-icons/react";
+import Link from "next/link";
+import { startConversation } from "../../lib/store";
+import { Bell, List, Plus, Sparkle } from "@phosphor-icons/react";
 
 export function DashboardTopbar({
   title,
@@ -62,20 +64,36 @@ export function DashboardTopbar({
       <h1 className="shrink-0 text-[15px] font-semibold text-ink">{title}</h1>
 
       <div className="ms-auto flex shrink-0 items-center gap-2">
-        {/* The assistant is a first-class thing to open, so it gets a
-            control up here rather than only a floating button. */}
+        {/* Building the next campaign is the one thing up here that
+            makes money, so it is the one thing that looks like a
+            button. The assistant is a panel you show and hide, which is
+            a view control and not an action: filled and outlined, it
+            was competing with the primary for the same attention, and
+            an always-lit filled button beside a real one reads as two
+            primaries. Plain text, and the panel it toggles is the
+            feedback. */}
         <button
           onClick={onToggleAssistant}
           aria-pressed={assistantOpen}
-          className={`inline-flex items-center gap-2 rounded-control px-3 py-2 text-meta font-semibold transition-colors ${
-            assistantOpen
-              ? "bg-brand text-white hover:bg-brand-hover"
-              : "border border-hairline bg-white text-ink-soft hover:bg-neutral-50"
+          className={`inline-flex items-center gap-2 rounded-control px-2.5 py-2 text-meta font-semibold transition-colors hover:bg-black/[0.04] ${
+            assistantOpen ? "text-brand" : "text-ink-soft hover:text-ink"
           }`}
         >
           <Sparkle size={13} weight="fill" aria-hidden />
           <span className="hidden sm:inline">Ask HeyMoon</span>
         </button>
+
+        <Link
+          href="/c"
+          /* A fresh thread, the same as the rail's. Without it this
+             drops the brand back into the conversation that built the
+             campaign they are already looking at. */
+          onClick={() => startConversation()}
+          className="inline-flex items-center gap-2 rounded-control bg-brand px-3.5 py-2 text-meta font-semibold text-white transition-colors hover:bg-brand-hover"
+        >
+          <Plus size={13} weight="bold" aria-hidden />
+          <span className="hidden sm:inline">Build a campaign</span>
+        </Link>
 
         <span
           className="relative grid h-9 w-9 place-items-center rounded-control border border-hairline bg-white text-ink-faint"

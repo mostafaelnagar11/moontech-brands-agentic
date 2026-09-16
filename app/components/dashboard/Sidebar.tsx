@@ -34,13 +34,12 @@ import {
   SignOut,
   SquaresFour,
   UsersThree,
-  Sparkle,
   Tray,
   X,
   type Icon,
 } from "@phosphor-icons/react";
 import type { DashboardView } from "../../lib/agent/dashboard";
-import { campaignLabel, renameCampaign, setActiveCampaign, signOut, startConversation, useCampaigns, useStore } from "../../lib/store";
+import { campaignLabel, renameCampaign, resetAll, setActiveCampaign, useCampaigns, useStore } from "../../lib/store";
 
 export const NAV: { key: DashboardView; label: string; icon: Icon }[] = [
   { key: "home", label: "Dashboard", icon: SquaresFour },
@@ -183,23 +182,12 @@ function Content({ collapsed, view, onView, waiting, brandName, onMobileClose }:
           {/* A NEW campaign, not the old conversation. Going back to
               the thread that built this one is the one thing this
               button must not do. */}
-          <Link
-            href="/c"
-            onClick={() => startConversation()}
-            title={collapsed ? "Build another campaign" : undefined}
-            className={`flex items-center rounded-control py-2.5 text-body font-medium text-ink-faint transition-all hover:bg-neutral-50 hover:text-ink-soft ${
-              collapsed ? "justify-center px-0" : "gap-3 px-3"
-            }`}
-          >
-            <Sparkle size={16} weight="bold" aria-hidden className="shrink-0" />
-            {!collapsed && <span>Build a campaign</span>}
-          </Link>
-          {/* It went home and left the account signed in, which was
-              honest while there was no account to leave. There is one
-              now, so it clears it. */}
+          {/* It went home and left everything signed in, which was
+              honest while nothing survived a reload. Both of those
+              changed, so it clears the account and the work with it. */}
           <Link
             href="/"
-            onClick={() => signOut()}
+            onClick={() => resetAll()}
             title={collapsed ? "Sign out" : undefined}
             className={`flex items-center rounded-control py-2.5 text-body font-medium text-ink-faint transition-all hover:bg-danger/[0.07] hover:text-danger ${
               collapsed ? "justify-center px-0" : "gap-3 px-3"

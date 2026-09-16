@@ -304,6 +304,33 @@ export const FIRST_THREAD = "t-1";
 const LOCALE_KEY = "mtab_locale";
 const AUTONOMY_KEY = "mtab_autonomy";
 
+/* The work survives a reload.
+ *
+ * Everything below used to live in this module and nowhere else, so a
+ * refresh, a deep link or a second tab started at "No campaign yet"
+ * with a paid phase already behind it. That was survivable while every
+ * outstanding step sat in the thread you were already looking at. It
+ * stopped being survivable when the store connection moved to the
+ * dashboard: the brand navigates there, the navigation clears the
+ * campaign, and the step they went looking for is not on the page.
+ *
+ * Only the work is kept. Which panel is open, which dashboard view,
+ * what the page was scrolled to — none of that is worth restoring, and
+ * restoring it puts a brand back inside a drill-down they had left.
+ *
+ * The version suffix is a kill switch: change the shape of anything
+ * below and old saved state is dropped rather than half-read. */
+const STATE_KEY = "mtab_state_v1";
+const KEPT = [
+  "campaigns", "campaignOrder", "activeCampaignId",
+  "reads", "plans", "activePlanId",
+  "threads", "activeThreadId",
+  "funding", "approvals",
+  "ads", "declineNotes", "creatorSignals", "dismissedInbox",
+  "activity", "account",
+] as const;
+type Kept = (typeof KEPT)[number];
+
 function initial(): State {
   return {
     panel: { view: "plan", open: false },
@@ -340,9 +367,41 @@ let hydrated = false;
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
 
+/* Written on a timer rather than on every set: a read streams nine
+   layers in and a plan streams its fields, so an unthrottled save would
+   serialise the whole store dozens of times during one build. */
+let saveTimer: ReturnType<typeof setTimeout> | null = null;
+function save() {
+  if (typeof localStorage === "undefined") return;
+  if (saveTimer) return;
+  saveTimer = setTimeout(() => {
+    saveTimer = null;
+    try {
+      const out: Record<string, unknown> = {};
+      for (const k of KEPT) out[k] = state[k];
+      localStorage.setItem(STATE_KEY, JSON.stringify(out));
+    } catch {
+      /* A full quota, or a private window that refuses. Losing the
+         restore is not worth losing the session over. */
+    }
+  }, 250);
+}
+
 function hydrate() {
   if (hydrated) return;
   hydrated = true;
+  try {
+    const raw = localStorage.getItem(STATE_KEY);
+    if (raw) {
+      const saved = JSON.parse(raw) as Partial<Pick<State, Kept>>;
+      const patch: Partial<State> = {};
+      for (const k of KEPT) if (saved[k] !== undefined) (patch as Record<string, unknown>)[k] = saved[k];
+      state = { ...state, ...patch };
+      /* A plan holds a read id, not a read, so the registry has to know
+         the restored reads or every plan comes back without evidence. */
+      for (const r of Object.values(state.reads)) rememberRead(r);
+    }
+  } catch {}
   try {
     const l = localStorage.getItem(LOCALE_KEY);
     if (l === "ar" || l === "en") state = { ...state, locale: l };
@@ -370,7 +429,18 @@ function set(patch: Partial<State> | ((s: State) => Partial<State>)) {
   const p = typeof patch === "function" ? patch(state) : patch;
   state = { ...state, ...p };
   emit();
+  save();
 }
+
+/** Forget the account and everything built under it. Signing out of a
+    prototype that then shows you the last brand's campaign is not a
+    sign-out. */
+export const resetAll = () => {
+  try { localStorage.removeItem(STATE_KEY); } catch {}
+  const fresh = initial();
+  state = { ...fresh, locale: state.locale, autonomy: state.autonomy };
+  emit();
+};
 
 export function useStore<T>(pick: (s: State) => T): T {
   return useSyncExternalStore(subscribe, () => pick(snap()), () => pick(serverSnap()));
@@ -639,10 +709,25 @@ export const markPaid = () =>
 export const signIn = (email: string, verifiedAt: number) =>
   set(() => ({ account: { email, verifiedAt } }));
 
-export const signOut = () => set(() => ({ account: null }));
+export const connectStore = (which: StorePlatform, campaignId?: string) =>
+  set((s) => {
+    const id = campaignId ?? s.activeCampaignId;
+    return id && s.campaigns[id] ? patchCampaignIn(s, id, { connectedStore: which }) : {};
+  });
 
-export const connectStore = (which: StorePlatform) =>
-  set((s) => (s.activeCampaignId ? patchCampaignIn(s, s.activeCampaignId, { connectedStore: which }) : {}));
+/** The first campaign that is paid for and still not connected, whether
+    or not it is the one on screen. The dashboard's alert reads this
+    rather than the active campaign: pressing Build a campaign clears
+    the active one, and an outstanding step is not finished because the
+    brand navigated away from it. */
+export const useUnconnected = () =>
+  useStore((s) => {
+    for (const id of s.campaignOrder) {
+      const c = s.campaigns[id];
+      if (c?.paid && !c.connectedStore) return c;
+    }
+    return null;
+  });
 
 const patchCampaignIn = (s: State, id: string, patch: Partial<Campaign>) => ({
   campaigns: { ...s.campaigns, [id]: { ...s.campaigns[id], ...patch } },

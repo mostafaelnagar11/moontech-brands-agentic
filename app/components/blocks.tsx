@@ -11,7 +11,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   ArrowRight, Check, CheckCircle, Lightning, LockSimple, Receipt as ReceiptIcon,
-  ShieldCheck, Storefront, WarningCircle,
+  ShieldCheck, WarningCircle,
 } from "@phosphor-icons/react";
 import type { ApprovalRequest, BrandRead, Eligibility, FundingRequest, Plan, PlanChange, ReadLayerKey, Report } from "../lib/agent/types";
 import { UNLOCK_AT, fmtUSD, phaseTitle } from "../lib/mock/campaigns";
@@ -1014,6 +1014,13 @@ interface Platform {
   note: string;
   /** The button label. Salla, Zid and Shopify authorise; Magento connects. */
   cta: string;
+  /** The platform's own mark, the same files the landing uses. */
+  src: string;
+  /** Optical height, not a common one. These are wordmarks of very
+      different proportions, and setting them all to the same number
+      makes Salla loom and Shopify vanish. The same four values the
+      landing page balances them at, scaled for a tile. */
+  h: number;
   steps: IntegrationStep[];
 }
 
@@ -1038,10 +1045,10 @@ const MAGENTO_STEPS: IntegrationStep[] = [
 ];
 
 const SUPPORTED: Platform[] = [
-  { key: "salla", name: "Salla", note: "One tap", cta: "Connect Salla", steps: authSteps("Salla") },
-  { key: "zid", name: "Zid", note: "One tap", cta: "Connect Zid", steps: authSteps("Zid") },
-  { key: "shopify", name: "Shopify", note: "Shopify and Shopify Plus", cta: "Connect Shopify", steps: authSteps("Shopify") },
-  { key: "magento", name: "Magento", note: "Read-only API key", cta: "Connect Magento", steps: MAGENTO_STEPS },
+  { key: "salla", name: "Salla", note: "One tap", cta: "Connect Salla", src: "/platforms/salla.png", h: 21, steps: authSteps("Salla") },
+  { key: "zid", name: "Zid", note: "One tap", cta: "Connect Zid", src: "/platforms/zid.png", h: 20, steps: authSteps("Zid") },
+  { key: "shopify", name: "Shopify", note: "Shopify and Shopify Plus", cta: "Connect Shopify", src: "/platforms/shopify.png", h: 15, steps: authSteps("Shopify") },
+  { key: "magento", name: "Magento", note: "Read-only API key", cta: "Connect Magento", src: "/platforms/magento.png", h: 15, steps: MAGENTO_STEPS },
 ];
 const platformOf = (k: StorePlatform) => SUPPORTED.find((p) => p.key === k) ?? SUPPORTED[0];
 
@@ -1194,10 +1201,14 @@ export function IntegrationBlock({ onConnect, compact = false }: {
                 onClick={() => setAuth({ key: p.key, step: 0 })}
                 className="flex items-center gap-3 rounded-control border border-hairline bg-white p-3 text-start transition hover:border-brand/40 hover:shadow-card"
               >
-                <Storefront size={17} weight="fill" className="shrink-0 text-brand" aria-hidden />
+                {/* The platform's own mark rather than a generic shop
+                    icon beside its name in our type. A brand recognises
+                    Salla's logo faster than it reads the word, and the
+                    button beside it already says the name. */}
                 <span className="min-w-0 flex-1">
-                  <span className="block text-body font-semibold text-ink">{p.name}</span>
-                  <span className="block text-[11px] text-ink-faint">{p.note}</span>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={p.src} alt={p.name} style={{ height: p.h }} className="w-auto max-w-[120px] object-contain object-left rtl:object-right" />
+                  <span className="mt-1.5 block text-[11px] text-ink-faint">{p.note}</span>
                 </span>
                 <span className="shrink-0 rounded-control bg-brand px-2.5 py-1.5 text-[11px] font-semibold text-white">{p.cta}</span>
               </button>
