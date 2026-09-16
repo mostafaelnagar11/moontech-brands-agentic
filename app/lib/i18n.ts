@@ -33,9 +33,6 @@ export const STR: Dict = {
 
      The Arabic remains a first pass for the Arabic copywriter. */
 
-  /* L1. The note says keep the uppercase as STYLING, so the string is
-     sentence case and the CSS lifts it. */
-  "landing.eyebrow": { en: "HeyMoon.AI for Brands", ar: "HeyMoon.AI للعلامات التجارية" },
   /* L2, L3. Line 2 carries the accent colour. */
   "landing.h1a": { en: "A campaign in fifteen seconds.", ar: "حملة في 15 ثانية." },
   "landing.h1b": { en: "Sales, guaranteed.", ar: "ومبيعات مضمونة." },
@@ -107,8 +104,8 @@ export const STR: Dict = {
      money is owed the name of what is spending it. */
   "landing.runT": { en: "From a link to a live campaign.", ar: "من رابط إلى حملة تعمل." },
   "landing.runD": {
-    en: "Four steps. You decide at two of them, and nothing goes out without you.",
-    ar: "أربع خطوات. تقرر أنت في اثنتين منها، ولا شيء يُنشر بدونك.",
+    en: "Four steps. You decide at one of them, and it ends on the number HeyMoon guaranteed.",
+    ar: "أربع خطوات. تقرر أنت في واحدة منها، وتنتهي عند الرقم الذي ضمنته هاي مون.",
   },
   "landing.r1t": { en: "Paste your store link", ar: "ألصق رابط متجرك" },
   "landing.r1d": {
@@ -125,11 +122,12 @@ export const STR: Dict = {
     en: "One payment, the same for every brand. Nothing after it is charged or committed.",
     ar: "دفعة واحدة، نفسها لكل علامة تجارية. ولا شيء بعدها يُخصم أو يُلتزم به.",
   },
-  "landing.r4t": { en: "Drafts wait on your approval", ar: "المسودات تنتظر موافقتك" },
+  "landing.r4t": { en: "The sales land on the number", ar: "تصل المبيعات إلى الرقم" },
   "landing.r4d": {
-    en: "Every creator's work reaches you before it reaches anyone else. Nothing publishes on its own.",
-    ar: "يصلك عمل كل صانع محتوى قبل أن يصل إلى غيرك. ولا شيء يُنشر من تلقاء نفسه.",
+    en: "Three phases run to the sales HeyMoon guaranteed on your budget, at the multiple you signed.",
+    ar: "ثلاث مراحل تسير نحو المبيعات التي ضمنتها هاي مون على ميزانيتك، بالمضاعف الذي وقّعت عليه.",
   },
+  "landing.mock.salesLabel": { en: "Sales, guaranteed", ar: "المبيعات المضمونة" },
 
   /* The seven, by name and by the stage each one runs. */
   "landing.agentsT": { en: "Seven agents run the campaign.", ar: "سبعة وكلاء يديرون الحملة." },
@@ -144,6 +142,19 @@ export const STR: Dict = {
   "landing.stage.activation": { en: "Activation", ar: "التفعيل" },
   "landing.stage.optimization": { en: "Optimization", ar: "التحسين" },
   "landing.stage.learning": { en: "Learning", ar: "التعلّم" },
+
+  /* The multiple. The spec's G2 retires the word "ROAS" in favour of
+     "sales", and it is retired everywhere else in the product; it is
+     kept here because this is the number the market asks for by name
+     and the section exists to answer that question. */
+  "landing.roasT": { en: "You set the ROAS. HeyMoon signs it.", ar: "أنت تحدد العائد. وهاي مون توقّع عليه." },
+  "landing.roasD": {
+    en: "Pick the multiple you want on the whole campaign. HeyMoon prices the phases to reach it, or tells you it cannot and offers the number it can stand behind.",
+    ar: "اختر المضاعف الذي تريده على الحملة كاملة. تُسعّر هاي مون المراحل للوصول إليه، أو تخبرك أنها لا تستطيع وتعرض الرقم الذي يمكنها ضمانه.",
+  },
+  "landing.roasLabel": { en: "Guaranteed ROAS", ar: "العائد المضمون" },
+  "landing.roasNote": { en: "blended across all three phases", ar: "موزّع على المراحل الثلاث" },
+  "landing.roasClimb": { en: "It climbs as the campaign earns it", ar: "ويرتفع كلما استحقت الحملة ذلك" },
 
   /* The stores it connects to, after payment and read-only. */
   "landing.storesT": { en: "Connects to the store you already have.", ar: "يرتبط بالمتجر الذي لديك بالفعل." },

@@ -93,6 +93,69 @@ input, textarea, select { font: inherit; }
   .rule-draw { transform: none; transition: none; }
 }
 
+/* A drawn line and a swept dial. `pathLength="1"` on the path lets one
+   rule draw any shape: the dash and the offset are both the whole line.
+   `data-drawn` rather than `data-in` on purpose, because these fire off
+   the figure's own observer and not its section's: a tall section is in
+   view long before the chart at the bottom of it is. */
+.draw { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.2s cubic-bezier(.22,.8,.2,1); }
+[data-drawn] .draw { stroke-dashoffset: 0; }
+.draw-fill { opacity: 0; transition: opacity .8s ease-out .45s; }
+[data-drawn] .draw-fill { opacity: 1; }
+.dial-dot { transform-box: view-box; transform-origin: 100px 100px; transition: transform 1.2s cubic-bezier(.22,.8,.2,1); }
+[data-drawn] .dial-dot { transform: rotate(var(--sweep)); }
+@media (prefers-reduced-motion: reduce) {
+  .draw { stroke-dashoffset: 0; transition: none; }
+  .draw-fill { opacity: 1; transition: none; }
+  .dial-dot { transform: rotate(var(--sweep)); transition: none; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   THE CONSTELLATION IS RUNNING
+   The diagram of the seven agents was a correct, completely still
+   picture. What it describes is a system that dispatches work, so it
+   dispatches: a pulse leaves the core along one spoke at a time and
+   lands on the agent at the far end, and the ring turns slowly under
+   all of it. Nothing here is decoration for its own sake; every motion
+   is the thing the diagram already claimed, happening.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* A short dash travelling the length of a spoke. The spoke is 37 units
+   long, so the dash pattern sums to 37 and one full period of travel
+   lands the pattern exactly where it started: the loop is seamless and
+   the pulse always re-enters at the core. */
+@keyframes hm-spoke {
+  0%   { stroke-dashoffset: 0;   opacity: 0 }
+  6%   { opacity: 0.95 }
+  24%  { stroke-dashoffset: -37; opacity: 0 }
+  100% { stroke-dashoffset: -37; opacity: 0 }
+}
+.hm-spoke { stroke-dasharray: 5 32; animation: hm-spoke 3.6s linear infinite; }
+
+/* The far end lights when the pulse arrives, a beat after it leaves. */
+@keyframes hm-node {
+  0%, 18% { box-shadow: 0 0 0 0 rgba(124,92,224,0) }
+  26%     { box-shadow: 0 0 0 5px rgba(160,130,255,0.18) }
+  46%     { box-shadow: 0 0 0 12px rgba(160,130,255,0) }
+  100%    { box-shadow: 0 0 0 0 rgba(160,130,255,0) }
+}
+.hm-node { animation: hm-node 3.6s ease-out infinite; }
+
+/* The ring turns once a minute: too slow to watch, fast enough to feel. */
+@keyframes hm-ring { to { transform: rotate(360deg) } }
+.hm-ring { transform-box: view-box; transform-origin: 50px 50px; animation: hm-ring 60s linear infinite; }
+
+/* The core breathes, and its star turns against the ring. */
+@keyframes hm-breathe { 0%, 100% { opacity: 0.8 } 50% { opacity: 1 } }
+.hm-breathe { animation: hm-breathe 4.8s ease-in-out infinite; }
+@keyframes hm-star { to { transform: rotate(360deg) } }
+.hm-star { animation: hm-star 28s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hm-spoke, .hm-node, .hm-ring, .hm-breathe, .hm-star { animation: none !important; }
+  .hm-spoke { opacity: 0; }
+}
+
 /* ══════════════════════════════════════════════════════════════════
    THE SIGNATURE MARKS
    Shared byte-for-byte with the current web app and the HeyMoon mobile

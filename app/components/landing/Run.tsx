@@ -26,7 +26,10 @@ export interface Step {
   title: string;
   body: string;
   agent: string;
-  panel: React.ReactNode;
+  /* A function when the panel has to know it is the open one: the last
+     step counts its figure up, and a count that ran while the step was
+     hidden would be over before anyone saw it. */
+  panel: React.ReactNode | ((active: boolean) => React.ReactNode);
 }
 
 export function Run({ steps }: { steps: Step[] }) {
@@ -131,7 +134,7 @@ export function Run({ steps }: { steps: Step[] }) {
               i === at ? "opacity-100" : "pointer-events-none opacity-0"
             }`}
           >
-            {s.panel}
+            {typeof s.panel === "function" ? s.panel(i === at) : s.panel}
           </div>
         ))}
       </div>

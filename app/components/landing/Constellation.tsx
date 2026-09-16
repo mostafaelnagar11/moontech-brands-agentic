@@ -49,11 +49,30 @@ export function Constellation() {
             <stop offset="60%" stopColor="#F0559D" stopOpacity="0.16" />
             <stop offset="100%" stopColor="#F0559D" stopOpacity="0" />
           </radialGradient>
+          <linearGradient id="hm-pulse" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#F0559D" />
+            <stop offset="100%" stopColor="#A98BFF" />
+          </linearGradient>
         </defs>
-        <circle cx="50" cy="50" r="34" fill="url(#hm-core-glow)" />
-        <circle cx="50" cy="50" r={RADIUS} fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="0.3" strokeDasharray="1.4 1.8" />
+        <circle cx="50" cy="50" r="34" fill="url(#hm-core-glow)" className="motion-safe:hm-breathe" />
+        <circle
+          cx="50" cy="50" r={RADIUS} fill="none"
+          stroke="rgba(255,255,255,0.10)" strokeWidth="0.3" strokeDasharray="1.4 1.8"
+          className="motion-safe:hm-ring"
+        />
         {RING.map((p, i) => (
           <line key={i} x1="50" y1="50" x2={p.x} y2={p.y} stroke="rgba(255,255,255,0.09)" strokeWidth="0.3" />
+        ))}
+        {/* The dispatch. One pulse per spoke, offset around the ring so
+            the core is never idle and never firing all seven at once. */}
+        {RING.map((p, i) => (
+          <line
+            key={`pulse-${i}`}
+            x1="50" y1="50" x2={p.x} y2={p.y}
+            stroke="url(#hm-pulse)" strokeWidth="0.7" strokeLinecap="round"
+            className="hm-spoke"
+            style={{ animationDelay: `${(i * 3600) / RING.length}ms` }}
+          />
         ))}
       </svg>
 
@@ -65,7 +84,7 @@ export function Constellation() {
         {/* The mark: the four-pointed star, which is what an AI core
             looks like to anyone who has used one. A crescent sat here
             first and read as night, not as intelligence. */}
-        <svg aria-hidden viewBox="0 0 24 24" className="h-[54%] w-[54%] text-white">
+        <svg aria-hidden viewBox="0 0 24 24" className="h-[54%] w-[54%] text-white motion-safe:hm-star">
           <path
             d="M12 1.6c0 5.2 5.2 10.4 10.4 10.4C17.2 12 12 17.2 12 22.4 12 17.2 6.8 12 1.6 12 6.8 12 12 6.8 12 1.6Z"
             fill="currentColor"
@@ -84,7 +103,10 @@ export function Constellation() {
             style={{ left: `${p.x}%`, top: `${p.y}%` }}
           >
             <div className="flex flex-col items-center gap-2">
-              <span className="grid h-[44px] w-[44px] place-items-center rounded-[14px] bg-white/[0.07] text-white/75 ring-1 ring-white/[0.12] backdrop-blur-sm sm:h-[52px] sm:w-[52px]">
+              <span
+                className="hm-node grid h-[44px] w-[44px] place-items-center rounded-[14px] bg-white/[0.07] text-white/75 ring-1 ring-white/[0.12] backdrop-blur-sm sm:h-[52px] sm:w-[52px]"
+                style={{ animationDelay: `${(i * 3600) / RING.length}ms` }}
+              >
                 <I size={20} weight="regular" aria-hidden />
               </span>
               {/* Names are the second read, not the first. */}
