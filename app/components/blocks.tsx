@@ -544,21 +544,6 @@ export function TaskRoster({ tasks, done, live, title, framed = true }: {
   return <Card className="overflow-hidden">{body}</Card>;
 }
 
-/** The read's roster. `live` is what the stream says; if the caller does
-    not know, an unfinished read is taken to be still running. */
-export function AgentRoster({ read, live }: { read: BrandRead; live?: boolean }) {
-  const running = live ?? read.done.length < READ_TASKS.length;
-  return (
-    <TaskRoster
-      tasks={READ_TASKS}
-      done={read.done}
-      live={running}
-      title={rosterTitle(READ_TASKS, running ? "on your store" : "read your store")}
-      framed={false}
-    />
-  );
-}
-
 /* ------------------------------------------------------------------ */
 /* The read, in the conversation                                       */
 /*                                                                     */
@@ -622,9 +607,6 @@ export function ReadBlock({ read, live }: { read: BrandRead | null; live: boolea
             </div>
           ))}
         </dl>
-        {/* Who is on it, under what they have found. One row per agent,
-            ticking as each finishes its own tasks. */}
-        <AgentRoster read={read} live />
       </Card>
     );
   }

@@ -62,7 +62,6 @@ const PLATFORMS: { name: string; src?: string; h: number }[] = [
 ];
 
 /* What the field types when nobody is looking. Real, working links. */
-const HINTS = EXAMPLES.map((e) => e.url);
 
 const ALL_LAYERS: ReadLayerKey[] = [
   "identity", "category", "socials", "priceBand", "voice", "markets", "bestsellers", "seasonality", "eligibility",
@@ -110,6 +109,10 @@ function useTypedHint(words: string[], active: boolean) {
         ? setTimeout(() => setText(word.slice(0, text.length + 1)), TYPE_MS)
         : setTimeout(() => setPhase("hold"), 0);
     } else if (phase === "hold") {
+      /* One example, written once. With nothing to cycle to there is
+         nothing to erase for, so it stays on the field the way a
+         placeholder does. */
+      if (words.length < 2) return;
       t = setTimeout(() => setPhase("delete"), HOLD_MS);
     } else {
       t = text.length > 0
@@ -153,7 +156,13 @@ function StoreField({ id, autoFocus = false }: { id: string; autoFocus?: boolean
      field has a real one by then, and two blinking carets in one row
      is a bug the reader has to work out. */
   const hinting = !still && !url;
-  const hint = useTypedHint(HINTS, hinting);
+  /* The placeholder is the thing that gets written: naming a real shop
+     in the field reads as a customer, and it is not the reader's shop
+     either way. Memoised on the string so the effect is not handed a
+     new array on every render. */
+  const placeholder = t("landing.placeholder");
+  const hints = useMemo(() => [placeholder], [placeholder]);
+  const hint = useTypedHint(hints, hinting);
 
   const submit = () => {
     const u = normaliseUrl(url);

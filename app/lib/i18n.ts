@@ -53,7 +53,7 @@ export const STR: Dict = {
   /* L6 said "See the plan". Changed to a single verb: the button is
      the one control on the page and it reads as an action, not as a
      destination. Still a verb with no arrow, which is what G8 asks. */
-  "landing.cta": { en: "Build", ar: "ابنِ" },
+  "landing.cta": { en: "Start", ar: "ابدأ" },
   "landing.reading": { en: "Reading", ar: "جارٍ القراءة" },
   "landing.free": { en: "Free. No account needed.", ar: "مجانًا. وبدون حساب." },
   "landing.try": { en: "Try a sample store", ar: "جرّب متجرًا نموذجيًا" },

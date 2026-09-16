@@ -44,7 +44,7 @@ export function MockField({ url }: { url: string }) {
         </p>
         <div className="mt-6 flex items-center justify-between">
           <span className="h-7 w-7 rounded-full bg-ink/[0.05]" />
-          <span className="rounded-[9px] bg-ink px-3.5 py-2 text-[12px] font-semibold text-white">Build</span>
+          <span className="rounded-[9px] bg-ink px-3.5 py-2 text-[12px] font-semibold text-white">Start</span>
         </div>
       </div>
     </div>
