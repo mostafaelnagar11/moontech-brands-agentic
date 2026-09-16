@@ -28,8 +28,8 @@ export const STR: Dict = {
   "landing.h1a": { en: "A campaign in fifteen seconds.", ar: "حملة في 15 ثانية." },
   "landing.h1b": { en: "Sales, guaranteed.", ar: "ومبيعات مضمونة." },
   "landing.sub": {
-    en: "Paste your store link. HeyMoon builds the whole campaign around what you sell, and guarantees the sales.",
-    ar: "ألصق رابط متجرك. تبني هاي مون الحملة كاملة حول ما تبيعه، وتضمن لك المبيعات.",
+    en: "Paste your store link. HeyMoon builds the campaign and guarantees the sales.",
+    ar: "ألصق رابط متجرك. تبني هاي مون الحملة وتضمن لك المبيعات.",
   },
   /* The three "no"s from the old subhead, kept as their own row under
      the field. They are the fastest thing on the page to read and the
@@ -41,26 +41,12 @@ export const STR: Dict = {
     en: "See everything. Before you pay anything.",
     ar: "شاهد كل شيء. قبل أن تدفع أي شيء.",
   },
-  "landing.v1d": {
-    en: "The whole campaign, built and priced before you approve it: the markets, the creators, the budget and the brief.",
-    ar: "الحملة كاملة، مبنية ومُسعّرة قبل أن توافق عليها: الأسواق وصنّاع المحتوى والميزانية والموجز.",
-  },
+  "landing.v1d": { en: "Markets, creators, products and the brief, priced on one card.", ar: "الأسواق وصنّاع المحتوى والمنتجات والموجز، مُسعّرة على بطاقة واحدة." },
   "landing.v2t": {
     en: "Miss the number? HeyMoon pays the difference.",
     ar: "لم يتحقق الرقم؟ تدفع هاي مون الفرق.",
   },
-  "landing.v2d": {
-    en: "Every campaign comes with a sales figure, in writing, before you pay. If your sales come in under it, the shortfall is HeyMoon's to cover, not yours.",
-    ar: "كل حملة تأتي برقم مبيعات مكتوب قبل أن تدفع. وإذا جاءت مبيعاتك أقل منه، فالفرق على هاي مون لا عليك.",
-  },
-  "landing.v3t": {
-    en: "Start small. Scale on results.",
-    ar: "ابدأ صغيرًا. وتوسّع على النتائج.",
-  },
-  "landing.v3d": {
-    en: "Your first campaign is $1,000, the same for every brand. The next is offered only when this one reaches 80% of its target.",
-    ar: "حملتك الأولى بـ 1,000 دولار، وهي نفسها لكل علامة تجارية. ولا تُعرض التالية إلا عندما تبلغ هذه 80% من هدفها.",
-  },
+  "landing.v2d": { en: "Every phase carries a sales figure, in writing, before you pay.", ar: "كل مرحلة تحمل رقم مبيعات مكتوبًا قبل أن تدفع." },
   "landing.placeholder": { en: "yourstore.com", ar: "متجرك.com" },
   "landing.cta": { en: "See the plan", ar: "عرض الخطة" },
   "landing.free": { en: "Free. No account needed.", ar: "مجانًا. وبدون حساب." },
@@ -81,34 +67,56 @@ export const STR: Dict = {
      anything is submitted. */
   "landing.try": { en: "Or try one of these", ar: "أو جرّب أحد هذه المتاجر" },
   "landing.domain": { en: "Reading", ar: "سنقرأ" },
-  "landing.safe": { en: "Nothing is charged", ar: "لا يُخصم أي مبلغ" },
 
-  /* How it works. A sequence, unlike the three promises, so it is
-     numbered. */
-  "landing.hiwTitle": { en: "How it works", ar: "كيف تعمل" },
-  "landing.hiwSub": {
-    en: "Three steps, and the money is only in the second one.",
-    ar: "ثلاث خطوات، والدفع في الثانية منها فقط.",
+  /* The nav. Anchors into this page, and the one way into the product. */
+  "landing.nav.how": { en: "How it works", ar: "كيف تعمل" },
+  "landing.nav.guarantee": { en: "The guarantee", ar: "الضمان" },
+  "landing.nav.phases": { en: "Phases", ar: "المراحل" },
+  "landing.nav.dashboard": { en: "Dashboard", ar: "لوحة التحكم" },
+
+  /* Section headings are two keys each: the plain part and the phrase
+     set in the brand ramp. Splitting them keeps the colour where the
+     copywriter put it in either language. */
+  "landing.s2a": { en: "One link.", ar: "رابط واحد." },
+  "landing.s2b": { en: "The whole campaign.", ar: "والحملة كاملة." },
+  "landing.s2sub": { en: "Three steps. The money is only in the second.", ar: "ثلاث خطوات. والدفع في الثانية فقط." },
+  "landing.s3a": { en: "Built before you pay.", ar: "تُبنى قبل أن تدفع." },
+  "landing.s3b": { en: "Guaranteed after.", ar: "ومضمونة بعده." },
+  "landing.s3sub": { en: "Every number below is HeyMoon's own plan for a real store.", ar: "كل رقم أدناه من خطة هاي مون الفعلية لمتجر حقيقي." },
+  "landing.payToday": { en: "You pay today", ar: "تدفع اليوم" },
+  "landing.guaranteed": { en: "guaranteed", ar: "مضمونة" },
+  "landing.threePhases": { en: "across all three phases", ar: "عبر المراحل الثلاث" },
+  "landing.readIn": { en: "Read in fifteen seconds", ar: "قُرئ في 15 ثانية" },
+  "landing.catalogue": { en: "Catalogue", ar: "الكتالوج" },
+  "landing.prices": { en: "Prices", ar: "الأسعار" },
+  "landing.products": { en: "Products", ar: "المنتجات" },
+  "landing.draft": { en: "Draft", ar: "مسودة" },
+  "landing.matched": { en: "matched", ar: "مطابَق" },
+  "landing.inWarmup": { en: "in the warm-up", ar: "في التهيئة" },
+  "landing.today": { en: "today", ar: "اليوم" },
+  "landing.offered80": { en: "offered at 80%", ar: "تُعرض عند 80%" },
+  "landing.f4t": { en: "Nothing moves without you", ar: "لا شيء يتحرك بدونك" },
+  "landing.f4d": { en: "Money, publishing and signing are fixed at never. No setting turns them on.", ar: "المال والنشر والتوقيع ثابتة على «أبدًا». ولا إعداد يفعّلها." },
+  "landing.never": { en: "Never", ar: "أبدًا" },
+
+  /* The stores it connects to. Names only; they are the product's. */
+  "landing.storesTitle": { en: "Connects to the store you already have", ar: "يرتبط بالمتجر الذي لديك بالفعل" },
+  "landing.storesSub": {
+    en: "One tap, after you pay. It reads the orders that use a creator's code, and nothing else.",
+    ar: "نقرة واحدة بعد الدفع. يقرأ الطلبات التي تستخدم كود صانع المحتوى، ولا شيء غير ذلك.",
   },
+
+  /* Footer columns. */
+  "landing.foot.product": { en: "Product", ar: "المنتج" },
+  "landing.foot.company": { en: "Company", ar: "الشركة" },
+  "landing.foot.start": { en: "Start a campaign", ar: "ابدأ حملة" },
+  "landing.foot.lang": { en: "Language", ar: "اللغة" },
   "landing.s1t": { en: "Paste your store link", ar: "ألصق رابط متجرك" },
-  "landing.s1d": {
-    en: "HeyMoon reads your catalogue, your prices, how you write and where you ship, then builds the whole campaign on it.",
-    ar: "تقرأ هاي مون كتالوجك وأسعارك وطريقة كتابتك وأماكن شحنك، ثم تبني الحملة كاملة عليها.",
-  },
+  "landing.s1d": { en: "It reads your catalogue, prices, voice and markets.", ar: "تقرأ كتالوجك وأسعارك وأسلوبك وأسواقك." },
   "landing.s2t": { en: "Change anything, then start Phase 1", ar: "غيّر ما تشاء، ثم ابدأ المرحلة الأولى" },
-  "landing.s2d": {
-    en: "Markets, products, creators, the brief. All of it priced and on screen before you approve it.",
-    ar: "الأسواق والمنتجات وصنّاع المحتوى والموجز. كلها مُسعّرة وأمامك قبل أن توافق.",
-  },
+  "landing.s2d": { en: "The whole plan on one card, priced before you approve.", ar: "الخطة كاملة على بطاقة واحدة، مُسعّرة قبل موافقتك." },
   "landing.s3t": { en: "Connect your store", ar: "اربط متجرك" },
-  "landing.s3d": {
-    en: "One tap, after you pay, so every order a creator brings in is counted against the guarantee.",
-    ar: "نقرة واحدة بعد الدفع، ليُحتسب كل طلب يجلبه صانع محتوى مقابل الضمان.",
-  },
-
-  /* The three promises already above get a heading once they are a
-     section rather than a footnote. */
-  "landing.promisesTitle": { en: "What HeyMoon promises", ar: "ما تضمنه لك هاي مون" },
+  "landing.s3d": { en: "One tap. Every creator's orders count against the guarantee.", ar: "نقرة واحدة. وتُحتسب طلبات كل صانع محتوى مقابل الضمان." },
 
   /* The ladder. Numbers that move with the plan are not quoted here:
      the landing says the SHAPE, the conversation quotes the figures. */
@@ -117,14 +125,6 @@ export const STR: Dict = {
     en: "Only Phase 1 is due today. Each phase after it is offered on results, and you decide then.",
     ar: "المرحلة الأولى وحدها مستحقة اليوم. وكل مرحلة بعدها تُعرض على النتائج، وتقرر أنت حينها.",
   },
-  "landing.p1t": { en: "Phase 1 · Warm-up", ar: "المرحلة 1 · التهيئة" },
-  "landing.p1d": { en: "Starts today. The same price for every brand.", ar: "تبدأ اليوم. نفس السعر لكل علامة تجارية." },
-  "landing.p2t": { en: "Phase 2 · Scale", ar: "المرحلة 2 · التوسّع" },
-  "landing.p2d": { en: "Offered when Phase 1 reaches 80% of its target.", ar: "تُعرض عندما تبلغ المرحلة الأولى 80% من هدفها." },
-  "landing.p3t": { en: "Phase 3 · Peak", ar: "المرحلة 3 · الذروة" },
-  "landing.p3d": { en: "Offered when Phase 2 reaches 80% of its target.", ar: "تُعرض عندما تبلغ المرحلة الثانية 80% من هدفها." },
-  "landing.phase1Price": { en: "due today", ar: "مستحقة اليوم" },
-  "landing.later": { en: "not charged, not committed", ar: "غير مدفوعة وغير ملتزم بها" },
 
   /* The last thing on the page is the first thing on it. */
   "landing.ctaTitle": { en: "Paste your link. See the plan.", ar: "ألصق رابطك. وشاهد الخطة." },
@@ -179,7 +179,6 @@ export const STR: Dict = {
   "plan.guaranteed": { en: "guaranteed", ar: "مضمون" },
   "plan.budget": { en: "Budget", ar: "الميزانية" },
   "plan.target": { en: "Guaranteed sales", ar: "المبيعات المضمونة" },
-  "plan.expected": { en: "Expected sales", ar: "ما نتوقعه" },
   /* The three warm-up figures, as one sentence read left to right:
      what you pay, the floor under it, what we actually think happens.
      The first two are the same number on purpose, which is why each
@@ -188,14 +187,8 @@ export const STR: Dict = {
   "plan.youPayNote": { en: "your spend on Phase 1", ar: "إنفاقك على المرحلة ١" },
   "plan.backGuaranteed": { en: "Guaranteed back in sales", ar: "مبيعات مضمونة" },
   "plan.backGuaranteedNote": { en: "written into the phase", ar: "مكتوب في المرحلة" },
-  "plan.expectedNote": { en: "from this crew, in these markets", ar: "من هذا الفريق، في هذه الأسواق" },
   /* Upside reads as a note under the guarantee, never as a second
      figure beside it. Two big numbers are two promises. */
-  "plan.upsideLead": { en: "HeyMoon expects this crew to do", ar: "نتوقع من هذا الفريق تحقيق" },
-  "plan.upsideTail": {
-    en: "That is what tends to happen. The number above is what HeyMoon guarantees.",
-    ar: "هذا ما نتوقع حدوثه. الرقم أعلاه هو ما نضمنه.",
-  },
   "plan.markets": { en: "Markets", ar: "الأسواق" },
   "plan.audience": { en: "Audience", ar: "الجمهور" },
   "plan.creators": { en: "Creators", ar: "صنّاع المحتوى" },

@@ -584,11 +584,13 @@ figures on screen are bound to the plan rather than hardcoded, so nothing is
 wrong in the build, but the two documents describe different products. This is
 a pricing decision, not a copy one.
 
-There is a visible consequence of the mismatch worth deciding on its own: the
-plan card now shows "Guaranteed sales $1,000 · 1x" beside "Expected sales
-$5,242 to $8,591". C16's rule is that the expected range must never sit *below*
-the guarantee, and it does not — but a floor five times under the expectation
-makes the guarantee read as a formality.
+**C16 is withdrawn, 16 Sep: no expected range anywhere.** The plan card used
+to show "Expected sales $5,242 to $8,591" beside "Guaranteed sales $1,000 · 1x",
+and the gap made the guarantee read as a formality. The decision was to remove
+the range from every screen rather than reconcile the two numbers. The model
+still computes `price.expected` because `underwriting` judges the crew by it;
+the brand is shown the figure HeyMoon stands behind and nothing that could be
+mistaken for it.
 
 **The wordmark is type, not art.** `public/logo.svg` draws "MOONTech" as vector
 outlines; a rename cannot be done by editing paths. `app/components/Wordmark.tsx`

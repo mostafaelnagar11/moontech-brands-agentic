@@ -92,10 +92,28 @@ Ten minutes, one path, no page loads after the first.
 
 ### 1. Landing — `/`
 
-One field, shaped exactly like the message box you are about to use. Type
-**`ounass.com`** and press Read my store. Two other stores are wired:
-`lunabeauty.ae` (eligible, different economics) and `freshgrocer.ae` (below the
-traffic floor). Any other domain gets a generic read, marked as a first pass.
+The whole first screen is three things: a heading, one line under it, and a
+card you type into. The card is white on a painted wash in the brand's violet
+family (`.aurora` in `globals.css`; the two warm accent hues are hero-only CSS
+variables), which is what makes it read as the thing the page is for. The
+reference for these proportions is lovable.dev; the colours, the words and the
+sections are HeyMoon's.
+
+Type **`ounass.com`** and press See the plan. The round button in the card's
+corner drops one of three seeded stores into the field — `ounass.com`,
+`lunabeauty.ae` (eligible, different economics), `freshgrocer.ae` (below the
+traffic floor) — and the row beside it shows what your link is understood to
+be before you press anything. Any other domain gets a generic read, marked as
+a first pass.
+
+Below the fold, every section is a left-aligned heading with one phrase in
+colour, one grey line, and a small card with very little in it: the read in
+four rows, the plan in five, the whole-plan guarantee as one number, the ladder
+as three rows, and the three things that can never happen. Every figure on
+those cards is bound to `planFor(ounass)`, the same plan the conversation would
+build for that store. Nothing is a screenshot, nothing is invented, and there
+is no expected range anywhere — on this page or in the product (C16 withdrawn,
+see OPEN-QUESTIONS 14).
 
 ### 2. Named agents read the store, in the conversation
 
@@ -365,7 +383,7 @@ better informed than the one before.
 
 ```
 app/
-  page.tsx        the landing. One field.
+  page.tsx        the landing. The field, then the argument.
   c/page.tsx      the agent — the conversation and its panel
   dashboard/      the running campaign, on the current app's shell
   components/dashboard/  Sidebar · Topbar · Assistant

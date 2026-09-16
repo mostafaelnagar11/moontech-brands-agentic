@@ -1378,8 +1378,8 @@ function interpret(i: { text: string; plan?: Plan; paid?: boolean }): Interpreta
       kind: "edit", patch: { dropCreatorIds: [c.id] },
       because: paid ? `because you dropped ${c.name}` : "because you dropped a creator",
       say: paid
-        ? `Dropping ${c.name} from the crew. The budget and the expected range both come down with her reach.`
-        : `Dropping ${biggest ? "the creator with the most reach" : "the creator who adds the least to this phase"}. The budget and the expected range both come down with her reach.`,
+        ? `Dropping ${c.name} from the crew.`
+        : `Dropping ${biggest ? "the creator with the most reach" : "the creator who adds the least to this phase"}.`,
     };
   }
 
@@ -1396,15 +1396,15 @@ function interpret(i: { text: string; plan?: Plan; paid?: boolean }): Interpreta
             kind: "edit", patch: { dropCreatorIds: [c.id] },
             because: paid ? `because you dropped ${c.name}` : "because you dropped a creator",
             say: paid
-              ? `Dropping ${c.name} from the crew. The budget and the expected range both come down with her reach.`
-              : "Dropping that creator. The budget and the expected range both come down with her reach.",
+              ? `Dropping ${c.name} from the crew.`
+              : "Dropping that creator.",
           };
         return {
           kind: "edit", patch: { addCreatorIds: [c.id] },
           because: paid ? `because you asked for ${c.name}` : "because you asked for another creator",
           say: paid
-            ? `Adding ${c.name} to the crew. The budget and the expected range both move up with her reach.`
-            : "Adding that creator to the crew. The budget and the expected range both move up with her reach.",
+            ? `Adding ${c.name} to the crew.`
+            : "Adding that creator to the crew.",
         };
       }
     }

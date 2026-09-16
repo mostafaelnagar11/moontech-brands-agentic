@@ -32,12 +32,6 @@ import { usePaid } from "../lib/store";
    display, and only here: `ConfidenceMeter` reasons about the gap
    between the raw model and the guarantee, and clamping that gap shut
    would make every plan look safe. */
-function shownExpected(plan: Plan) {
-  const raw = plan.price.expected.value;
-  const floor = plan.price.revenueTarget.value;
-  const low = Math.max(raw.low, floor);
-  return { low, high: Math.max(raw.high, low) };
-}
 
 function Row({ label, children, onEdit, editLabel }: { label: string; children: React.ReactNode; onEdit?: () => void; editLabel?: string }) {
   return (
@@ -69,7 +63,6 @@ export function PlanCard({
   const paid = usePaid();
   const a = plan.audience.value;
   const target = plan.price.revenueTarget.value;
-  const expected = shownExpected(plan);
   const genderWord = t(`aud.${a.gender}`);
   /* The multiple is divided out of the two figures beside it rather than
      read from `guaranteedRoas`, which is the blended average across all
@@ -101,16 +94,18 @@ export function PlanCard({
         <span className="ms-auto text-meta text-ink-faint">{plan.brandName}</span>
       </div>
 
-      {/* Three cells, and the guarantee carries the weight.
+      {/* Two cells, and the guarantee carries the weight.
 
           What you pay is a cost, so it is the smallest. The guaranteed
           figure is the product, so it is the largest, with the multiple
-          under it as a note rather than as a second promise. Expected
-          sales sit last and small: they are what tends to happen, not
-          what is owed, and the card must never let the range read as
-          the number HeyMoon is standing behind. */}
+          under it as a note rather than as a second promise. There is
+          no third cell: an expected range sat here once, and a range
+          beside a guarantee reads as a second, softer promise. The
+          model still computes it — `underwriting` judges the crew by it
+          — but the brand is shown the number HeyMoon stands behind and
+          nothing that could be mistaken for it. */}
       <div className="mt-3.5 overflow-hidden rounded-control border border-hairline">
-        <div className="grid gap-x-8 gap-y-3.5 p-3.5 sm:grid-cols-3">
+        <div className="grid gap-x-8 gap-y-3.5 p-3.5 sm:grid-cols-2">
           <div className="min-w-0">
             <p className="text-[11px] font-medium text-ink-faint">You pay</p>
             <div className="mt-1">
@@ -124,17 +119,6 @@ export function PlanCard({
               <Figure src={plan.price.revenueTarget} render={fmtUSD(target)} size="lg" />
             </div>
             <p className="mt-1 text-[11px] leading-4 tabular-nums text-ink-faint">{multiple}x</p>
-          </div>
-          <div className="min-w-0">
-            <p className="text-[11px] font-medium text-ink-faint">Expected sales</p>
-            <div className="mt-1">
-              <Figure
-                src={plan.price.expected}
-                render={`${fmtUSD(expected.low)} to ${fmtUSD(expected.high)}`}
-                size="sm"
-              />
-            </div>
-            <p className="mt-1 text-[11px] leading-4 text-ink-faint">From this crew, in these markets.</p>
           </div>
         </div>
         <p className="border-t border-hairline bg-neutral-50 px-3.5 py-2 text-[11px] leading-4 text-ink-soft">
@@ -161,11 +145,7 @@ export function PlanCard({
           </Claim>
         </Row>
         <Row label={t("plan.creators")} onEdit={onEdit && (() => onEdit("creators"))}>
-          <button
-            onClick={onOpenCreators}
-            className="flex w-full items-center gap-2 text-start"
-            disabled={!onOpenCreators}
-          >
+          <div className="flex w-full items-center gap-2 text-start">
             {/* Real faces, no names — before payment and after. The review
                 call cleared the pictures ("there is no harm in showing the
                 icons of these profiles") and drew the line at names,
@@ -187,8 +167,29 @@ export function PlanCard({
               <Figure src={plan.pool} render={`${pool} ${t("plan.matched")}`} size="sm" />
               {pool > crew ? <span className="text-ink-faint"> · {crew} in the warm-up</span> : null}
             </span>
-            {onOpenCreators && <CaretRight size={12} className="text-ink-faint" aria-hidden />}
-          </button>
+            {/* The way to the crew is its own control. This row used to be one
+                big button with the matched-count Figure inside it, which put a
+                button inside a button: invalid HTML, and a hydration failure on
+                any page that renders this card from the server. */}
+
+            {onOpenCreators && (
+
+              <button
+
+                onClick={onOpenCreators}
+
+                aria-label="See the creators"
+
+                className="ms-auto grid h-6 w-6 shrink-0 place-items-center rounded-full text-ink-faint transition hover:bg-brand/[0.06] hover:text-brand"
+
+              >
+
+                <CaretRight size={12} aria-hidden />
+
+              </button>
+
+            )}
+          </div>
         </Row>
         <Row label="Products">
           {bestsellers && products.length > 0 ? (
