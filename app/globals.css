@@ -29,6 +29,26 @@ input, textarea, select { font: inherit; }
 }
 .dark-surface :focus-visible { outline-color: #ffffff; }
 
+/* Except a text box, which shows focus with its caret and its own
+   border. Two reasons the brand outline does not belong on one. It is
+   the loudest colour in the palette and it landed around whichever box
+   you happened to be filling, so working down a form made the form
+   flash. And `:focus-visible` cannot help here: a text input matches it
+   on a mouse CLICK too, by spec, so it fired for everybody, including
+   the people who never needed the hint.
+
+   The border darkening is the replacement affordance, set here so a
+   field gets one whether or not its own classes bothered. Every other
+   control — buttons, tabs, menu rows, links — keeps the outline, which
+   is the whole reason this block is scoped to three selectors rather
+   than turned off wholesale the way the current app does it. */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  border-color: rgba(25, 18, 52, 0.25);
+}
+
 /* Arabic gets its own stack; the layout swaps `dir` and the font together. */
 [lang="ar"], [lang="ar"] body { font-family: var(--font-ar), var(--font-geist-sans), system-ui, sans-serif; }
 

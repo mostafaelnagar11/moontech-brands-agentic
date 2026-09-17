@@ -215,7 +215,7 @@ export function SignInSheet({ open, onClose, onVerified }: {
                          was the brand colour doing a job the caret
                          already does, on every field in turn, which
                          made filling the form flash. */
-                      className="w-full rounded-control border border-black/[0.1] bg-white px-4 py-3 text-body text-ink outline-none focus-visible:outline-none transition placeholder:text-ink-faint focus:border-ink/25"
+                      className="w-full rounded-control border border-black/[0.1] bg-white px-4 py-3 text-body text-ink outline-none transition placeholder:text-ink-faint focus:border-ink/25"
                     />
                   </div>
                 ))}
@@ -244,7 +244,7 @@ export function SignInSheet({ open, onClose, onVerified }: {
                     aria-label="Country code"
                     value={dial}
                     onChange={(e) => setDial(e.target.value)}
-                    className="h-full appearance-none bg-transparent py-3 pl-3.5 pr-8 text-body font-semibold text-ink outline-none focus-visible:outline-none"
+                    className="h-full appearance-none bg-transparent py-3 pl-3.5 pr-8 text-body font-semibold text-ink outline-none"
                   >
                     {DIAL_CODES.map((c) => (
                       <option key={c.code} value={c.code}>{c.flag}  {c.code}</option>
@@ -266,7 +266,7 @@ export function SignInSheet({ open, onClose, onVerified }: {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="50 123 4567"
-                  className="num w-full min-w-0 bg-transparent px-3 py-3 text-body text-ink outline-none focus-visible:outline-none placeholder:font-normal placeholder:text-ink-faint"
+                  className="num w-full min-w-0 bg-transparent px-3 py-3 text-body text-ink outline-none placeholder:font-normal placeholder:text-ink-faint"
                 />
               </div>
 
@@ -325,7 +325,7 @@ export function SignInSheet({ open, onClose, onVerified }: {
                   autoComplete={i === 0 ? "one-time-code" : "off"}
                   aria-label={`Digit ${i + 1} of ${LEN}`}
                   aria-invalid={wrong || undefined}
-                  className={`num h-14 w-full min-w-0 rounded-control border bg-white text-center text-[22px] font-semibold text-ink outline-none focus-visible:outline-none transition disabled:bg-wash ${
+                  className={`num h-14 w-full min-w-0 rounded-control border bg-white text-center text-[22px] font-semibold text-ink outline-none transition disabled:bg-wash ${
                     wrong ? "border-danger" : "border-black/[0.12] focus:border-ink/30"
                   }`}
                 />
