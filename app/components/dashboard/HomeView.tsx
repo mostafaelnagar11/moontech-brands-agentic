@@ -526,7 +526,6 @@ export function HomeView() {
   const funded = allPhases.filter(isFunded);
   const revenue = sumBy(funded, (p) => p.rev);
   const spend = sumBy(funded, (p) => p.budget);
-  const ended = allPhases.filter((p) => p.status === "ended").length;
   const livePct = live ? phasePct(live) : null;
 
   /* Written out rather than pluralised inline: an account on its first
@@ -565,10 +564,6 @@ export function HomeView() {
           ? `${phaseTitle(live.phaseNo)} · ${fmtUSD(live.rev)} of ${fmtUSD(live.revTarget)}`
           : `${phaseTitle(live.phaseNo)} · deploying`
         : "Nothing running right now",
-    },
-    {
-      label: "Phases completed", value: String(ended),
-      sub: `${allPhases.length} on the ladder so far`,
     },
   ];
 
