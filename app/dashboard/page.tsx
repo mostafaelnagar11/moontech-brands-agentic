@@ -35,7 +35,7 @@ import { CreatorsView } from "../components/dashboard/CreatorsView";
 import { AdsView } from "../components/dashboard/AdsView";
 import { InboxView } from "../components/dashboard/InboxView";
 import { ActivityView } from "../components/dashboard/ActivityView";
-import { AutonomyView } from "../components/dashboard/AutonomyView";
+import { SettingsView } from "../components/dashboard/SettingsView";
 import { DashboardSidebar, NAV } from "../components/dashboard/Sidebar";
 import { DashboardTopbar } from "../components/dashboard/Topbar";
 import { DashboardAssistant } from "../components/dashboard/Assistant";
@@ -79,7 +79,11 @@ export default function DashboardPage() {
      fields, one owner each; the cross-links reach this one through
      the surface context below. */
   const stored = useDashboardView();
-  const view: DashboardView = (NAV.some((v) => v.key === stored) ? stored : "campaign") as DashboardView;
+  const view: DashboardView =
+    (NAV.some((v) => v.key === stored) || stored === "settings" || stored === "autonomy"
+      ? stored
+      : "campaign") as DashboardView;
+  const settingsOpen = view === "settings" || view === "autonomy";
 
   const camp = useActiveCampaign();
   const anyCampaign = useCampaigns().length > 0;
@@ -133,7 +137,8 @@ export default function DashboardPage() {
     inbox: "Needs you",
     ads: "Ads",
     activity: "What I did on my own",
-    autonomy: "What I may do alone",
+    autonomy: "Settings",
+    settings: "Settings",
   };
 
   return (
@@ -179,6 +184,15 @@ export default function DashboardPage() {
                 once for the account, so the ask does not belong to the
                 page that happens to be open. */}
             <ConnectAlert />
+            {/* Settings is the account, not the work, so it is the one
+                view that does not need a campaign or a payment behind
+                it. Both keys land here: the rail sends `settings`, and
+                the activity log and the inbox still link to `autonomy`,
+                which is a section of this page now. */}
+            {settingsOpen ? (
+              <SettingsView />
+            ) : (
+              <>
             {!anyCampaign && <EmptyDashboard />}
             {anyCampaign && view === "home" && <HomeView />}
             {anyCampaign && view === "campaign" && <CampaignView />}
@@ -199,7 +213,8 @@ export default function DashboardPage() {
             {anyCampaign && view === "inbox" && paid && <InboxView />}
             {anyCampaign && view === "ads" && paid && <AdsView />}
             {anyCampaign && view === "activity" && paid && <ActivityView />}
-            {anyCampaign && view === "autonomy" && paid && <AutonomyView />}
+              </>
+            )}
           </main>
 
           {/* A column, not an overlay. It sits in the row beside the

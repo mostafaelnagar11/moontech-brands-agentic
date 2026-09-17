@@ -30,7 +30,7 @@ import {
   ClockCounterClockwise,
   House,
   Megaphone,
-  ShieldCheck,
+  Gear,
   SignOut,
   SquaresFour,
   UsersThree,
@@ -48,8 +48,15 @@ export const NAV: { key: DashboardView; label: string; icon: Icon }[] = [
   { key: "inbox", label: "Needs you", icon: Tray },
   { key: "ads", label: "Ads", icon: Megaphone },
   { key: "activity", label: "Activity", icon: ClockCounterClockwise },
-  { key: "autonomy", label: "Autonomy", icon: ShieldCheck },
 ];
+
+/* Settings sits at the foot of the rail rather than in the list above,
+   because the list is the work and this is the account behind it.
+   Autonomy used to be the last row up there, which ranked a table of
+   preferences alongside Campaigns and Ads; it is inside settings now. */
+export const FOOT: { key: DashboardView; label: string; icon: Icon } = {
+  key: "settings", label: "Settings", icon: Gear,
+};
 
 interface Props {
   collapsed: boolean;
@@ -179,6 +186,21 @@ function Content({ collapsed, view, onView, waiting, brandName, onMobileClose }:
           nothing is worse than an absent one. */}
       <div className="mt-auto flex w-full flex-col gap-1">
         <div className={`flex w-full flex-col gap-1 ${collapsed ? "" : "border-t border-neutral-100 pt-3"}`}>
+          <button
+            onClick={() => { onView(FOOT.key); onMobileClose?.(); }}
+            aria-current={view === FOOT.key ? "page" : undefined}
+            title={collapsed ? FOOT.label : undefined}
+            className={`flex items-center rounded-control py-2.5 text-body font-medium transition-all ${
+              collapsed ? "justify-center px-0" : "gap-3 px-3"
+            } ${
+              view === FOOT.key
+                ? "bg-brand text-white"
+                : "text-ink-faint hover:bg-wash hover:text-ink-soft"
+            }`}
+          >
+            <FOOT.icon size={16} weight={view === FOOT.key ? "fill" : "bold"} aria-hidden className="shrink-0" />
+            {!collapsed && <span>{FOOT.label}</span>}
+          </button>
           {/* A NEW campaign, not the old conversation. Going back to
               the thread that built this one is the one thing this
               button must not do. */}

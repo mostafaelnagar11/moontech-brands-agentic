@@ -54,7 +54,8 @@ const VIEW_LABEL: Record<DashboardView, string> = {
   inbox: "Needs you",
   ads: "Ads",
   activity: "Activity",
-  autonomy: "Autonomy",
+  autonomy: "Settings",
+  settings: "Settings",
 };
 
 let seq = 0;

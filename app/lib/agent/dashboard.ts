@@ -27,7 +27,13 @@ import type { AdRecord } from "./types";
 
 /** The five things the dashboard can show. Mirrors the panel keys so
     an intent can be handed straight to the view switcher. */
-export type DashboardView = "home" | "campaign" | "creators" | "inbox" | "ads" | "activity" | "autonomy";
+export type DashboardView =
+  | "home" | "campaign" | "creators" | "inbox" | "ads" | "activity"
+  /* "autonomy" is kept as a key even though the rail no longer offers
+     it: the activity log and the inbox both link straight to a rule,
+     and settings is where that rule now lives. Both keys open the same
+     page; autonomy scrolls it to the table. */
+  | "autonomy" | "settings";
 
 export type DashboardIntent =
   /** Open a view. The assistant answers in a sentence and the page moves. */

@@ -187,7 +187,7 @@ export type PanelView =
   | "plan" | "read"
   /* The dashboard's own views. `home` is the overview the rail opens on;
      the rest are the running views. */
-  | "home" | "campaign" | "creators" | "ads" | "inbox" | "activity" | "autonomy";
+  | "home" | "campaign" | "creators" | "ads" | "inbox" | "activity" | "autonomy" | "settings";
 
 /* A campaign, and the conversation that built it.
 
@@ -286,6 +286,25 @@ export interface State {
      front of the thing that sells the product. Not a campaign field:
      one account can build several. */
   account: Account | null;
+  /* What the brand tells HeyMoon about itself, as opposed to what
+     HeyMoon read off the shop. The read is evidence and cannot be
+     typed over; this is the paperwork a campaign needs to be invoiced,
+     and it is empty until somebody fills it in. */
+  profile: Profile;
+}
+
+export interface Profile {
+  industry: string;
+  country: string;
+  /** Billing. All optional, all blank to start: nothing here is
+      invented on a brand's behalf. */
+  vat: string;
+  tradeLicence: string;
+  street: string;
+  city: string;
+  /** One switch, because there is one channel: the number that signed
+      in. Off means HeyMoon only speaks inside the product. */
+  notifications: boolean;
 }
 
 /** A name and a verified number. There is no password: the code sent
@@ -342,7 +361,7 @@ const KEPT = [
   "threads", "activeThreadId",
   "funding", "approvals",
   "ads", "declineNotes", "creatorSignals", "dismissedInbox",
-  "activity", "account",
+  "activity", "account", "profile",
 ] as const;
 type Kept = (typeof KEPT)[number];
 
@@ -374,6 +393,7 @@ function initial(): State {
     readFocus: null,
     drill: { level: "list", phaseId: null },
     account: null,
+    profile: { industry: "", country: "", vat: "", tradeLicence: "", street: "", city: "", notifications: true },
   };
 }
 
@@ -917,6 +937,14 @@ export const usePaid = () =>
   useStore((s) => (s.activeCampaignId ? s.campaigns[s.activeCampaignId]?.paid ?? false : false));
 export const useActivePlan = () => useStore((s) => (s.activePlanId ? s.plans[s.activePlanId] ?? null : null));
 export const useAccount = () => useStore((s) => s.account);
+export const useProfile = () => useStore((s) => s.profile);
+export const setProfile = (patch: Partial<Profile>) =>
+  set((s) => ({ profile: { ...s.profile, ...patch } }));
+
+/** The signed-in person's own details, edited from settings. Null-safe:
+    there is nothing to change before anyone has signed in. */
+export const setAccountDetails = (patch: Partial<Omit<Account, "verifiedAt">>) =>
+  set((s) => (s.account ? { account: { ...s.account, ...patch } } : {}));
 export const useLocale = () => useStore((s) => s.locale);
 export const useAutonomy = () => useStore((s) => s.autonomy);
 export const useActivity = () => useStore((s) => s.activity);
