@@ -635,17 +635,19 @@ export function HomeView() {
         </div>
       </div>
 
-      {/* Stats. Five tiles, one row from xl up. Below that the hero spans
-          two columns and the rest wrap under it; at xl the hero gives up
-          its span so all five sit on one line, and the solid purple fill
-          carries its emphasis instead of extra width. */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 xl:grid-cols-5">
+      {/* Stats. Four tiles, one row from lg up. The grid still said five
+          after the fifth tile came off, so four tiles sat in a five
+          column track and stopped short of the edge. Two up on a phone,
+          four across from lg, and the hero spans both columns only
+          while they are stacked — once they are on one line it gives up
+          the span and the purple fill carries its emphasis instead. */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {stats.map((s) => (
           <div
             key={s.label}
             className={`rounded-card p-4 transition-colors sm:p-5 ${
               s.hero
-                ? "col-span-2 bg-brand xl:col-span-1"
+                ? "col-span-2 bg-brand lg:col-span-1"
                 : "border border-hairline bg-white shadow-card hover:border-black/[0.12]"
             }`}
           >
