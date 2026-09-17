@@ -17,11 +17,10 @@
  * number is.
  */
 
-import { ArrowRight, Check, LockSimple, Plus, Warning } from "@phosphor-icons/react";
-import Link from "next/link";
+import { ArrowRight, Check, LockSimple, Warning } from "@phosphor-icons/react";
 import { fmtUSD, pace, phaseTitle, UNLOCK_AT } from "../../lib/mock/campaigns";
 import {
-  campaignLabel, openCampaign, startConversation, useAds, useCampaigns, type Campaign,
+  campaignLabel, openCampaign, useAds, useCampaigns, type Campaign,
 } from "../../lib/store";
 import { Section } from "./kit";
 
@@ -33,17 +32,14 @@ export function CampaignsList() {
   const ads = useAds();
 
   return (
+    /* No button beside the heading. Building a campaign is already the
+       top bar's one filled button, on every dashboard view including
+       this one, and the brand switcher offers it a third time. Three
+       copies of the same action on one screen is not three chances to
+       take it, it is a screen that cannot decide where its actions
+       live. The top bar wins because it is on every view. */
     <Section
       title={campaigns.length === 1 ? "Your campaign" : `Your campaigns · ${campaigns.length}`}
-      aside={
-        <Link
-          href="/c"
-          onClick={() => startConversation()}
-          className="inline-flex items-center gap-1.5 rounded-control bg-brand px-3 py-1.5 text-meta font-semibold text-white transition hover:bg-brand-hover"
-        >
-          <Plus size={12} weight="bold" aria-hidden /> New campaign
-        </Link>
-      }
     >
       {/* Two per row, never three. At three the card is narrow enough
           that the figure it exists to show gets clipped — and the
