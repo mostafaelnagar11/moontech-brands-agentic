@@ -79,7 +79,14 @@ const touchesLocked = (p: PlanPatch) =>
    warm-up price is the same for everybody. After payment the plan is
    locked, so they are about what happens now. */
 const WHY_CHIP = `Why is it ${fmtUSD(PHASE1_BUDGET)}?`;
-const PRE_CHIPS = ["Kuwait only", "Women 25 to 45", "Guarantee 8x instead", WHY_CHIP];
+/* Starting leads, because it is the only one of these that finishes
+   anything. An edit used to leave a brand with four ways to change the
+   plan again and no way forward from it: the markets branch of
+   `followUp` offered three edits, and every path that fell through to
+   this row offered four. A plan on screen can always be started, so the
+   way to start it is always on screen. `liveChips` takes it back out
+   once the payment card is open, so it is never offered twice. */
+const PRE_CHIPS = ["Start Phase 1", "Kuwait only", "Women 25 to 45", "Guarantee 8x instead", WHY_CHIP];
 /* After payment there is exactly one thing left to do, and it is now
    ON the dashboard: the connect step moved there, because a task with
    no deadline does not belong in a thread that scrolls away. So the
@@ -558,7 +565,7 @@ function ChatInner() {
          saying "fit those markets" — which is the pool's. */
       ask(
         `The crew is rebuilt around those markets. Do you want the shortlist, or the brief?`,
-        ["Show the creators", "Show the brief", "Go more aggressive"]
+        ["Show the creators", "Show the brief", "Go more aggressive", "Start Phase 1"]
       );
     } else if (touched.has("strategy") || touched.has("guaranteedRoas") || touched.has("budget")) {
       /* Rebuilt, not repriced. Phase 1 costs what it costs every brand,
