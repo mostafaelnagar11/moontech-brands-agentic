@@ -22,10 +22,11 @@
 
 import { Wordmark } from "../Wordmark";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   CaretDown,
   Check,
+  Plus,
   PencilSimple,
   ClockCounterClockwise,
   House,
@@ -39,15 +40,29 @@ import {
   type Icon,
 } from "@phosphor-icons/react";
 import type { DashboardView } from "../../lib/agent/dashboard";
-import { campaignLabel, renameCampaign, resetAll, setActiveCampaign, useCampaigns, useStore } from "../../lib/store";
+import {
+  campaignLabel, renameCampaign, resetAll, setActiveCampaign, startConversation, useCampaigns, useStore,
+  type Campaign,
+} from "../../lib/store";
+import { getRead } from "../../lib/agent/registry";
 
-export const NAV: { key: DashboardView; label: string; icon: Icon }[] = [
+/* Six rows, two ranks. Creators, Needs you, Ads and Activity are all
+   views OF a campaign — swap the campaign in the switcher above and
+   every one of them changes underneath you — so they were six siblings
+   pretending to be six destinations. They are indented under Campaigns
+   now, which is the thing they belong to, and Dashboard stays where it
+   is because it spans every campaign rather than describing one.
+
+   Kept as one flat list with a `child` flag rather than a tree: the
+   view validator and the assistant both read `NAV` as a set of keys,
+   and nesting the data would have made two consumers walk it. */
+export const NAV: { key: DashboardView; label: string; icon: Icon; child?: boolean }[] = [
   { key: "home", label: "Dashboard", icon: SquaresFour },
   { key: "campaign", label: "Campaigns", icon: House },
-  { key: "creators", label: "Creators", icon: UsersThree },
-  { key: "inbox", label: "Needs you", icon: Tray },
-  { key: "ads", label: "Ads", icon: Megaphone },
-  { key: "activity", label: "Activity", icon: ClockCounterClockwise },
+  { key: "creators", label: "Creators", icon: UsersThree, child: true },
+  { key: "inbox", label: "Needs you", icon: Tray, child: true },
+  { key: "ads", label: "Ads", icon: Megaphone, child: true },
+  { key: "activity", label: "Activity", icon: ClockCounterClockwise, child: true },
 ];
 
 /* Settings sits at the foot of the rail rather than in the list above,
@@ -68,10 +83,50 @@ interface Props {
   onMobileClose?: () => void;
 }
 
+/** A brand's own logo where the read found one, its initial where it
+    did not. Never a stock avatar: an invented face for a shop is worse
+    than a letter. */
+function BrandMark({ campaign, size }: { campaign: Campaign | null; size: number }) {
+  const logo = campaign?.readId ? getRead(campaign.readId).identity?.logo : undefined;
+  const label = campaign ? campaignLabel(campaign) : "";
+  return (
+    <span
+      aria-hidden
+      className="grid shrink-0 place-items-center overflow-hidden rounded-[8px] bg-brand font-semibold text-white"
+      style={{ height: size, width: size, fontSize: Math.round(size * 0.42) }}
+    >
+      {logo ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={logo} alt="" className="h-full w-full bg-white object-cover" />
+      ) : (
+        label[0]?.toUpperCase() ?? "?"
+      )}
+    </span>
+  );
+}
+
 function Content({ collapsed, view, onView, waiting, brandName, onMobileClose }: Props) {
   const [switcher, setSwitcher] = useState(false);
   const campaigns = useCampaigns();
   const activeId = useStore((s) => s.activeCampaignId);
+  const active = campaigns.find((c) => c.id === activeId) ?? null;
+  const switcherWrap = useRef<HTMLDivElement>(null);
+
+  /* A menu that only closes by pressing the thing that opened it is a
+     menu people leave open, the same rule the top bar's avatar uses. */
+  useEffect(() => {
+    if (!switcher) return;
+    const away = (e: MouseEvent) => {
+      if (switcherWrap.current && !switcherWrap.current.contains(e.target as Node)) setSwitcher(false);
+    };
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && setSwitcher(false);
+    document.addEventListener("mousedown", away);
+    document.addEventListener("keydown", esc);
+    return () => {
+      document.removeEventListener("mousedown", away);
+      document.removeEventListener("keydown", esc);
+    };
+  }, [switcher]);
   return (
     <div className={`flex h-full flex-col overflow-y-auto bg-white py-5 ${collapsed ? "items-center px-2" : "px-3"}`}>
       <div className={`mb-4 flex items-center ${collapsed ? "justify-center" : "justify-between px-2"}`}>
@@ -96,35 +151,57 @@ function Content({ collapsed, view, onView, waiting, brandName, onMobileClose }:
         )}
       </div>
 
-      {/* A tile while there is one campaign, a switcher the moment
-          there are two. The same rule the chat's rail follows. */}
+      {/* The brand switcher, the shape the current web app already has:
+          the mark, the name, a caret, and under it the list with a tick
+          on the one you are looking at and a way to add another.
+
+          It used to be a dead tile until a second campaign existed,
+          which made the first thing in the rail a box that looked
+          pressable and was not. Adding a brand is available from the
+          first one, so the control is a control from the first one. */}
       {!collapsed && (
-        <div className="relative mb-5 px-1">
+        <div className="relative mb-5 px-1" ref={switcherWrap}>
           <button
-            onClick={() => campaigns.length > 1 && setSwitcher((o) => !o)}
-            aria-expanded={campaigns.length > 1 ? switcher : undefined}
-            disabled={campaigns.length <= 1}
-            className={`flex w-full items-center gap-2.5 rounded-control border border-neutral-100 bg-wash px-3 py-2 text-start transition ${
-              campaigns.length > 1 ? "hover:bg-neutral-100" : ""
-            }`}
+            onClick={() => setSwitcher((o) => !o)}
+            aria-expanded={switcher}
+            aria-haspopup="menu"
+            className="flex w-full items-center gap-2.5 rounded-control border border-hairline bg-wash px-3 py-2 text-start transition hover:bg-brand-100/60"
           >
+            <BrandMark campaign={active} size={28} />
             <span className="min-w-0 flex-1 truncate text-body font-semibold text-ink-soft">{brandName}</span>
-            {campaigns.length > 1 && (
-              <CaretDown size={11} weight="bold" aria-hidden className={`shrink-0 text-ink-faint transition ${switcher ? "rotate-180" : ""}`} />
-            )}
+            <CaretDown
+              size={11}
+              weight="bold"
+              aria-hidden
+              className={`shrink-0 text-ink-faint transition ${switcher ? "rotate-180" : ""}`}
+            />
           </button>
-          {switcher && campaigns.length > 1 && (
-            <div className="absolute inset-x-0 top-full z-50 mt-1 overflow-hidden rounded-control border border-neutral-100 bg-white shadow-float">
+
+          {switcher && (
+            <div
+              role="menu"
+              className="absolute inset-x-0 top-full z-50 mt-1 overflow-hidden rounded-control border border-hairline bg-white shadow-float"
+            >
+              <p className="px-3 pb-1 pt-2.5 text-[9px] font-semibold uppercase tracking-widest text-ink-faint">
+                Switch brand
+              </p>
               {campaigns.map((c) => (
                 <div key={c.id} className={`group flex items-center ${c.id === activeId ? "bg-brand/[0.06]" : ""}`}>
                   <button
+                    role="menuitem"
                     onClick={() => { setActiveCampaign(c.id); setSwitcher(false); onMobileClose?.(); }}
-                    className="min-w-0 flex-1 px-3 py-2 text-start transition hover:bg-wash"
+                    className="flex min-w-0 flex-1 items-center gap-2.5 px-3 py-2.5 text-start transition hover:bg-wash"
                   >
-                    <span className="block truncate text-meta font-semibold text-ink">{campaignLabel(c)}</span>
-                    <span className="block truncate text-[10px] text-ink-faint">{c.paid ? "Running" : "Not started"}</span>
+                    <BrandMark campaign={c} size={24} />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-meta font-semibold text-ink">{campaignLabel(c)}</span>
+                      <span className="block truncate text-[10px] text-ink-faint">{c.paid ? "Running" : "Not started"}</span>
+                    </span>
+                    {c.id === activeId && <Check size={12} weight="bold" aria-hidden className="shrink-0 text-brand" />}
                   </button>
-                  {c.id === activeId && <Check size={11} weight="bold" aria-hidden className="me-1 shrink-0 text-brand" />}
+                  {/* Renaming stays. The current app cannot do it, and a
+                      workspace of campaigns all called by their domain
+                      is a workspace you cannot navigate. */}
                   <button
                     onClick={() => { const n = window.prompt("Name this campaign", campaignLabel(c)); if (n !== null) renameCampaign(c.id, n); }}
                     aria-label={`Rename ${campaignLabel(c)}`}
@@ -134,6 +211,19 @@ function Content({ collapsed, view, onView, waiting, brandName, onMobileClose }:
                   </button>
                 </div>
               ))}
+              <div className="border-t border-hairline">
+                {/* Adding a brand IS building a campaign for it, so this
+                    is the same fresh conversation the top bar opens. */}
+                <Link
+                  href="/c"
+                  role="menuitem"
+                  onClick={() => { startConversation(); setSwitcher(false); onMobileClose?.(); }}
+                  className="flex items-center gap-2 px-3 py-2.5 text-meta font-semibold text-brand transition hover:bg-wash"
+                >
+                  <Plus size={12} weight="bold" aria-hidden />
+                  Add brand
+                </Link>
+              </div>
             </div>
           )}
         </div>
@@ -153,14 +243,26 @@ function Content({ collapsed, view, onView, waiting, brandName, onMobileClose }:
               onClick={() => { onView(item.key); onMobileClose?.(); }}
               title={collapsed ? item.label : undefined}
               aria-current={active ? "page" : undefined}
-              className={`flex items-center rounded-control py-2.5 text-left text-body font-medium transition-all ${
-                collapsed ? "justify-center px-0" : "gap-3 px-3"
+              /* The rank is drawn with an indent and a guide, not with
+                 a smaller type size: a child row is still a destination
+                 and still has to be as easy to hit as its parent. At
+                 60px there is no room to indent anything, so a
+                 collapsed rail shows six equal icons and the grouping
+                 lives in the order alone. */
+              className={`relative flex items-center rounded-control py-2.5 text-left text-body font-medium transition-all ${
+                collapsed ? "justify-center px-0" : item.child ? "gap-3 ps-9 pe-3" : "gap-3 px-3"
               } ${
                 active
                   ? "bg-brand text-white shadow-md shadow-violet-200"
                   : "text-ink-faint hover:bg-wash hover:text-ink-soft"
               }`}
             >
+              {!collapsed && item.child && (
+                <span
+                  aria-hidden
+                  className={`absolute inset-y-0 start-[19px] w-px ${active ? "bg-white/25" : "bg-hairline"}`}
+                />
+              )}
               <I size={16} weight="bold" aria-hidden className="shrink-0" />
               {!collapsed && (
                 <>

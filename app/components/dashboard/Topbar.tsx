@@ -17,7 +17,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { startConversation } from "../../lib/store";
-import { Bell, List, Plus, Sparkle } from "@phosphor-icons/react";
+import { ArrowLeft, Bell, List, Plus, Sparkle } from "@phosphor-icons/react";
 
 export function DashboardTopbar({
   title,
@@ -25,12 +25,16 @@ export function DashboardTopbar({
   assistantOpen,
   onToggleAssistant,
   onToggleNav,
+  onBack,
 }: {
   title: string;
   waiting: number;
   assistantOpen: boolean;
   onToggleAssistant: () => void;
   onToggleNav: () => void;
+  /** Set on a page that hides the rail. The hamburger has nothing to
+      collapse then, so it becomes the way back to where you were. */
+  onBack?: () => void;
 }) {
   const [menu, setMenu] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
@@ -54,11 +58,13 @@ export function DashboardTopbar({
   return (
     <header className="sticky top-0 z-20 flex h-[67px] shrink-0 items-center gap-3 border-b border-hairline bg-white/80 px-4 backdrop-blur-sm">
       <button
-        onClick={onToggleNav}
-        aria-label="Menu"
-        className="grid h-8 w-8 shrink-0 place-items-center rounded-control text-ink-faint transition-colors hover:bg-neutral-100"
+        onClick={onBack ?? onToggleNav}
+        aria-label={onBack ? "Back" : "Menu"}
+        className="grid h-8 w-8 shrink-0 place-items-center rounded-control text-ink-faint transition-colors hover:bg-wash hover:text-ink-soft"
       >
-        <List size={18} aria-hidden />
+        {onBack
+          ? <ArrowLeft size={17} weight="bold" aria-hidden className="rtl:rotate-180" />
+          : <List size={18} aria-hidden />}
       </button>
 
       <h1 className="shrink-0 text-[15px] font-semibold text-ink">{title}</h1>

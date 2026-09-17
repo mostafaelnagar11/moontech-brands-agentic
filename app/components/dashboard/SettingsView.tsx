@@ -90,7 +90,21 @@ function Picker({ label, value, onChange, options, placeholder }: {
   );
 }
 
-export function SettingsView() {
+/* Four tabs rather than one long scroll. Settings is the only page in
+   the product you arrive at knowing which thing you came to change, so
+   a column that makes you scroll past the other three is a column that
+   answers a question nobody asked. The grouping is by who the setting
+   belongs to: the shop, the invoice, the person, and the agents. */
+const TABS = [
+  { key: "brand", label: "Brand" },
+  { key: "billing", label: "Billing" },
+  { key: "account", label: "Account" },
+  { key: "autonomy", label: "Autonomy" },
+] as const;
+type Tab = (typeof TABS)[number]["key"];
+
+export function SettingsView({ initialTab = "brand" }: { initialTab?: Tab }) {
+  const [tab, setTab] = useState<Tab>(initialTab);
   const { locale } = useT();
   const account = useAccount();
   const profile = useProfile();
@@ -110,6 +124,23 @@ export function SettingsView() {
 
   return (
     <div className="space-y-6">
+      <div role="tablist" aria-label="Settings" className="flex flex-wrap gap-1 rounded-control border border-hairline bg-white p-1">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            role="tab"
+            aria-selected={tab === t.key}
+            onClick={() => setTab(t.key)}
+            className={`rounded-[9px] px-3.5 py-2 text-body font-semibold transition ${
+              tab === t.key ? "bg-brand text-white" : "text-ink-faint hover:bg-wash hover:text-ink-soft"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "brand" && (
       <Section title="Your brand">
         <div className="grid gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
           <Surface className="p-6 text-center">
@@ -180,7 +211,9 @@ export function SettingsView() {
           </Surface>
         </div>
       </Section>
+      )}
 
+      {tab === "billing" && (
       <Section
         title="Business and billing"
         aside={
@@ -232,7 +265,10 @@ export function SettingsView() {
           </div>
         </Surface>
       </Section>
+      )}
 
+      {tab === "account" && (
+        <>
       <Section title="You">
         <Surface className="p-5">
           {account ? (
@@ -327,13 +363,6 @@ export function SettingsView() {
         </Surface>
       </Section>
 
-      {/* Autonomy, which used to be its own destination in the rail. It
-          is a preference about how HeyMoon behaves, so it sits with the
-          preferences rather than beside the work. */}
-      <div id="autonomy" className="scroll-mt-6">
-        <AutonomyView />
-      </div>
-
       <Section title="Danger zone">
         <Surface className="border-danger/25 p-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -351,6 +380,13 @@ export function SettingsView() {
           </div>
         </Surface>
       </Section>
+        </>
+      )}
+
+      {/* Autonomy, which used to be its own destination in the rail. It
+          is a preference about how HeyMoon behaves, so it is a tab here
+          rather than a row beside the work. */}
+      {tab === "autonomy" && <AutonomyView />}
 
       {/* Asked once, in its own sheet, with the count in it. A confirm
           that does not say what is about to go is not a confirm. */}

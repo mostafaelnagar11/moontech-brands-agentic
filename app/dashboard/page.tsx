@@ -26,7 +26,7 @@
  * text box this close to a live campaign.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Sparkle } from "@phosphor-icons/react";
 import { CampaignView } from "../components/dashboard/CampaignView";
@@ -84,6 +84,11 @@ export default function DashboardPage() {
       ? stored
       : "campaign") as DashboardView;
   const settingsOpen = view === "settings" || view === "autonomy";
+  /* Remembered rather than hardcoded to "home": a brand who opened
+     settings from the ads queue expects the back arrow to return them
+     to the ads queue. */
+  const cameFrom = useRef<DashboardView>("home");
+  useEffect(() => { if (!settingsOpen) cameFrom.current = view; }, [view, settingsOpen]);
 
   const camp = useActiveCampaign();
   const anyCampaign = useCampaigns().length > 0;
@@ -146,6 +151,11 @@ export default function DashboardPage() {
        for `useGo()` and never learns which page it is on. */
     <SurfaceProvider go={setDashboardView}>
     <div className="flex h-[100dvh] overflow-hidden bg-canvas">
+      {/* The rail is the work, and settings is not the work. It steps
+          aside here and the top bar carries a way back instead, so the
+          page you came from is one press away and nothing else on
+          screen invites you sideways mid-edit. */}
+      {!settingsOpen && (
       <DashboardSidebar
         collapsed={collapsed}
         view={view}
@@ -155,12 +165,17 @@ export default function DashboardPage() {
         mobileOpen={mobileNav}
         onMobileClose={() => setMobileNav(false)}
       />
+      )}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <DashboardTopbar
           title={TITLE[view]}
           waiting={waiting}
           assistantOpen={assistant}
+          /* Where the hamburger goes back to: the view that was open
+             before settings, or the dashboard if settings is where the
+             session started. */
+          onBack={settingsOpen ? () => setDashboardView(cameFrom.current) : undefined}
           onToggleAssistant={() => setAssistant((o) => !o)}
           /* One control, two jobs, the way the current app does it: it
              collapses the rail where there is room for one and opens
@@ -190,7 +205,7 @@ export default function DashboardPage() {
                 the activity log and the inbox still link to `autonomy`,
                 which is a section of this page now. */}
             {settingsOpen ? (
-              <SettingsView />
+              <SettingsView initialTab={view === "autonomy" ? "autonomy" : "brand"} key={view} />
             ) : (
               <>
             {!anyCampaign && <EmptyDashboard />}

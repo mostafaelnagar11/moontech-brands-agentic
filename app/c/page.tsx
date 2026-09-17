@@ -181,12 +181,30 @@ function ChatInner() {
      drop the "Start Phase 1" chip, for the same reason the ladder
      drops its button: the card below is the live one. */
   const requested = usePhaseRequested(plan?.id, 1);
+  /* Chips that answer with the same words however many times they are
+     pressed. An explainer is not an action: once a brand has been told
+     what happens next, offering to tell them again is a button that
+     does nothing new, sitting where the button that moves them on
+     should be. Asked once, gone.
+
+     Read off the transcript rather than held in state, because that is
+     where the question already lives: pressing a chip pushes it as the
+     brand's own message. So it survives a reload, and it is per thread
+     for free — a second campaign has not asked anything yet. */
+  const EXPLAINERS = new Set(["What happens next?", WHY_CHIP]);
+  const asked = new Set(thread.filter((i) => i.kind === "user").map((i) => (i as { text: string }).text));
+
   /* "Start Phase 1" comes out of the chip row the moment the card
      asking for it is on screen. Filtered HERE, at render, not where
      each list is written: `setAsking` stores a snapshot, so a list
      filtered when it was asked keeps the chip that was correct then
      and is wrong now. */
-  const liveChips = (opts: string[]) => (requested ? opts.filter((o) => o !== "Start Phase 1") : opts);
+  const liveChips = (opts: string[]) =>
+    opts.filter(
+      (o) =>
+        !(requested && o === "Start Phase 1") &&
+        !(EXPLAINERS.has(o) && asked.has(o))
+    );
   const [text, setText] = useState("");
   const [changes, setChanges] = useState<Record<string, PlanChange[]>>({});
   const [reports, setReports] = useState<Record<string, Report>>({});
