@@ -68,7 +68,7 @@ export function Composer({
           </div>
         )}
 
-        <div className="flex items-end gap-2 rounded-[26px] border border-black/[0.1] bg-white px-4 py-2.5 shadow-[0_2px_12px_rgba(16,12,40,0.06)] transition focus-within:border-brand/40 focus-within:shadow-[0_2px_18px_rgba(77,47,176,0.10)]">
+        <div className="flex items-end gap-2 rounded-[26px] border border-black/[0.1] bg-white px-4 py-2.5 shadow-[0_2px_12px_rgba(16,12,40,0.06)] transition focus-within:border-ink/25">
           <textarea
             ref={ref}
             rows={1}

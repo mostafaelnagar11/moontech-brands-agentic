@@ -22,8 +22,9 @@ export const T = {
   dangerDeep: "#B00011",
   good: "#059669",
   goodDeep: "#047857",
-  canvas: "#F7F7F8",
-  rail: "#FAFAFA",
+  canvas: "#F6F4FC",
+  rail: "#FAF9FE",
+  wash: "#F1EDFB",
   track: "#EFEBFA",
   hairline: "rgba(0,0,0,0.06)",
 } as const;
@@ -41,8 +42,8 @@ export const CARD = "rounded-card bg-white border border-hairline shadow-card";
 export const CARD_TIGHT = "rounded-control bg-white border border-hairline shadow-card";
 export const EYEBROW = "text-eyebrow font-semibold uppercase tracking-[0.14em]";
 export const FIELD =
-  "w-full rounded-control border border-black/[0.09] bg-white px-4 py-2.5 text-body text-ink outline-none transition focus:border-brand/50 focus:ring-2 focus:ring-brand/10";
+  "w-full rounded-control border border-black/[0.09] bg-white px-4 py-2.5 text-body text-ink outline-none transition focus:border-ink/25";
 export const BTN_PRIMARY =
   "inline-flex items-center justify-center gap-2 rounded-control bg-brand px-4 py-2.5 text-body font-semibold text-white transition hover:bg-brand-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-brand/40";
 export const BTN_QUIET =
-  "inline-flex items-center justify-center gap-2 rounded-control border border-black/[0.09] bg-white px-4 py-2.5 text-body font-semibold text-ink-soft transition hover:bg-neutral-50 active:scale-[0.98]";
+  "inline-flex items-center justify-center gap-2 rounded-control border border-black/[0.09] bg-white px-4 py-2.5 text-body font-semibold text-ink-soft transition hover:bg-wash active:scale-[0.98]";

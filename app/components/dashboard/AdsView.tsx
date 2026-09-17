@@ -349,7 +349,7 @@ function AdCard({
             onChange={(e) => setReason(e.target.value.slice(0, 280))}
             rows={3}
             placeholder="It doesn't follow the brief because…"
-            className="mt-3 w-full resize-none rounded-control border border-hairline bg-rail p-3 text-body text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+            className="mt-3 w-full resize-none rounded-control border border-hairline bg-rail p-3 text-body text-ink outline-none focus:border-ink/25"
           />
           <p className="mt-1 text-end text-[11px] tabular-nums text-ink-faint">{reason.length}/280</p>
           <div className="mt-4 flex gap-2">

@@ -40,9 +40,15 @@ const config: Config = {
            that is due. Never for a low score, never for a failed check. */
         danger: { DEFAULT: "#D70015", deep: "#B00011" },
         good: { DEFAULT: "#059669", deep: "#047857" },
-        /* Surfaces, coolest to warmest. */
-        canvas: "#F7F7F8",
-        rail: "#FAFAFA",
+        /* Surfaces. Every one of these used to be a neutral grey, and
+           a grey surface under a purple brand reads as a default nobody
+           chose. They are the same lightnesses, tinted toward the brand
+           so the whole app sits in one family: `canvas` is the ground a
+           page rests on, `rail` the chrome beside it, `wash` the fill
+           inside a card, and `track` the groove a bar runs in. */
+        canvas: "#F6F4FC",
+        rail: "#FAF9FE",
+        wash: "#F1EDFB",
         track: "#EFEBFA",
       },
       /* `hairline` inside cards and between rows; `rule` is the landing's

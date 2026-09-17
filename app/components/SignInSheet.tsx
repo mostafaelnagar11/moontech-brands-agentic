@@ -27,7 +27,7 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, ChatCircleDots } from "@phosphor-icons/react";
+import { ArrowLeft, CaretDown, ChatCircleDots } from "@phosphor-icons/react";
 import { Sheet } from "./ui";
 import { Wordmark } from "./Wordmark";
 import { signIn } from "../lib/store";
@@ -41,13 +41,13 @@ const EXPIRES_IN = 60;
    it is a worse control than a short one that covers everybody who can
    actually use the product today. */
 const DIAL_CODES = [
-  { code: "+966", name: "Saudi Arabia" },
-  { code: "+971", name: "United Arab Emirates" },
-  { code: "+965", name: "Kuwait" },
-  { code: "+974", name: "Qatar" },
-  { code: "+973", name: "Bahrain" },
-  { code: "+968", name: "Oman" },
-  { code: "+20", name: "Egypt" },
+  { code: "+966", flag: "\u{1F1F8}\u{1F1E6}", name: "Saudi Arabia" },
+  { code: "+971", flag: "\u{1F1E6}\u{1F1EA}", name: "United Arab Emirates" },
+  { code: "+965", flag: "\u{1F1F0}\u{1F1FC}", name: "Kuwait" },
+  { code: "+974", flag: "\u{1F1F6}\u{1F1E6}", name: "Qatar" },
+  { code: "+973", flag: "\u{1F1E7}\u{1F1ED}", name: "Bahrain" },
+  { code: "+968", flag: "\u{1F1F4}\u{1F1F2}", name: "Oman" },
+  { code: "+20", flag: "\u{1F1EA}\u{1F1EC}", name: "Egypt" },
 ];
 
 /* Deliberately loose. It is checking that a person typed a number
@@ -210,7 +210,12 @@ export function SignInSheet({ open, onClose, onVerified }: {
                       onChange={(e) => f.set(e.target.value)}
                       autoComplete={f.ac}
                       spellCheck={false}
-                      className="w-full rounded-control border-2 border-black/[0.1] bg-white px-4 py-3 text-body text-ink outline-none transition placeholder:text-ink-faint focus:border-brand"
+                      /* A focused field darkens its own hairline and
+                         nothing more. The purple stroke it used to draw
+                         was the brand colour doing a job the caret
+                         already does, on every field in turn, which
+                         made filling the form flash. */
+                      className="w-full rounded-control border border-black/[0.1] bg-white px-4 py-3 text-body text-ink outline-none focus-visible:outline-none transition placeholder:text-ink-faint focus:border-ink/25"
                     />
                   </div>
                 ))}
@@ -227,18 +232,32 @@ export function SignInSheet({ open, onClose, onVerified }: {
                   language. */}
               <div
                 dir="ltr"
-                className="flex items-stretch overflow-hidden rounded-control border-2 border-black/[0.1] bg-white transition focus-within:border-brand"
+                className="flex items-stretch overflow-hidden rounded-control border border-black/[0.1] bg-white transition focus-within:border-ink/25"
               >
-                <select
-                  aria-label="Country code"
-                  value={dial}
-                  onChange={(e) => setDial(e.target.value)}
-                  className="num shrink-0 border-e border-black/[0.08] bg-transparent py-3 ps-4 pe-2 text-body font-semibold text-ink outline-none"
-                >
-                  {DIAL_CODES.map((c) => (
-                    <option key={c.code} value={c.code}>{c.code}</option>
-                  ))}
-                </select>
+                {/* The caret is drawn rather than left to the browser,
+                    which puts its own arrow hard against the right edge
+                    and therefore hard against the seam. Drawing it
+                    means the select can reserve room for it: `pr-8`
+                    holds the arrow, and the seam sits clear of both. */}
+                <div className="relative shrink-0">
+                  <select
+                    aria-label="Country code"
+                    value={dial}
+                    onChange={(e) => setDial(e.target.value)}
+                    className="h-full appearance-none bg-transparent py-3 pl-3.5 pr-8 text-body font-semibold text-ink outline-none focus-visible:outline-none"
+                  >
+                    {DIAL_CODES.map((c) => (
+                      <option key={c.code} value={c.code}>{c.flag}  {c.code}</option>
+                    ))}
+                  </select>
+                  <CaretDown
+                    size={11}
+                    weight="bold"
+                    aria-hidden
+                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-faint"
+                  />
+                </div>
+                <span aria-hidden className="my-2 w-px shrink-0 bg-black/[0.08]" />
                 <input
                   id="signin-phone"
                   type="tel"
@@ -247,7 +266,7 @@ export function SignInSheet({ open, onClose, onVerified }: {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="50 123 4567"
-                  className="num w-full min-w-0 bg-transparent px-3 py-3 text-body text-ink outline-none placeholder:font-normal placeholder:text-ink-faint"
+                  className="num w-full min-w-0 bg-transparent px-3 py-3 text-body text-ink outline-none focus-visible:outline-none placeholder:font-normal placeholder:text-ink-faint"
                 />
               </div>
 
@@ -276,7 +295,7 @@ export function SignInSheet({ open, onClose, onVerified }: {
               type="button"
               onClick={() => setStep("details")}
               aria-label="Back to your details"
-              className="grid h-9 w-9 place-items-center rounded-control border border-hairline bg-white text-ink-soft transition hover:bg-neutral-50"
+              className="grid h-9 w-9 place-items-center rounded-control border border-hairline bg-white text-ink-soft transition hover:bg-wash"
             >
               <ArrowLeft size={15} weight="bold" aria-hidden className="rtl:rotate-180" />
             </button>
@@ -306,8 +325,8 @@ export function SignInSheet({ open, onClose, onVerified }: {
                   autoComplete={i === 0 ? "one-time-code" : "off"}
                   aria-label={`Digit ${i + 1} of ${LEN}`}
                   aria-invalid={wrong || undefined}
-                  className={`num h-14 w-full min-w-0 rounded-control border bg-white text-center text-[22px] font-semibold text-ink outline-none transition focus:ring-2 focus:ring-brand/10 disabled:bg-neutral-50 ${
-                    wrong ? "border-danger" : "border-black/[0.12] focus:border-brand"
+                  className={`num h-14 w-full min-w-0 rounded-control border bg-white text-center text-[22px] font-semibold text-ink outline-none focus-visible:outline-none transition disabled:bg-wash ${
+                    wrong ? "border-danger" : "border-black/[0.12] focus:border-ink/30"
                   }`}
                 />
               ))}

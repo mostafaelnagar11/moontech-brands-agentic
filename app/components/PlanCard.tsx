@@ -121,7 +121,7 @@ export function PlanCard({
             <p className="mt-1 text-[11px] leading-4 tabular-nums text-ink-faint">{multiple}x</p>
           </div>
         </div>
-        <p className="border-t border-hairline bg-neutral-50 px-3.5 py-2 text-[11px] leading-4 text-ink-soft">
+        <p className="border-t border-hairline bg-wash px-3.5 py-2 text-[11px] leading-4 text-ink-soft">
           Sell more than the guarantee and it is all yours. Sell less and HeyMoon pays you the difference.
         </p>
       </div>

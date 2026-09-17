@@ -26,7 +26,7 @@ export function Pill({ children, tone = "brand", className = "" }: { children: R
     brand: "border-brand/20 bg-brand/[0.07] text-brand",
     good: "border-good/20 bg-good/[0.08] text-good-deep",
     danger: "border-danger/25 bg-danger/[0.07] text-danger",
-    muted: "border-hairline bg-neutral-50 text-ink-faint",
+    muted: "border-hairline bg-wash text-ink-faint",
     live: "border-brand/20 bg-brand/[0.07] text-brand",
   }[tone];
   return (
@@ -46,7 +46,7 @@ export function Btn({
 } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const v = {
     primary: "bg-brand text-white hover:bg-brand-hover disabled:bg-brand/40",
-    quiet: "border border-black/[0.09] bg-white text-ink-soft hover:bg-neutral-50 disabled:text-ink-faint",
+    quiet: "border border-black/[0.09] bg-white text-ink-soft hover:bg-wash disabled:text-ink-faint",
     ghost: "text-ink-soft hover:bg-black/[0.04] disabled:text-ink-faint",
     danger: "border border-danger/25 bg-danger/[0.07] text-danger hover:bg-danger/[0.12]",
   }[variant];

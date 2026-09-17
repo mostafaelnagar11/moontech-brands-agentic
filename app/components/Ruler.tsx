@@ -121,7 +121,7 @@ export function PhaseTiles({
         const tone =
           r.state === "live" ? "border-brand/30 bg-brand/[0.05]"
           : r.state === "ready" ? "border-danger/25 bg-danger/[0.05]"
-          : r.state === "ended" ? "border-hairline bg-neutral-50"
+          : r.state === "ended" ? "border-hairline bg-wash"
           : "border-hairline bg-white";
         return (
           <li key={r.phaseNo} className={`min-w-[148px] flex-1 rounded-control border p-3 ${tone}`}>

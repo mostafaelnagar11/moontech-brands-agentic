@@ -91,13 +91,13 @@ function StatusBadge({ status }: { status: PhaseStatus }) {
     </span>
   );
   if (status === "locked") return (
-    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-pill border border-hairline bg-neutral-50 px-2.5 py-1 text-[11px] font-semibold text-ink-faint">
+    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-pill border border-hairline bg-wash px-2.5 py-1 text-[11px] font-semibold text-ink-faint">
       <LockSimple size={11} weight="fill" aria-hidden />
       Queued
     </span>
   );
   return (
-    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-pill border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-[11px] font-semibold text-ink-faint">
+    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-pill border border-neutral-200 bg-wash px-2.5 py-1 text-[11px] font-semibold text-ink-faint">
       <Check size={11} weight="bold" aria-hidden />
       Completed
     </span>

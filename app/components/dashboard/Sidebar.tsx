@@ -97,7 +97,7 @@ function Content({ collapsed, view, onView, waiting, brandName, onMobileClose }:
             onClick={() => campaigns.length > 1 && setSwitcher((o) => !o)}
             aria-expanded={campaigns.length > 1 ? switcher : undefined}
             disabled={campaigns.length <= 1}
-            className={`flex w-full items-center gap-2.5 rounded-control border border-neutral-100 bg-neutral-50 px-3 py-2 text-start transition ${
+            className={`flex w-full items-center gap-2.5 rounded-control border border-neutral-100 bg-wash px-3 py-2 text-start transition ${
               campaigns.length > 1 ? "hover:bg-neutral-100" : ""
             }`}
           >
@@ -112,7 +112,7 @@ function Content({ collapsed, view, onView, waiting, brandName, onMobileClose }:
                 <div key={c.id} className={`group flex items-center ${c.id === activeId ? "bg-brand/[0.06]" : ""}`}>
                   <button
                     onClick={() => { setActiveCampaign(c.id); setSwitcher(false); onMobileClose?.(); }}
-                    className="min-w-0 flex-1 px-3 py-2 text-start transition hover:bg-neutral-50"
+                    className="min-w-0 flex-1 px-3 py-2 text-start transition hover:bg-wash"
                   >
                     <span className="block truncate text-meta font-semibold text-ink">{campaignLabel(c)}</span>
                     <span className="block truncate text-[10px] text-ink-faint">{c.paid ? "Running" : "Not started"}</span>
@@ -151,7 +151,7 @@ function Content({ collapsed, view, onView, waiting, brandName, onMobileClose }:
               } ${
                 active
                   ? "bg-brand text-white shadow-md shadow-violet-200"
-                  : "text-ink-faint hover:bg-neutral-50 hover:text-ink-soft"
+                  : "text-ink-faint hover:bg-wash hover:text-ink-soft"
               }`}
             >
               <I size={16} weight="bold" aria-hidden className="shrink-0" />

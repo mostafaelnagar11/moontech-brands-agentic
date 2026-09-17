@@ -120,7 +120,7 @@ export function ActivityView() {
         aside={
           <button
             onClick={() => go("autonomy")}
-            className="inline-flex items-center gap-1.5 rounded-control border border-hairline bg-white px-3 py-1.5 text-[11px] font-semibold text-ink-soft transition hover:bg-neutral-50"
+            className="inline-flex items-center gap-1.5 rounded-control border border-hairline bg-white px-3 py-1.5 text-[11px] font-semibold text-ink-soft transition hover:bg-wash"
           >
             <Sliders size={12} weight="bold" aria-hidden /> Change what I may do
           </button>
@@ -145,7 +145,7 @@ export function ActivityView() {
                 const rule = ruleOf(a.ruleKey);
                 const agent = agentOf(a);
                 return (
-                  <li key={a.id} className={`px-4 py-3 ${a.undone ? "bg-neutral-50/60" : ""}`}>
+                  <li key={a.id} className={`px-4 py-3 ${a.undone ? "bg-wash/60" : ""}`}>
                     <div className="flex items-start gap-3">
                       <span className="hidden w-[132px] shrink-0 sm:block">
                         {agent && (
@@ -222,7 +222,7 @@ export function ActivityView() {
                           ) : (
                             <button
                               onClick={() => undoActivity(a.id)}
-                              className="inline-flex items-center gap-1 rounded-control border border-hairline bg-white px-2.5 py-1.5 text-[11px] font-semibold text-ink-soft transition hover:bg-neutral-50"
+                              className="inline-flex items-center gap-1 rounded-control border border-hairline bg-white px-2.5 py-1.5 text-[11px] font-semibold text-ink-soft transition hover:bg-wash"
                             >
                               <ArrowCounterClockwise size={11} weight="bold" aria-hidden />
                               Undo

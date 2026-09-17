@@ -148,7 +148,7 @@ export function ApprovalCard({
             onChange={(e) => setReason(e.target.value.slice(0, 280))}
             rows={3}
             placeholder="It doesn't follow the brief because…"
-            className="mt-3 w-full resize-none rounded-control border border-black/[0.09] bg-rail p-3 text-body text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+            className="mt-3 w-full resize-none rounded-control border border-black/[0.09] bg-rail p-3 text-body text-ink outline-none focus:border-ink/25"
           />
           <p className="mt-1 text-end text-[11px] tabular-nums text-ink-faint">{reason.length}/280</p>
           <div className="mt-4 flex gap-2">
@@ -172,7 +172,7 @@ export function ApprovalCard({
 export function LiveAdGrid({ ads }: { ads: AdRecord[] }) {
   if (!ads.length) {
     return (
-      <p className="rounded-card border border-dashed border-black/[0.12] bg-neutral-50 p-6 text-center text-body text-ink-faint">
+      <p className="rounded-card border border-dashed border-black/[0.12] bg-wash p-6 text-center text-body text-ink-faint">
         Nothing is live from this phase yet. Drafts you approve publish within the hour and collect here.
       </p>
     );

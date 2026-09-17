@@ -137,7 +137,7 @@ export function FundingBlock({ req, onConfirmed, onCancelled }: {
           </li>
         </ul>
 
-        <div className="mt-3 flex items-center gap-3 rounded-control bg-neutral-50 px-3 py-2.5">
+        <div className="mt-3 flex items-center gap-3 rounded-control bg-wash px-3 py-2.5">
           {/* The card brand in capitals is a badge, so the capitals come
               from the stylesheet and the string stays as it is written. */}
           <span aria-hidden className="grid h-7 w-11 place-items-center rounded bg-gradient-to-br from-brand to-brand-500 text-[9px] font-bold uppercase text-white">
@@ -1233,7 +1233,7 @@ export function IntegrationBlock({ onConnect, compact = false }: {
               value={form.phone}
               placeholder="+971…"
               onChange={(e) => setForm((st) => ({ ...st, phone: e.target.value }))}
-              className="w-full rounded-control border border-brand/40 bg-white px-3 py-2 text-body text-ink outline-none transition focus:border-brand/60 focus:ring-2 focus:ring-brand/10"
+              className="w-full rounded-control border border-black/[0.1] bg-white px-3 py-2 text-body text-ink outline-none transition focus:border-ink/25"
             />
           </label>
 
@@ -1272,7 +1272,7 @@ export function IntegrationBlock({ onConnect, compact = false }: {
                 value={form[f.k]}
                 placeholder={f.ph}
                 onChange={(e) => setForm((st) => ({ ...st, [f.k]: e.target.value }))}
-                className="w-full rounded-control border border-black/[0.09] bg-white px-3 py-2 text-body text-ink outline-none transition focus:border-brand/50 focus:ring-2 focus:ring-brand/10"
+                className="w-full rounded-control border border-black/[0.09] bg-white px-3 py-2 text-body text-ink outline-none transition focus:border-ink/25"
               />
             </label>
           ))}

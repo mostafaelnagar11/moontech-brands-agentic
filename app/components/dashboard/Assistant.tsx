@@ -183,7 +183,7 @@ export function DashboardAssistant({ onClose }: { onClose?: () => void }) {
             return (
               <div
                 key={t.id}
-                className="flex items-center gap-2.5 rounded-control border border-hairline bg-neutral-50 px-3 py-2.5"
+                className="flex items-center gap-2.5 rounded-control border border-hairline bg-wash px-3 py-2.5"
               >
                 <span aria-hidden className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-good/15 text-good-deep">
                   <Check size={11} weight="bold" />
@@ -221,7 +221,7 @@ export function DashboardAssistant({ onClose }: { onClose?: () => void }) {
             ))}
           </div>
         )}
-        <div className="flex items-end gap-2 rounded-[20px] border border-black/[0.1] bg-white px-3 py-2 transition focus-within:border-brand/40">
+        <div className="flex items-end gap-2 rounded-[20px] border border-black/[0.1] bg-white px-3 py-2 transition focus-within:border-ink/25">
           <Sparkle size={14} weight="fill" className="mb-1.5 shrink-0 text-brand/60" aria-hidden />
           <textarea
             ref={box}

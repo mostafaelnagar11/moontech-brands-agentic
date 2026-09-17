@@ -296,7 +296,7 @@ function Profile({
                 href={P.url(c.handle.replace("@", ""))}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 rounded-md border border-hairline bg-neutral-50 px-2 py-0.5 text-[11px] font-medium text-ink-soft no-underline transition hover:border-brand/30 hover:text-brand"
+                className="inline-flex items-center gap-1 rounded-md border border-hairline bg-wash px-2 py-0.5 text-[11px] font-medium text-ink-soft no-underline transition hover:border-brand/30 hover:text-brand"
               >
                 <P.Icon size={13} weight="fill" aria-hidden /> {c.platform}
                 <ArrowUpRight size={10} weight="bold" aria-hidden className="opacity-60 rtl:-scale-x-100" />
@@ -338,7 +338,7 @@ function Profile({
         )}
 
         {status === "passed" && (
-          <div className="mt-5 rounded-control border border-hairline bg-neutral-50 px-3.5 py-2.5">
+          <div className="mt-5 rounded-control border border-hairline bg-wash px-3.5 py-2.5">
             <div className="flex flex-wrap items-center gap-3">
               <p className="min-w-0 flex-1 text-meta text-ink-soft">
                 Passed. MoonMatch AI will ease off profiles like hers.
@@ -413,7 +413,7 @@ function Profile({
         <div className="flex shrink-0 gap-2 border-t border-hairline p-3">
           <button
             onClick={onPass}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-control border border-hairline bg-white px-4 py-2.5 text-body font-semibold text-ink-soft transition hover:bg-neutral-50"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-control border border-hairline bg-white px-4 py-2.5 text-body font-semibold text-ink-soft transition hover:bg-wash"
           >
             <ThumbsDown size={14} weight="fill" aria-hidden /> Pass
           </button>
@@ -477,7 +477,7 @@ function PassDialog({
                 onClick={() => toggle(r.id)}
                 aria-pressed={on}
                 className={`flex w-full items-center gap-2.5 rounded-control border px-3 py-2 text-start text-body transition ${
-                  on ? "border-brand/40 bg-brand/[0.05] text-ink" : "border-hairline bg-white text-ink-soft hover:bg-neutral-50"
+                  on ? "border-brand/40 bg-brand/[0.05] text-ink" : "border-hairline bg-white text-ink-soft hover:bg-wash"
                 }`}
               >
                 <span
@@ -497,7 +497,7 @@ function PassDialog({
             onChange={(e) => setNote(e.target.value)}
             placeholder="Anything else? (optional)"
             aria-label="Note"
-            className="mt-1.5 h-20 w-full resize-none rounded-control border border-hairline bg-white p-3 text-body text-ink outline-none transition focus:border-brand/40"
+            className="mt-1.5 h-20 w-full resize-none rounded-control border border-hairline bg-white p-3 text-body text-ink outline-none transition focus:border-ink/25"
           />
           <p className="text-end text-[10px] text-ink-faint">{note.length}/{NOTE_MAX}</p>
         </div>
@@ -505,7 +505,7 @@ function PassDialog({
         <div className="flex gap-2 border-t border-hairline p-3">
           <button
             onClick={onClose}
-            className="flex-1 rounded-control border border-hairline bg-white px-4 py-2 text-body font-semibold text-ink-soft transition hover:bg-neutral-50"
+            className="flex-1 rounded-control border border-hairline bg-white px-4 py-2 text-body font-semibold text-ink-soft transition hover:bg-wash"
           >
             Cancel
           </button>

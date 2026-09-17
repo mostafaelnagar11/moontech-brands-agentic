@@ -30,7 +30,7 @@ export function WorkingLine({
 
   if (status === "cancelled") {
     return (
-      <div className={`flex flex-wrap items-center gap-3 rounded-control border border-hairline bg-neutral-50 px-3 py-2.5 ${className}`}>
+      <div className={`flex flex-wrap items-center gap-3 rounded-control border border-hairline bg-wash px-3 py-2.5 ${className}`}>
         <p className="flex-1 text-meta text-ink-soft">
           Stopped after {done} of {total}. Everything found so far is below and still usable.
         </p>

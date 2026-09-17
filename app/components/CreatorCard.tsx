@@ -73,7 +73,7 @@ export function CreatorCard({
       )}
 
       {c.caveat && (
-        <p className="mt-3 flex items-start gap-2 rounded-control bg-neutral-50 px-2.5 py-2 text-[11px] leading-4 text-ink-soft">
+        <p className="mt-3 flex items-start gap-2 rounded-control bg-wash px-2.5 py-2 text-[11px] leading-4 text-ink-soft">
           <Warning size={12} weight="fill" className="mt-0.5 shrink-0 text-ink-faint" aria-hidden />
           {c.caveat}
         </p>
@@ -128,7 +128,7 @@ export function CreatorRow({ c, onDrop }: { c: CreatorMatch; onDrop?: (id: numbe
       </ul>
 
       {c.caveat && (
-        <p className="mt-2.5 flex items-start gap-2 rounded-control bg-neutral-50 px-2.5 py-2 text-[11px] leading-4 text-ink-soft">
+        <p className="mt-2.5 flex items-start gap-2 rounded-control bg-wash px-2.5 py-2 text-[11px] leading-4 text-ink-soft">
           <Warning size={12} weight="fill" className="mt-0.5 shrink-0 text-ink-faint" aria-hidden />
           {c.caveat}
         </p>
@@ -147,7 +147,7 @@ export function CreatorGrid({
 }) {
   if (!creators.length) {
     return (
-      <p className="rounded-card border border-dashed border-black/[0.12] bg-neutral-50 p-6 text-center text-body text-ink-faint">
+      <p className="rounded-card border border-dashed border-black/[0.12] bg-wash p-6 text-center text-body text-ink-faint">
         No creator on the roster has enough of their audience in these markets. Widen the markets and the shortlist comes back.
       </p>
     );
@@ -196,7 +196,7 @@ export function CreatorSummary({ creators, matched }: {
 }) {
   if (!creators.length) {
     return (
-      <p className="rounded-card border border-dashed border-black/[0.12] bg-neutral-50 p-6 text-center text-body text-ink-faint">
+      <p className="rounded-card border border-dashed border-black/[0.12] bg-wash p-6 text-center text-body text-ink-faint">
         No creator on the roster has enough of their audience in these markets. Widen the markets and the shortlist comes back.
       </p>
     );
@@ -268,7 +268,7 @@ export function CreatorSummary({ creators, matched }: {
         </div>
       </dl>
 
-      <p className="mt-3 flex items-start gap-2 rounded-control bg-neutral-50 px-2.5 py-2 text-[11px] leading-4 text-ink-soft">
+      <p className="mt-3 flex items-start gap-2 rounded-control bg-wash px-2.5 py-2 text-[11px] leading-4 text-ink-soft">
         <LockSimple size={12} weight="fill" className="mt-0.5 shrink-0 text-ink-faint" aria-hidden />
         <span>
           MoonMatch AI found {subset ? `all ${pool}` : "them"} and MoonSearch AI vetted every one for brand and fraud

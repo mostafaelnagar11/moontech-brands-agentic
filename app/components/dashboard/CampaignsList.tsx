@@ -200,7 +200,7 @@ function StatusChip({ campaign }: { campaign: Campaign }) {
 
   if (!campaign.paid) {
     return (
-      <span className={`${skin} border-hairline bg-neutral-50 text-ink-faint`}>
+      <span className={`${skin} border-hairline bg-wash text-ink-faint`}>
         <LockSimple size={11} weight="fill" aria-hidden />
         Not started
       </span>
@@ -208,7 +208,7 @@ function StatusChip({ campaign }: { campaign: Campaign }) {
   }
   if (!live) {
     return (
-      <span className={`${skin} border-neutral-200 bg-neutral-50 text-ink-soft`}>
+      <span className={`${skin} border-neutral-200 bg-wash text-ink-soft`}>
         <Check size={11} weight="bold" aria-hidden />
         Closed
       </span>

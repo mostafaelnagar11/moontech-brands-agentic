@@ -201,7 +201,7 @@ function Layer({ readId, k, read }: { readId: string; k: ReadLayerKey; read: Bra
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder={mode === "fix" ? "What should this say instead?" : "What else should I know about this?"}
-            className="w-full resize-none rounded-control border border-black/[0.09] bg-rail p-2.5 text-body text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+            className="w-full resize-none rounded-control border border-black/[0.09] bg-rail p-2.5 text-body text-ink outline-none focus:border-ink/25"
           />
           <div className="mt-2 flex gap-2">
             <Btn size="sm" onClick={mode === "fix" ? saveFix : saveAdd} disabled={!draft.trim()}>{t("read.save")}</Btn>

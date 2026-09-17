@@ -38,7 +38,7 @@ export function LangToggle({ className = "", plain = false }: { className?: stri
         plain
           /* A text link, for the landing's masthead: no box, no border. */
           ? `text-[14px] font-medium text-ink/70 transition hover:text-ink ${className}`
-          : `inline-flex items-center gap-2 rounded-control border border-hairline bg-white px-3 py-2 text-meta font-medium text-ink-soft transition hover:bg-neutral-50 ${className}`
+          : `inline-flex items-center gap-2 rounded-control border border-hairline bg-white px-3 py-2 text-meta font-medium text-ink-soft transition hover:bg-wash ${className}`
       }
       lang={locale === "ar" ? "en" : "ar"}
     >
