@@ -55,14 +55,18 @@ export function Tile({
 export function Section({
   title, aside, children,
 }: {
-  title: string;
+  /** A node, not just a string: a section whose heading is also the
+      control that folds it needs to pass a button in. */
+  title: ReactNode;
   aside?: ReactNode;
   children: ReactNode;
 }) {
   return (
     <section>
       <div className="mb-2.5 flex flex-wrap items-center gap-3">
-        <h2 className="text-[13px] font-semibold text-ink">{title}</h2>
+        {typeof title === "string"
+          ? <h2 className="text-[13px] font-semibold text-ink">{title}</h2>
+          : <h2>{title}</h2>}
         {aside && <div className="ms-auto shrink-0">{aside}</div>}
       </div>
       {children}

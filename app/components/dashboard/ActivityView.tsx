@@ -109,7 +109,8 @@ export function ActivityView() {
 
       {/* The fixed limits, kept where they were: above the log, not in a
           settings screen nobody opens. */}
-      <Surface className="flex flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3">
+      <Surface className="px-4 py-3">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
         <span className="inline-flex shrink-0 items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.09em] text-ink-faint">
           <LockSimple size={12} weight="fill" className="text-brand" aria-hidden />
           Fixed limits
@@ -120,11 +121,14 @@ export function ActivityView() {
             <span className="font-semibold text-good-deep">{LEVEL_WORD[r.level]}</span>
           </span>
         ))}
-        <div className="ms-auto shrink-0">
+        </div>
+        <div className="mt-2">
           <Detail summary="Why these cannot be turned on">
-            They are not preferences. Nothing in this log moved money or published anything, and there is no
-            level of trust that would let it: an agent may move budget you have already paid, inside the phase
-            you paid it for, and a draft goes live only after you approve it.
+            <p className="max-w-[86ch]">
+              They are not preferences. Nothing in this log moved money or published anything, and there is no
+              level of trust that would let it: an agent may move budget you have already paid, inside the phase
+              you paid it for, and a draft goes live only after you approve it.
+            </p>
           </Detail>
         </div>
       </Surface>

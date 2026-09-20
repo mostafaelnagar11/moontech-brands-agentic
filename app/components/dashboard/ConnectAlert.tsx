@@ -40,7 +40,7 @@ export function ConnectAlert() {
         <span aria-hidden className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand text-white">
           <PlugsConnected size={16} weight="fill" />
         </span>
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 basis-[15rem]">
           <p id="connect-alert" className="text-body font-semibold text-ink">
             One step left: connect your store
           </p>
@@ -55,7 +55,7 @@ export function ConnectAlert() {
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
           aria-controls="connect-alert-body"
-          className="flex shrink-0 items-center gap-1.5 rounded-control bg-brand px-3.5 py-2 text-body font-semibold text-white transition hover:bg-brand-hover"
+          className="flex w-full shrink-0 items-center justify-center gap-1.5 rounded-control bg-brand px-3.5 py-2 text-body font-semibold text-white transition hover:bg-brand-hover sm:w-auto"
         >
           {open ? "Not now" : "Connect store"}
           <CaretDown

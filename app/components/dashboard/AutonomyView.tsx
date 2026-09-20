@@ -24,7 +24,8 @@
  * segment is rendered as text, not as buttons.
  */
 
-import { ArrowRight, LockSimple } from "@phosphor-icons/react";
+import { useState } from "react";
+import { ArrowRight, CaretDown, LockSimple } from "@phosphor-icons/react";
 import {
   setAutonomy,
   useActivity,
@@ -82,6 +83,7 @@ const PIPELINE: { agent: string; stage: string; job: string; needsYou?: string }
 const LOCKED_AGENTS = PIPELINE.filter((p) => p.needsYou).length;
 
 export function AutonomyView() {
+  const [pipeline, setPipeline] = useState(false);
   const go = useGo();
   const rules = useAutonomy();
   const activity = useActivity();
@@ -117,12 +119,34 @@ export function AutonomyView() {
         />
       </div>
 
-      {/* ── The pipeline ─────────────────────────────────────────────
-          One line per agent at dashboard width: name, stage, job, and
-          the lock on the two that cannot finish alone. Below sm the job
-          wraps under the name rather than being squeezed. */}
+      {/* ── The pipeline, folded away ───────────────────────────────
+          One line per agent: name, stage, job, and the lock on the two
+          that cannot finish alone.
+
+          Closed by default. Nobody opens this tab to read a roster of
+          seven agents; they open it to change what those agents may do
+          on their own, and the roster is 340px of reference material
+          standing between the page and its own controls. It is worth
+          keeping, so it folds rather than going. The one fact from it
+          that changes a decision, that two of the seven can never
+          finish alone, stays visible on the closed row. */}
       <Section
-        title="The agents, in the order they run"
+        title={
+          <button
+            type="button"
+            onClick={() => setPipeline((o) => !o)}
+            aria-expanded={pipeline}
+            className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-ink transition hover:text-brand"
+          >
+            The agents, in the order they run
+            <CaretDown
+              size={11}
+              weight="bold"
+              aria-hidden
+              className={`text-ink-faint transition ${pipeline ? "rotate-180" : ""}`}
+            />
+          </button>
+        }
         aside={
           <span className="inline-flex items-center gap-1 rounded-pill border border-danger/25 bg-danger/[0.07] px-2.5 py-1 text-[11px] font-semibold text-danger">
             <LockSimple size={11} weight="fill" aria-hidden />
@@ -130,6 +154,7 @@ export function AutonomyView() {
           </span>
         }
       >
+        {pipeline && (
         <Surface>
           <ol className="divide-y divide-hairline">
             {PIPELINE.map((p, i) => (
@@ -175,6 +200,7 @@ export function AutonomyView() {
             </Detail>
           </div>
         </Surface>
+        )}
       </Section>
 
       {/* ── The fixed limits, first, and not a control ───────────────

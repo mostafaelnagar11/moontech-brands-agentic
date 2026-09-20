@@ -434,12 +434,21 @@ export function HomeView() {
           that survived are below the staircase where they belong. This
           band is the whole subject of the dashboard, said once, in the
           brand's own numbers, at the top. */}
-      <p className="text-body text-ink-faint">
+      <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-ink sm:text-[24px]">
         {account ? `Welcome back, ${account.firstName}` : "Welcome back"}
-      </p>
+      </h2>
 
+      {/* One row, three cards. The two totals used to sit below the
+          staircase, which put the money the brand has made two screens
+          away from the money it is promised. They are the same
+          subject: the band is the phase running now, and the pair
+          beside it is what every phase before it has already added up
+          to. On a phone they fall under the band side by side; from lg
+          the band takes two thirds and they stack in the last third,
+          which is exactly its height. */}
+      <div className="grid gap-3 lg:grid-cols-3">
       {live && live.revTarget !== null ? (
-        <section className="rounded-card bg-brand p-6 sm:p-7">
+        <section className="rounded-card bg-brand p-6 sm:p-7 lg:col-span-2">
           {/* Both ranks, in order. A campaign holds phases, and this
               line is the only place on the page where the one you are
               looking at is named inside the one it belongs to. */}
@@ -465,7 +474,7 @@ export function HomeView() {
           />
         </section>
       ) : (
-        <section className="rounded-card border border-hairline bg-white p-6 shadow-card">
+        <section className="rounded-card border border-hairline bg-white p-6 shadow-card lg:col-span-2">
           <p className="text-eyebrow font-semibold uppercase tracking-[0.12em] text-ink-faint">
             {label} · no phase running
           </p>
@@ -476,6 +485,17 @@ export function HomeView() {
           </p>
         </section>
       )}
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+          {stats.map((st) => (
+            <Surface key={st.label} className="flex flex-col justify-center p-5">
+              <p className="text-body font-medium text-ink-soft">{st.label}</p>
+              <p className="num mt-2 text-figure font-semibold leading-none tracking-tight text-ink">{st.value}</p>
+              <p className="mt-2 text-meta text-ink-faint">{st.sub}</p>
+            </Surface>
+          ))}
+        </div>
+      </div>
 
       {/* The phase running now — singular, because only one can be */}
       <div className="pt-2">
@@ -493,17 +513,6 @@ export function HomeView() {
 
       {/* The ladder itself — the active campaign's, in phase order */}
       <PhaseLadder phases={phases} label={label} onOpen={open} />
-
-      {/* The two totals that survived, under the thing they total. */}
-      <div className="grid gap-3 sm:grid-cols-2">
-        {stats.map((st) => (
-          <Surface key={st.label} className="p-5">
-            <p className="text-body font-medium text-ink-soft">{st.label}</p>
-            <p className="num mt-2 text-figure font-semibold leading-none tracking-tight text-ink">{st.value}</p>
-            <p className="mt-2 text-meta text-ink-faint">{st.sub}</p>
-          </Surface>
-        ))}
-      </div>
 
       {/* Three things stood here and all three were invented.
 

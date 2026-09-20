@@ -28,7 +28,7 @@ import {
   Check,
   Plus,
   PencilSimple,
-  House,
+  Megaphone,
   Gear,
   SignOut,
   SquaresFour,
@@ -56,7 +56,7 @@ import { getRead } from "../../lib/agent/registry";
    not four ways to slice whichever one happens to be active. */
 export const NAV: { key: DashboardView; label: string; icon: Icon }[] = [
   { key: "home", label: "Dashboard", icon: SquaresFour },
-  { key: "campaign", label: "Campaigns", icon: House },
+  { key: "campaign", label: "Campaigns", icon: Megaphone },
 ];
 
 /* Settings sits at the foot of the rail rather than in the list above,
@@ -106,9 +106,29 @@ function Content({ collapsed, view, onView, brandName, onMobileClose }: Props) {
   const activeId = useStore((s) => s.activeCampaignId);
   const active = campaigns.find((c) => c.id === activeId) ?? null;
   const switcherWrap = useRef<HTMLDivElement>(null);
+  const [campMenu, setCampMenu] = useState(false);
+  const campWrap = useRef<HTMLElement>(null);
 
   /* A menu that only closes by pressing the thing that opened it is a
      menu people leave open, the same rule the top bar's avatar uses. */
+  useEffect(() => {
+    if (!campMenu) return;
+    const away = (e: MouseEvent) => {
+      if (campWrap.current && !campWrap.current.contains(e.target as Node)) setCampMenu(false);
+    };
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && setCampMenu(false);
+    document.addEventListener("mousedown", away);
+    document.addEventListener("keydown", esc);
+    return () => {
+      document.removeEventListener("mousedown", away);
+      document.removeEventListener("keydown", esc);
+    };
+  }, [campMenu]);
+
+  /* Expanding the rail puts the real rows back, so the flyout that
+     stood in for them has nothing left to do. */
+  useEffect(() => { if (!collapsed) setCampMenu(false); }, [collapsed]);
+
   useEffect(() => {
     if (!switcher) return;
     const away = (e: MouseEvent) => {
@@ -123,7 +143,11 @@ function Content({ collapsed, view, onView, brandName, onMobileClose }: Props) {
     };
   }, [switcher]);
   return (
-    <div className={`flex h-full flex-col overflow-y-auto bg-white py-5 ${collapsed ? "items-center px-2" : "px-3"}`}>
+    <div
+      className={`flex h-full flex-col bg-white py-5 ${
+        collapsed ? "items-center overflow-visible px-2" : "overflow-y-auto px-3"
+      }`}
+    >
       <div className={`mb-4 flex items-center ${collapsed ? "justify-center" : "justify-between px-2"}`}>
         {collapsed ? (
           <span
@@ -154,28 +178,41 @@ function Content({ collapsed, view, onView, brandName, onMobileClose }: Props) {
           which made the first thing in the rail a box that looked
           pressable and was not. Adding a brand is available from the
           first one, so the control is a control from the first one. */}
-      {!collapsed && (
-        <div className="relative mb-5 px-1" ref={switcherWrap}>
+      {/* Collapsed, this was rendered not at all, so the one control
+          that changes which brand you are looking at simply left the
+          rail. The mark alone is the trigger at 60px, and the menu
+          opens beside the rail instead of under the button. */}
+      <div className={`relative mb-5 ${collapsed ? "" : "px-1"}`} ref={switcherWrap}>
           <button
             onClick={() => setSwitcher((o) => !o)}
             aria-expanded={switcher}
             aria-haspopup="menu"
-            className="flex w-full items-center gap-2.5 rounded-control border border-hairline bg-wash px-3 py-2 text-start transition hover:bg-brand-100/60"
+            aria-label={collapsed ? `Brand: ${brandName}. Switch brand` : undefined}
+            title={collapsed ? brandName : undefined}
+            className={`flex items-center rounded-control border border-hairline bg-wash transition hover:bg-brand-100/60 ${
+              collapsed ? "justify-center p-1.5" : "w-full gap-2.5 px-3 py-2 text-start"
+            }`}
           >
             <BrandMark campaign={active} size={28} />
-            <span className="min-w-0 flex-1 truncate text-body font-semibold text-ink-soft">{brandName}</span>
-            <CaretDown
-              size={11}
-              weight="bold"
-              aria-hidden
-              className={`shrink-0 text-ink-faint transition ${switcher ? "rotate-180" : ""}`}
-            />
+            {!collapsed && (
+              <>
+                <span className="min-w-0 flex-1 truncate text-body font-semibold text-ink-soft">{brandName}</span>
+                <CaretDown
+                  size={11}
+                  weight="bold"
+                  aria-hidden
+                  className={`shrink-0 text-ink-faint transition ${switcher ? "rotate-180" : ""}`}
+                />
+              </>
+            )}
           </button>
 
           {switcher && (
             <div
               role="menu"
-              className="absolute inset-x-0 top-full z-50 mt-1 overflow-hidden rounded-control border border-hairline bg-white shadow-float"
+              className={`absolute z-50 overflow-hidden rounded-control border border-hairline bg-white shadow-float ${
+                collapsed ? "start-full top-0 ms-2 w-[232px]" : "inset-x-0 top-full mt-1"
+              }`}
             >
               <p className="px-3 pb-1 pt-2.5 text-[9px] font-semibold uppercase tracking-widest text-ink-faint">
                 Switch brand
@@ -223,22 +260,32 @@ function Content({ collapsed, view, onView, brandName, onMobileClose }: Props) {
               </div>
             </div>
           )}
-        </div>
-      )}
+      </div>
 
       {!collapsed && (
         <p className="mb-2 px-2 text-[9px] font-medium uppercase tracking-widest text-ink-faint/60">Menu</p>
       )}
 
-      <nav className="mb-6 flex w-full flex-col gap-1" aria-label="Dashboard">
+      <nav className="relative mb-6 flex w-full flex-col gap-1" aria-label="Dashboard" ref={campWrap}>
         {NAV.map((item) => {
           const active = item.key === view;
           const I = item.icon;
           return (
             <button
               key={item.key}
-              onClick={() => { onView(item.key); if (item.key === "campaign") showCampaignList(); onMobileClose?.(); }}
+              onClick={() => {
+                /* Collapsed, Campaigns opens the list of names beside
+                   the rail instead of navigating, because the rows that
+                   would have carried those names cannot exist at 60px.
+                   Expanded, it does what it always did. */
+                if (collapsed && item.key === "campaign") { setCampMenu((o) => !o); return; }
+                onView(item.key);
+                if (item.key === "campaign") showCampaignList();
+                onMobileClose?.();
+              }}
               title={collapsed ? item.label : undefined}
+              aria-expanded={collapsed && item.key === "campaign" ? campMenu : undefined}
+              aria-haspopup={collapsed && item.key === "campaign" ? "menu" : undefined}
               aria-current={active ? "page" : undefined}
               className={`flex items-center rounded-control py-2.5 text-left text-body font-medium transition-all ${
                 collapsed ? "justify-center px-0" : "gap-3 px-3"
@@ -254,51 +301,76 @@ function Content({ collapsed, view, onView, brandName, onMobileClose }: Props) {
           );
         })}
 
-        {/* The brands, indented under Campaigns. A shortcut straight
-            into one, which is what a rail is for: the alternative is
-            Campaigns, then the list, then the card, to reach a page you
-            visit twenty times a day.
+        {/* The campaigns, indented under Campaigns.
 
-            Each row carries its own count of drafts waiting, because
-            the point of seeing three brands at once is seeing which of
-            the three needs you. At 60px there is no room to indent or
-            to name anything, so a collapsed rail shows the initial and
-            the count rides it as a dot. */}
-        {campaigns.map((c) => {
-          const here = view !== "home" && view !== "settings" && c.id === activeId;
-          const owed = ads.filter((a) => a.state === "waiting" && c.adIds.includes(a.id)).length;
-          return (
-            <button
-              key={c.id}
-              onClick={() => { openCampaign(c.id); onMobileClose?.(); }}
-              title={collapsed ? campaignLabel(c) : undefined}
-              aria-current={here ? "page" : undefined}
-              className={`relative flex items-center rounded-control py-2 text-left text-meta font-medium transition-all ${
-                collapsed ? "justify-center px-0" : "gap-2.5 ps-9 pe-3"
-              } ${
-                here ? "bg-brand/[0.08] text-ink" : "text-ink-faint hover:bg-wash hover:text-ink-soft"
-              }`}
-            >
-              {!collapsed && (
-                <span
-                  aria-hidden
-                  className={`absolute inset-y-0 start-[19px] w-px ${here ? "bg-brand/40" : "bg-hairline"}`}
-                />
-              )}
-              {collapsed && <BrandMark campaign={c} size={22} />}
-              {!collapsed ? (
-                <>
+            A shortcut straight into one, which is what a rail is for:
+            the alternative is Campaigns, then the list, then the card,
+            to reach a page you visit twenty times a day. Each row
+            carries its own count of drafts waiting, because the point
+            of seeing three at once is seeing which of the three needs
+            you.
+
+            Collapsed, these rows do not render. They used to fall back
+            to the BRAND's mark, which stopped meaning anything the
+            moment campaigns got names of their own: three campaigns of
+            one brand drew the same circle three times. A 60px rail
+            cannot label anything, so the list moves into a flyout off
+            the Campaigns row above, where the names can be read. */}
+        {/* The collapsed rail's campaign list, by name, where names fit. */}
+        {collapsed && campMenu && (
+          <div
+            role="menu"
+            className="absolute start-full top-8 z-50 ms-2 w-[232px] overflow-hidden rounded-control border border-hairline bg-white shadow-float"
+          >
+            <p className="px-3 pb-1 pt-2.5 text-[9px] font-semibold uppercase tracking-widest text-ink-faint">
+              {brandName}
+            </p>
+            {campaigns.map((c) => {
+              const here = view !== "home" && view !== "settings" && c.id === activeId;
+              const owed = ads.filter((a) => a.state === "waiting" && c.adIds.includes(a.id)).length;
+              return (
+                <button
+                  key={c.id}
+                  role="menuitem"
+                  onClick={() => { openCampaign(c.id); setCampMenu(false); onMobileClose?.(); }}
+                  className={`flex w-full items-center gap-2 px-3 py-2.5 text-start text-meta font-medium transition hover:bg-wash ${
+                    here ? "bg-brand/[0.06] text-ink" : "text-ink-soft"
+                  }`}
+                >
                   <span className="min-w-0 flex-1 truncate">{campaignLabel(c)}</span>
                   {owed > 0 && (
                     <span className="shrink-0 rounded-md bg-danger/[0.08] px-1.5 py-0.5 text-[11px] font-semibold text-danger">
                       {owed}
                     </span>
                   )}
-                </>
-              ) : (
-                owed > 0 && (
-                  <span aria-hidden className="absolute end-1 top-1 h-1.5 w-1.5 rounded-full bg-danger" />
-                )
+                  {here && <Check size={12} weight="bold" aria-hidden className="shrink-0 text-brand" />}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {!collapsed && campaigns.map((c) => {
+          const here = view !== "home" && view !== "settings" && c.id === activeId;
+          const owed = ads.filter((a) => a.state === "waiting" && c.adIds.includes(a.id)).length;
+          return (
+            <button
+              key={c.id}
+              onClick={() => { openCampaign(c.id); onMobileClose?.(); }}
+              aria-current={here ? "page" : undefined}
+              className={`relative flex items-center gap-2.5 rounded-control py-2 pe-3 ps-9 text-left text-meta font-medium transition-all ${
+                here ? "bg-brand/[0.08] text-ink" : "text-ink-faint hover:bg-wash hover:text-ink-soft"
+              }`}
+            >
+              <span
+                aria-hidden
+                className={`absolute inset-y-0 start-[19px] w-px ${here ? "bg-brand/40" : "bg-hairline"}`}
+              />
+              <span className="min-w-0 flex-1 truncate">{campaignLabel(c)}</span>
+              {owed > 0 && (
+                <span className="shrink-0 rounded-md bg-danger/[0.08] px-1.5 py-0.5 text-[11px] font-semibold text-danger">
+                  {owed}
+                </span>
               )}
             </button>
           );
