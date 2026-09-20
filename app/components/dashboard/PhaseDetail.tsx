@@ -65,10 +65,26 @@ export function PhaseDetail({ campaign, phase }: { campaign: Campaign; phase: Ph
             />
             <Tile label="Ads live" value={live} sub={waiting ? `${waiting} waiting on you` : "nothing waiting"} />
             <Tile
-              tone={p && p.onPace ? "good" : "plain"}
-              label={phase.status === "ended" ? "Closed at" : "Forecast at close"}
-              value={p ? fmtUSD(Math.round(phase.status === "ended" ? phase.rev : p.atEnd)) : fmtUSD(phase.rev)}
-              sub={p ? `${Math.round(phase.status === "ended" ? (phase.rev / (target || 1)) * 100 : p.pctForecast)}% of target` : undefined}
+              /* "Forecast at close · $19,895 · 133% of target" stood
+                 here. It is the same projected figure CampaignView
+                 deleted a level up, with the ten-line explanation for
+                 why still sitting in that file: a forecast beside a
+                 guarantee reads as a second, softer promise, and the
+                 brand remembers the forecast. A closed phase states
+                 what it closed at, which is a fact. A running one
+                 states how long it has, which is the thing you can
+                 still act on. */
+              label={phase.status === "ended" ? "Closed at" : "Days to the unlock line"}
+              value={
+                phase.status === "ended"
+                  ? fmtUSD(phase.rev)
+                  : p ? p.daysToUnlock : "—"
+              }
+              sub={
+                phase.status === "ended"
+                  ? `${Math.round((phase.rev / (target || 1)) * 100)}% of the guarantee`
+                  : p ? `${p.daysLeft} days left in the phase` : undefined
+              }
             />
           </div>
 

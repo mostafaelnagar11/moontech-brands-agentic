@@ -100,6 +100,16 @@ export function AdsView() {
 
   return (
     <div className="space-y-6">
+      {/* The review window, said where the countdown is rather than in
+          a panel of promises it contradicts. */}
+      {shelf === "waiting" && counts.waiting > 0 && (
+        <p className="flex items-center gap-2 text-meta text-ink-faint">
+          <Clock size={13} weight="fill" aria-hidden className="shrink-0 text-ink-faint" />
+          A draft you do not decide within {REVIEW_WINDOW_DAYS} days publishes as the creator drafted it. Decline
+          it and nothing goes out.
+        </p>
+      )}
+
       {/* The batch row. One line: what I would do, and the two presses
           that do it. The paragraph that used to explain the review
           window is now a chip on every card that has a clock on it. */}
@@ -176,15 +186,23 @@ export function AdsView() {
         )}
       </Section>
 
-      {/* The footer paragraph about who is allowed to publish, as the
-          four facts it was actually making. */}
-      <Section title="What I may not do here">
+      {/* This panel said "Ads published without your approval: Never"
+          and then, three rows lower, "An undecided draft goes live on
+          its own: After 10 days". Both were true and the pair was a
+          lie: the second IS publishing without approval, it just waits
+          first. A brand who reads the two together learns that the
+          promise has an expiry, which is the worst possible way to
+          find that out.
+
+          So the never-rows say never and mean it, and the timeout
+          moves out to sit with the countdown chips on the cards it
+          actually governs, worded as what it is. */}
+      <Section title="What I may never do here">
         <Surface>
           <div className="divide-y divide-hairline">
-            <DataRow label="Ads published without your approval" value="Never" />
-            <DataRow label="Money moved without your approval" value="Never" />
+            <DataRow label="Publish an ad you have not approved" value="Never" />
+            <DataRow label="Move money without your approval" value="Never" />
             <DataRow label="What I do instead" value="Rank the queue, recommend" />
-            <DataRow label="An undecided draft goes live on its own" value={`After ${REVIEW_WINDOW_DAYS} days`} />
           </div>
         </Surface>
       </Section>

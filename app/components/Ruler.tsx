@@ -22,19 +22,22 @@
 import { UNLOCK_AT } from "../lib/mock/campaigns";
 
 export function RevenueRuler({
-  pct, forecastPct, delay = 0.25, className = "", srLabel,
+  pct, forecastPct, delay = 0.25, className = "", trackClass = "bg-track", srLabel,
 }: {
   pct: number;
   forecastPct?: number;
   delay?: number;
   className?: string;
+  /** The groove the fill runs in. Overridden on a dark surface, where
+      the default sits at almost the same lightness as the fill. */
+  trackClass?: string;
   srLabel?: string;
 }) {
   const crossed = pct >= UNLOCK_AT * 100;
   const showGhost = forecastPct !== undefined && forecastPct > pct + 1;
   return (
     <div className={className}>
-      <div className="relative h-2 rounded-pill bg-track">
+      <div className={`relative h-2 rounded-pill ${trackClass}`}>
         <div
           className="bar-fill keyline-grad h-full rounded-pill"
           style={{ width: `${Math.min(Math.max(pct, 0), 100)}%`, ["--bd" as string]: `${delay}s` }}

@@ -17,6 +17,7 @@
  * is zero, permanently, because it is not a setting.
  */
 
+import { useEffect, useState } from "react";
 import { ArrowClockwise, ArrowCounterClockwise, ArrowRight, LockSimple, Sliders } from "@phosphor-icons/react";
 import { Pill } from "../ui";
 import {
@@ -35,10 +36,16 @@ const agentOf = (a: ActivityEntry): string | null => {
   return typeof v === "string" && v.trim() !== "" ? v.trim() : null;
 };
 
-/* A column, not a sentence: "41m", not "41 minutes ago". Same arithmetic
-   as everywhere else on the dashboard. */
-const ago = (ts: number) => {
-  const m = Math.round((Date.now() - ts) / 60000);
+/* A column, not a sentence: "41m", not "41 minutes ago".
+
+   `now` is passed in rather than read from the clock, because this runs
+   during render: the server stamps one time into the HTML, the client
+   stamps another a beat later, and React reports the mismatch. It is
+   also the rule this codebase holds everywhere else, that nothing
+   deterministic calls Date.now. The caller reads the clock once, in an
+   effect, after hydration. */
+const ago = (ts: number, now: number) => {
+  const m = Math.round((now - ts) / 60000);
   if (m < 1) return "just now";
   if (m < 60) return `${m}m ago`;
   const h = Math.round(m / 60);
@@ -52,6 +59,12 @@ const LEVEL_WORD: Record<AutonomyLevel, string> = {
 };
 
 export function ActivityView() {
+  /* Read once after mount, never during render. Zero until then, which
+     renders every row as "just now" for one frame rather than as a
+     time the server and the browser disagree about. */
+  const [now, setNow] = useState(0);
+  useEffect(() => { setNow(Date.now()); }, []);
+
   const go = useGo();
   const activity = useActivity();
   const autonomy = useAutonomy();
@@ -167,7 +180,7 @@ export function ActivityView() {
 
                         <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-ink-faint">
                           {agent && <span className="font-semibold text-brand sm:hidden">{agent}</span>}
-                          <span className="sm:hidden">{ago(a.at)}</span>
+                          <span className="sm:hidden">{ago(a.at, now)}</span>
                           {rule && <span className="truncate">{rule.label}</span>}
                           {a.undone && <span className="font-semibold text-danger">Undone</span>}
                         </div>
@@ -207,7 +220,7 @@ export function ActivityView() {
                       </div>
 
                       <span className="hidden w-[72px] shrink-0 text-end text-[11px] tabular-nums text-ink-faint sm:block">
-                        {ago(a.at)}
+                        {ago(a.at, now)}
                       </span>
 
                       <div className="flex w-[88px] shrink-0 justify-end">
