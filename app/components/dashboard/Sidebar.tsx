@@ -82,7 +82,7 @@ interface Props {
     than a letter. */
 function BrandMark({ campaign, size }: { campaign: Campaign | null; size: number }) {
   const logo = campaign?.readId ? getRead(campaign.readId).identity?.logo : undefined;
-  const label = campaign ? campaignLabel(campaign) : "";
+  const label = campaign?.brandName ?? "";
   return (
     <span
       aria-hidden
@@ -189,8 +189,10 @@ function Content({ collapsed, view, onView, brandName, onMobileClose }: Props) {
                   >
                     <BrandMark campaign={c} size={24} />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-meta font-semibold text-ink">{campaignLabel(c)}</span>
-                      <span className="block truncate text-[10px] text-ink-faint">{c.paid ? "Running" : "Not started"}</span>
+                      <span className="block truncate text-meta font-semibold text-ink">{c.brandName}</span>
+                      <span className="block truncate text-[10px] text-ink-faint">
+                        {campaignLabel(c)} · {c.paid ? "Running" : "Not started"}
+                      </span>
                     </span>
                     {c.id === activeId && <Check size={12} weight="bold" aria-hidden className="shrink-0 text-brand" />}
                   </button>
@@ -283,7 +285,7 @@ function Content({ collapsed, view, onView, brandName, onMobileClose }: Props) {
                   className={`absolute inset-y-0 start-[19px] w-px ${here ? "bg-brand/40" : "bg-hairline"}`}
                 />
               )}
-              <BrandMark campaign={c} size={collapsed ? 22 : 18} />
+              {collapsed && <BrandMark campaign={c} size={22} />}
               {!collapsed ? (
                 <>
                   <span className="min-w-0 flex-1 truncate">{campaignLabel(c)}</span>

@@ -21,6 +21,7 @@ import type {
   FundingRequest, Plan,
 } from "./agent/types";
 import { rememberRead } from "./agent/registry";
+import { hash } from "./agent/rng";
 import { ADS, PHASES, type Phase } from "./mock/campaigns";
 
 /* ------------------------------------------------------------------ */
@@ -807,8 +808,40 @@ export const renameCampaign = (id: string, name: string) =>
     return { campaigns: { ...s.campaigns, [id]: { ...c, label: trimmed || undefined } } };
   });
 
-/** What to call it: the brand's name for it, or the brand. */
-export const campaignLabel = (c: Campaign) => c.label ?? c.brandName;
+/* Campaign names.
+ *
+ * A campaign used to be called after the brand that owns it, which was
+ * fine while a brand had one. The rail lists campaigns now, and a brand
+ * running three had three rows all reading "Ounass" — a list that
+ * cannot be navigated by the thing it is a list of.
+ *
+ * So each one gets a name of its own. Two words, an amber-and-falcon
+ * sort of name rather than "Campaign 2", because the row has to be
+ * recognisable at a glance six months later and an ordinal never is.
+ *
+ * Picked by hashing the campaign id, not by Math.random: this whole
+ * project has no random in it, so that the same demo run twice reads
+ * the same both times and a screenshot can be trusted. The second word
+ * is offset by a different hash so the two do not move together, and
+ * the pair is 24 x 16, which is more campaigns than this prototype will
+ * ever hold. Renaming still wins over the generated name, because
+ * `label` is checked first. */
+const NAME_FIRST = [
+  "Amber", "Cobalt", "Crescent", "Dune", "Ember", "Falcon", "Harbour", "Indigo",
+  "Lantern", "Meridian", "Mirage", "Monsoon", "Oasis", "Onyx", "Pearl", "Quartz",
+  "Saffron", "Sable", "Solstice", "Tide", "Vermilion", "Zephyr", "Cardamom", "Cinder",
+];
+const NAME_SECOND = [
+  "Run", "Push", "Sprint", "Wave", "Arc", "Drift", "Signal", "Current",
+  "Circuit", "Relay", "Ascent", "Trace", "Loop", "Spark", "Bloom", "Surge",
+];
+
+/** The generated name for a campaign, stable for the life of its id. */
+export const generatedName = (id: string) =>
+  `${NAME_FIRST[hash(id) % NAME_FIRST.length]} ${NAME_SECOND[hash(`${id}:2`) % NAME_SECOND.length]}`;
+
+/** What to call it: the name the brand typed, or the one it was given. */
+export const campaignLabel = (c: Campaign) => c.label ?? generatedName(c.id);
 
 export const useCampaigns = () => useStore(campaignList);
 

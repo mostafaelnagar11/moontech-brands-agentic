@@ -159,7 +159,7 @@ export default function DashboardPage() {
         view={view}
         onView={(v) => { setDashboardView(v); if (v === "campaign") showCampaignList(); }}
         waiting={waiting}
-        brandName={camp ? campaignLabel(camp) : "Campaigns"}
+        brandName={camp?.brandName ?? "Campaigns"}
         mobileOpen={mobileNav}
         onMobileClose={() => setMobileNav(false)}
       />
