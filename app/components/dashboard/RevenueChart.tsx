@@ -22,7 +22,7 @@ import { useState } from "react";
 import { fmtUSD, revenueSeries, UNLOCK_AT, type Phase } from "../../lib/mock/campaigns";
 
 const W = 720;
-const H = 200;
+const H = 360;
 const PAD = { t: 14, r: 16, b: 24, l: 56 };
 
 export function RevenueChart({ phase }: { phase: Phase }) {

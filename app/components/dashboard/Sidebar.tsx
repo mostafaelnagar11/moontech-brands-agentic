@@ -228,7 +228,7 @@ function Content({ collapsed, view, onView, brandName, onMobileClose }: Props) {
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-meta font-semibold text-ink">{c.brandName}</span>
                       <span className="block truncate text-[10px] text-ink-faint">
-                        {campaignLabel(c)} · {c.paid ? "Running" : "Not started"}
+                        {c.paid ? "Running" : "Not started"}
                       </span>
                     </span>
                     {c.id === activeId && <Check size={12} weight="bold" aria-hidden className="shrink-0 text-brand" />}

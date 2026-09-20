@@ -32,7 +32,7 @@ import {
 import { LiveAdGrid } from "../AdCards";
 import { Claim } from "../Evidence";
 import { Avatar, Btn, Sheet } from "../ui";
-import { DataRow, Detail, Section, Surface } from "./kit";
+import { Detail, Section, Surface } from "./kit";
 
 type Shelf = "waiting" | "live" | "declined";
 
@@ -186,26 +186,7 @@ export function AdsView() {
         )}
       </Section>
 
-      {/* This panel said "Ads published without your approval: Never"
-          and then, three rows lower, "An undecided draft goes live on
-          its own: After 10 days". Both were true and the pair was a
-          lie: the second IS publishing without approval, it just waits
-          first. A brand who reads the two together learns that the
-          promise has an expiry, which is the worst possible way to
-          find that out.
 
-          So the never-rows say never and mean it, and the timeout
-          moves out to sit with the countdown chips on the cards it
-          actually governs, worded as what it is. */}
-      <Section title="What I may never do here">
-        <Surface>
-          <div className="divide-y divide-hairline">
-            <DataRow label="Publish an ad you have not approved" value="Never" />
-            <DataRow label="Move money without your approval" value="Never" />
-            <DataRow label="What I do instead" value="Rank the queue, recommend" />
-          </div>
-        </Surface>
-      </Section>
     </div>
   );
 }

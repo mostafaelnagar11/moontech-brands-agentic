@@ -40,9 +40,9 @@ import { ActionBar, Section, Surface, Tile } from "./kit";
     one thing: switch the brand and every one of them changes. */
 export const CAMPAIGN_TABS = [
   { key: "campaign", label: "Phases" },
+  { key: "ads", label: "Ads" },
   { key: "creators", label: "Creators" },
   { key: "inbox", label: "Needs you" },
-  { key: "ads", label: "Ads" },
   { key: "activity", label: "Activity" },
 ] as const;
 export type CampaignTab = (typeof CAMPAIGN_TABS)[number]["key"];
@@ -246,7 +246,7 @@ function OneCampaign() {
               it: the plot grows with the card and keeps the padding
               even on all four sides. */}
           <Surface className="flex h-full flex-col p-5">
-            <div className="flex min-h-[260px] flex-1 flex-col justify-center">
+            <div className="flex min-h-[300px] flex-1 flex-col justify-center">
               <RevenueChart phase={phase} />
             </div>
           </Surface>
