@@ -191,22 +191,29 @@ function OneCampaign() {
         onCta={() => go("ads")}
       />
 
-      {/* Four figures, ranked — and every one of them LABELLED with
-          what it counts.
+      {/* Two figures, which are the two questions: how is the phase
+          that is running doing, and how is the campaign doing.
 
-          Three screens show revenue for the same campaign and they
-          count different things: the card in the list sums every phase,
-          this view is about the phase running now, and the phase page
-          is about one rung. All three were right and none of them said
-          so, which reads as three screens disagreeing. The campaign
-          total now sits beside the phase figure here, so the number on
-          the card you clicked is on the page you land on. */}
-      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+          There were four. "This phase at close" was a FORECAST, and a
+          forecast beside a guarantee is the one thing this product has
+          been careful not to print anywhere: it reads as a second,
+          softer promise sitting next to the real one, and a brand who
+          reads $19,895 there will remember that number rather than the
+          $16,000 HeyMoon actually signed. "Waiting on you" was the
+          fourth copy of the same 6 — the action bar directly above it
+          says it in a sentence with a button, the Needs you tab wears
+          it as a badge, and so does the brand in the rail.
+
+          What is left is labelled with what it counts, because three
+          screens show sales for this campaign and they count different
+          things: the card in the list sums every phase, this view is
+          about the phase running now, and the phase page is one rung. */}
+      <div className="grid gap-3 sm:grid-cols-2">
         <Tile
           tone="hero"
           label={`${phaseTitle(phase.phaseNo)} attributed`}
           value={fmtUSD(phase.rev)}
-          sub={`${pct}% of ${fmtUSD(target)} on this phase`}
+          sub={`${pct}% of ${fmtUSD(target)}`}
           foot={
             <div className="h-1 w-full overflow-hidden rounded-pill bg-white/25">
               <div className="h-full rounded-pill bg-white" style={{ width: `${Math.min(100, pct)}%` }} />
@@ -216,19 +223,7 @@ function OneCampaign() {
         <Tile
           label="Campaign to date"
           value={fmtUSD(earned)}
-          sub={promised ? `of ${fmtUSD(promised)} guaranteed, all phases` : "across every phase"}
-        />
-        <Tile
-          tone={p && p.onPace ? "good" : "plain"}
-          label="This phase at close"
-          value={p ? fmtUSD(Math.round(p.atEnd)) : "—"}
-          sub={p ? `${Math.round(p.pctForecast)}% of this phase's target` : undefined}
-        />
-        <Tile
-          tone={waiting.length ? "alert" : "plain"}
-          label="Waiting on you"
-          value={waiting.length}
-          sub={waiting.length ? "nothing publishes until you decide" : "nothing right now"}
+          sub={promised ? `of ${fmtUSD(promised)} guaranteed` : "across every phase"}
         />
       </div>
 
@@ -274,8 +269,11 @@ function OneCampaign() {
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-body font-medium text-ink">{phaseTitle(ph.phaseNo)}</span>
+                      {/* The multiple, not the budget. A row's job is
+                          which rung and how it is going; what the rung
+                          costs is on the page the row opens. */}
                       <span className="block truncate text-[11px] text-ink-faint">
-                        {fmtUSD(ph.budget)} · {ph.guaranteedRoas}x guaranteed
+                        {ph.guaranteedRoas}x guaranteed
                       </span>
                     </span>
                     <span className="shrink-0 text-body font-semibold tabular-nums text-ink">
