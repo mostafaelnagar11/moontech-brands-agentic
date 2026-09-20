@@ -25,27 +25,110 @@ import {
 } from "../../lib/store";
 import { useGo } from "../../lib/surface";
 import { CampaignsList } from "./CampaignsList";
+import { CreatorsView } from "./CreatorsView";
+import { InboxView } from "./InboxView";
+import { AdsView } from "./AdsView";
+import { ActivityView } from "./ActivityView";
 import { PhaseDetail } from "./PhaseDetail";
 import { RevenueChart } from "./RevenueChart";
 import { ActionBar, Section, Surface, Tile } from "./kit";
 
 
+/** The five faces of one campaign. They were five rows in the rail,
+    ranked alongside Campaigns itself, which made them read as five
+    places rather than five views of one thing — and they are views of
+    one thing: switch the brand and every one of them changes. */
+export const CAMPAIGN_TABS = [
+  { key: "campaign", label: "Phases" },
+  { key: "creators", label: "Creators" },
+  { key: "inbox", label: "Needs you" },
+  { key: "ads", label: "Ads" },
+  { key: "activity", label: "Activity" },
+] as const;
+export type CampaignTab = (typeof CAMPAIGN_TABS)[number]["key"];
+
 /* Three levels behind one nav item: every campaign, one campaign with
    its phases, one phase. Pressing Campaign in the rail always returns
    to the list, which is the only way a drill-down stays escapable. */
-export function CampaignView() {
+export function CampaignView({ tab = "campaign", onTab }: {
+  tab?: CampaignTab;
+  /** Set by the dashboard, because the tab IS the dashboard view: the
+      assistant and the activity log both deep-link to "ads" and
+      "inbox", and those links have to keep working now that the rail
+      no longer offers them. */
+  onTab?: (t: CampaignTab) => void;
+}) {
   const drill = useDrill();
   const campaign = useActiveCampaign();
   const phases = useCampaignPhases();
+  const ads = useAds();
+  const waiting = campaign
+    ? ads.filter((a) => a.state === "waiting" && campaign.adIds.includes(a.id)).length
+    : 0;
 
-  if (drill.level === "list" || !campaign) return <CampaignsList />;
+  /* The list only answers for the Phases tab. Asking for Ads from
+     somewhere else — the action bar on the home page, the assistant,
+     the activity log — names a face of a campaign, so it opens that
+     face of the active one rather than dropping you on the list of
+     brands to find it yourself. */
+  if (!campaign || (drill.level === "list" && tab === "campaign")) return <CampaignsList />;
 
   const phase = drill.phaseId ? phases.find((p) => p.id === drill.phaseId) ?? null : null;
 
   return (
     <div className="space-y-4">
       <Crumbs campaign={campaign} phase={phase} />
-      {phase ? <PhaseDetail campaign={campaign} phase={phase} /> : <OneCampaign />}
+      {/* The tabs belong to the campaign, not to the phase: drilling
+          into one rung is a level deeper than choosing which face of
+          the campaign to look at, so the row steps aside there. */}
+      {!phase && (
+        <div role="tablist" aria-label="Campaign" className="flex flex-wrap gap-1 rounded-control border border-hairline bg-white p-1">
+          {CAMPAIGN_TABS.map((t) => (
+            <button
+              key={t.key}
+              role="tab"
+              aria-selected={tab === t.key}
+              onClick={() => onTab?.(t.key)}
+              className={`flex items-center gap-1.5 rounded-[9px] px-3.5 py-2 text-body font-semibold transition ${
+                tab === t.key ? "bg-brand text-white" : "text-ink-faint hover:bg-wash hover:text-ink-soft"
+              }`}
+            >
+              {t.label}
+              {t.key === "inbox" && waiting > 0 && (
+                <span
+                  className={`rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${
+                    tab === t.key ? "bg-white/20 text-white" : "bg-danger/[0.08] text-danger"
+                  }`}
+                >
+                  {waiting}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+      {phase ? (
+        <PhaseDetail campaign={campaign} phase={phase} />
+      ) : tab !== "campaign" && tab !== "creators" && !campaign.paid ? (
+        /* Phases and Creators read fine before payment: the ladder and
+           the crew are about what EXISTS. The other three are about
+           what is running, and nothing is. */
+        <Surface className="p-6 text-center">
+          <p className="text-body text-ink-soft">
+            {campaignLabel(campaign)} has not started yet. Start Phase 1 and connect the store, and this fills in.
+          </p>
+        </Surface>
+      ) : tab === "creators" ? (
+        <CreatorsView />
+      ) : tab === "inbox" ? (
+        <InboxView />
+      ) : tab === "ads" ? (
+        <AdsView />
+      ) : tab === "activity" ? (
+        <ActivityView />
+      ) : (
+        <OneCampaign />
+      )}
     </div>
   );
 }

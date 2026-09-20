@@ -28,41 +28,35 @@ import {
   Check,
   Plus,
   PencilSimple,
-  ClockCounterClockwise,
   House,
-  Megaphone,
   Gear,
   SignOut,
   SquaresFour,
-  UsersThree,
-  Tray,
   X,
   type Icon,
 } from "@phosphor-icons/react";
 import type { DashboardView } from "../../lib/agent/dashboard";
 import {
-  campaignLabel, renameCampaign, resetAll, setActiveCampaign, startConversation, useCampaigns, useStore,
-  type Campaign,
+  campaignLabel, openCampaign, renameCampaign, resetAll, setActiveCampaign, showCampaignList,
+  startConversation, useAds, useCampaigns, useStore, type Campaign,
 } from "../../lib/store";
 import { getRead } from "../../lib/agent/registry";
 
-/* Six rows, two ranks. Creators, Needs you, Ads and Activity are all
-   views OF a campaign — swap the campaign in the switcher above and
-   every one of them changes underneath you — so they were six siblings
-   pretending to be six destinations. They are indented under Campaigns
-   now, which is the thing they belong to, and Dashboard stays where it
-   is because it spans every campaign rather than describing one.
+/* Two rows, and then the brands.
 
-   Kept as one flat list with a `child` flag rather than a tree: the
-   view validator and the assistant both read `NAV` as a set of keys,
-   and nesting the data would have made two consumers walk it. */
-export const NAV: { key: DashboardView; label: string; icon: Icon; child?: boolean }[] = [
+   Creators, Needs you, Ads and Activity used to sit here as four more
+   destinations. They are not destinations, they are four faces of one
+   campaign: switch the brand above and every one of them changes
+   underneath you. They are tabs inside the campaign now, where the
+   thing they describe is.
+
+   What takes their place is the campaigns themselves, indented under
+   Campaigns, because THAT is the list a brand actually navigates by.
+   Somebody running three brands wants the three brands one press away,
+   not four ways to slice whichever one happens to be active. */
+export const NAV: { key: DashboardView; label: string; icon: Icon }[] = [
   { key: "home", label: "Dashboard", icon: SquaresFour },
   { key: "campaign", label: "Campaigns", icon: House },
-  { key: "creators", label: "Creators", icon: UsersThree, child: true },
-  { key: "inbox", label: "Needs you", icon: Tray, child: true },
-  { key: "ads", label: "Ads", icon: Megaphone, child: true },
-  { key: "activity", label: "Activity", icon: ClockCounterClockwise, child: true },
 ];
 
 /* Settings sits at the foot of the rail rather than in the list above,
@@ -105,9 +99,10 @@ function BrandMark({ campaign, size }: { campaign: Campaign | null; size: number
   );
 }
 
-function Content({ collapsed, view, onView, waiting, brandName, onMobileClose }: Props) {
+function Content({ collapsed, view, onView, brandName, onMobileClose }: Props) {
   const [switcher, setSwitcher] = useState(false);
   const campaigns = useCampaigns();
+  const ads = useAds();
   const activeId = useStore((s) => s.activeCampaignId);
   const active = campaigns.find((c) => c.id === activeId) ?? null;
   const switcherWrap = useRef<HTMLDivElement>(null);
@@ -240,43 +235,68 @@ function Content({ collapsed, view, onView, waiting, brandName, onMobileClose }:
           return (
             <button
               key={item.key}
-              onClick={() => { onView(item.key); onMobileClose?.(); }}
+              onClick={() => { onView(item.key); if (item.key === "campaign") showCampaignList(); onMobileClose?.(); }}
               title={collapsed ? item.label : undefined}
               aria-current={active ? "page" : undefined}
-              /* The rank is drawn with an indent and a guide, not with
-                 a smaller type size: a child row is still a destination
-                 and still has to be as easy to hit as its parent. At
-                 60px there is no room to indent anything, so a
-                 collapsed rail shows six equal icons and the grouping
-                 lives in the order alone. */
-              className={`relative flex items-center rounded-control py-2.5 text-left text-body font-medium transition-all ${
-                collapsed ? "justify-center px-0" : item.child ? "gap-3 ps-9 pe-3" : "gap-3 px-3"
+              className={`flex items-center rounded-control py-2.5 text-left text-body font-medium transition-all ${
+                collapsed ? "justify-center px-0" : "gap-3 px-3"
               } ${
                 active
                   ? "bg-brand text-white shadow-md shadow-violet-200"
                   : "text-ink-faint hover:bg-wash hover:text-ink-soft"
               }`}
             >
-              {!collapsed && item.child && (
+              <I size={16} weight="bold" aria-hidden className="shrink-0" />
+              {!collapsed && <span className="min-w-0 flex-1 truncate">{item.label}</span>}
+            </button>
+          );
+        })}
+
+        {/* The brands, indented under Campaigns. A shortcut straight
+            into one, which is what a rail is for: the alternative is
+            Campaigns, then the list, then the card, to reach a page you
+            visit twenty times a day.
+
+            Each row carries its own count of drafts waiting, because
+            the point of seeing three brands at once is seeing which of
+            the three needs you. At 60px there is no room to indent or
+            to name anything, so a collapsed rail shows the initial and
+            the count rides it as a dot. */}
+        {campaigns.map((c) => {
+          const here = view !== "home" && view !== "settings" && c.id === activeId;
+          const owed = ads.filter((a) => a.state === "waiting" && c.adIds.includes(a.id)).length;
+          return (
+            <button
+              key={c.id}
+              onClick={() => { openCampaign(c.id); onMobileClose?.(); }}
+              title={collapsed ? campaignLabel(c) : undefined}
+              aria-current={here ? "page" : undefined}
+              className={`relative flex items-center rounded-control py-2 text-left text-meta font-medium transition-all ${
+                collapsed ? "justify-center px-0" : "gap-2.5 ps-9 pe-3"
+              } ${
+                here ? "bg-brand/[0.08] text-ink" : "text-ink-faint hover:bg-wash hover:text-ink-soft"
+              }`}
+            >
+              {!collapsed && (
                 <span
                   aria-hidden
-                  className={`absolute inset-y-0 start-[19px] w-px ${active ? "bg-white/25" : "bg-hairline"}`}
+                  className={`absolute inset-y-0 start-[19px] w-px ${here ? "bg-brand/40" : "bg-hairline"}`}
                 />
               )}
-              <I size={16} weight="bold" aria-hidden className="shrink-0" />
-              {!collapsed && (
+              <BrandMark campaign={c} size={collapsed ? 22 : 18} />
+              {!collapsed ? (
                 <>
-                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                  {item.key === "inbox" && waiting > 0 && (
-                    <span
-                      className={`shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${
-                        active ? "bg-white/20 text-white" : "bg-danger/[0.08] text-danger"
-                      }`}
-                    >
-                      {waiting}
+                  <span className="min-w-0 flex-1 truncate">{campaignLabel(c)}</span>
+                  {owed > 0 && (
+                    <span className="shrink-0 rounded-md bg-danger/[0.08] px-1.5 py-0.5 text-[11px] font-semibold text-danger">
+                      {owed}
                     </span>
                   )}
                 </>
+              ) : (
+                owed > 0 && (
+                  <span aria-hidden className="absolute end-1 top-1 h-1.5 w-1.5 rounded-full bg-danger" />
+                )
               )}
             </button>
           );

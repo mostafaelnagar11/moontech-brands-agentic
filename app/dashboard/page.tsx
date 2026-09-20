@@ -29,12 +29,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Sparkle } from "@phosphor-icons/react";
-import { CampaignView } from "../components/dashboard/CampaignView";
+import { CampaignView, CAMPAIGN_TABS, type CampaignTab } from "../components/dashboard/CampaignView";
 import { HomeView } from "../components/dashboard/HomeView";
-import { CreatorsView } from "../components/dashboard/CreatorsView";
-import { AdsView } from "../components/dashboard/AdsView";
-import { InboxView } from "../components/dashboard/InboxView";
-import { ActivityView } from "../components/dashboard/ActivityView";
 import { SettingsView } from "../components/dashboard/SettingsView";
 import { DashboardSidebar, NAV } from "../components/dashboard/Sidebar";
 import { DashboardTopbar } from "../components/dashboard/Topbar";
@@ -42,7 +38,7 @@ import { DashboardAssistant } from "../components/dashboard/Assistant";
 import { ConnectAlert } from "../components/dashboard/ConnectAlert";
 import {
   campaignLabel, setDashboardView, showCampaignList, useActiveCampaign, useAds, useDashboardView,
-  useCampaigns, useDrill, usePaid,
+  useCampaigns, useDrill,
 } from "../lib/store";
 import { SurfaceProvider } from "../lib/surface";
 import { phaseTitle } from "../lib/mock/campaigns";
@@ -79,11 +75,10 @@ export default function DashboardPage() {
      fields, one owner each; the cross-links reach this one through
      the surface context below. */
   const stored = useDashboardView();
-  const view: DashboardView =
-    (NAV.some((v) => v.key === stored) || stored === "settings" || stored === "autonomy"
-      ? stored
-      : "campaign") as DashboardView;
+  const KNOWN = ["settings", "autonomy", ...NAV.map((v) => v.key), ...CAMPAIGN_TABS.map((t) => t.key)];
+  const view: DashboardView = (KNOWN.includes(stored) ? stored : "campaign") as DashboardView;
   const settingsOpen = view === "settings" || view === "autonomy";
+  const isCampaignView = CAMPAIGN_TABS.some((t) => t.key === view);
   /* Remembered rather than hardcoded to "home": a brand who opened
      settings from the ads queue expects the back arrow to return them
      to the ads queue. */
@@ -93,7 +88,6 @@ export default function DashboardPage() {
   const camp = useActiveCampaign();
   const anyCampaign = useCampaigns().length > 0;
   const drill = useDrill();
-  const paid = usePaid();
   const ads = useAds();
   /* Scoped to the campaign on screen. Counting every ad in the store
      put a "6" on the rail of an account with no campaign at all. */
@@ -137,11 +131,15 @@ export default function DashboardPage() {
 
   const TITLE: Record<DashboardView, string> = {
     home: "Dashboard",
+    /* All five campaign tabs are headed by the campaign, not by the
+       tab: the tab row directly below already says which face is open,
+       and repeating it in the heading left the brand you are looking
+       at named nowhere but the breadcrumb. */
     campaign: drilled,
-    creators: "Creators",
-    inbox: "Needs you",
-    ads: "Ads",
-    activity: "What I did on my own",
+    creators: drilled,
+    inbox: drilled,
+    ads: drilled,
+    activity: drilled,
     autonomy: "Settings",
     settings: "Settings",
   };
@@ -210,24 +208,14 @@ export default function DashboardPage() {
               <>
             {!anyCampaign && <EmptyDashboard />}
             {anyCampaign && view === "home" && <HomeView />}
-            {anyCampaign && view === "campaign" && <CampaignView />}
-            {anyCampaign && view === "creators" && <CreatorsView />}
-            {/* Home and Campaigns read fine before payment — the list and
-                the ladder are about what EXISTS. The running views are the
-                ones that need a phase in flight. */}
-            {anyCampaign && view !== "home" && view !== "campaign" && view !== "creators" && !paid && (
-              /* The running views need a phase in flight. Saying so
-                 beats five empty frames. */
-              <div className="rounded-card border border-hairline bg-white p-6 text-center shadow-card">
-                <p className="text-body text-ink-soft">
-                  {camp ? `${campaignLabel(camp)} has not started yet.` : "Nothing is running."} Start Phase 1 and
-                  connect the store, and this fills in.
-                </p>
-              </div>
+            {/* One component for five views. Creators, Needs you, Ads
+                and Activity are tabs of a campaign now, and the view
+                key IS the tab, so every deep link that used to open one
+                of them still opens it: the assistant's intents, the
+                activity log's cross-links, the action bar's Review. */}
+            {anyCampaign && isCampaignView && (
+              <CampaignView tab={view as CampaignTab} onTab={(t) => setDashboardView(t)} />
             )}
-            {anyCampaign && view === "inbox" && paid && <InboxView />}
-            {anyCampaign && view === "ads" && paid && <AdsView />}
-            {anyCampaign && view === "activity" && paid && <ActivityView />}
               </>
             )}
           </main>
