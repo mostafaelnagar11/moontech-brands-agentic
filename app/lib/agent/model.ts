@@ -132,33 +132,56 @@ export function confidenceFrom(implied: number, multiple: number) {
    CONFIDENCE
    ══════════════════════════════════════════════════════════════════
 
-   Ported unchanged from the current app's campaign calculator, because
-   it is HeyMoon's own underwriting rule and not something a prototype
-   should quietly reinvent:
+   The shape is the current app's campaign calculator:
 
        ratio = plan budget ÷ the multiple you are asking us to guarantee
 
-       ratio ≥ 12,000   high      we can commit to this
-       ratio ≥  4,000   medium    achievable on strong creator work
-       below            low       lower the multiple or raise the budget
+       ratio ≥ 2,500   high      we can commit to this
+       ratio ≥ 1,000   medium    achievable on strong creator work
+       below           low       lower the multiple or raise the budget
 
-   What IS new is that the number now explains itself. In the old app
-   the bar filled to 85, 50 or 20 with nothing behind it. Here every
+   The two thresholds are NOT the current app's. It underwrites at
+   12,000 and 4,000, which put the smallest committable plan at $60,000
+   for a 5x guarantee. This prototype was moved to 2,500 and 1,000 at
+   the client's direction, so that $10,000 at 4x is a plan HeyMoon
+   commits to rather than one it refuses: the opening pitch quotes that
+   pair, and an agent that proposes a number and then declines to
+   underwrite it is worse than either number alone.
+
+   What this actually changed, in one line: HeyMoon now commits to
+   plans 4.8 times thinner than the current app will. That is an
+   underwriting decision and not a display one — every guarantee on
+   every plan is priced off this ratio, and the money HeyMoon pays out
+   when a phase misses is set by it.
+
+   Two consequences worth knowing. The old rule made a high multiple
+   unreachable at high confidence whatever you spent: 8x topped out at
+   a ratio of 10,000 against the $80,000 cap. Under 2,500 every
+   multiple the product offers, up to 12x, reaches high confidence
+   inside the cap, so the bar no longer says "a very high multiple is a
+   bet however much you spend on it" — because under these thresholds
+   it is not saying that any more. And the floor for ANY commitment
+   drops with it: at 1,000, a 12x guarantee is medium at $12,000.
+
+   What IS new is that the number explains itself. In the old app the
+   bar filled to 85, 50 or 20 with nothing behind it. Here every
    confidence carries the arithmetic that produced it, because a brand
-   being pushed towards a different number deserves to see why.
+   being pushed towards a different number deserves to see why. */
 
-   The consequence worth knowing: with the budget capped at $80,000,
-   the best possible ratio at 8× is 10,000 — so an 8× guarantee can
-   never reach high confidence. That is not a bug in the rule, it is
-   the rule saying that a very high multiple is a bet however much you
-   spend on it. */
-
-export const CONFIDENCE_HIGH_RATIO = 12_000;
-export const CONFIDENCE_MEDIUM_RATIO = 4_000;
+export const CONFIDENCE_HIGH_RATIO = 2_500;
+export const CONFIDENCE_MEDIUM_RATIO = 1_000;
 export const PLAN_BUDGET_MIN = 1_000;
 export const PLAN_BUDGET_MAX = 80_000;
 export const ROAS_MIN = 1;
 export const ROAS_MAX = 12;
+
+/** The rule in one sentence, built from the thresholds rather than
+    typed beside them: the agent quotes this in its evidence, and a
+    policy that says 12,000 while the code says 2,500 is a policy the
+    brand is entitled to call a lie. */
+export const CONFIDENCE_RULE =
+  `Plan budget ÷ guaranteed multiple. ${CONFIDENCE_HIGH_RATIO.toLocaleString("en-US")} and above is high, ` +
+  `${CONFIDENCE_MEDIUM_RATIO.toLocaleString("en-US")} and above is medium, below that HeyMoon will not commit.`;
 
 export type ConfidenceLevel = "high" | "medium" | "low";
 

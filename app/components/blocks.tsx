@@ -21,7 +21,9 @@ import { EvidenceRow, Figure } from "./Evidence";
 import { READ_ORDER, ReadValue, readValueTree, srcFor } from "./ReadValue";
 import { TypeOn } from "./TypeOn";
 import { PHASE1_BUDGET, PHASE1_ROAS, READ_TASKS } from "../lib/agent/tools";
-import { getConfidence, type ConfidenceLevel } from "../lib/agent/model";
+import {
+  CONFIDENCE_HIGH_RATIO, CONFIDENCE_MEDIUM_RATIO, getConfidence, type ConfidenceLevel,
+} from "../lib/agent/model";
 import { PlanCard, ConfidenceMeter } from "./PlanCard";
 import { CreatorNames, CreatorSummary } from "./CreatorCard";
 import { ApprovalCard } from "./AdCards";
@@ -1348,8 +1350,8 @@ export function ConfidenceBar({ planBudget, roas }: { planBudget: number; roas: 
           reads as a scale rather than as a mood. */}
       <div className="mt-1.5 flex justify-between text-[10px] tabular-nums text-ink-faint">
         <span>Low</span>
-        <span>4,000 · medium</span>
-        <span>12,000 · HeyMoon commits</span>
+        <span>{CONFIDENCE_MEDIUM_RATIO.toLocaleString("en-US")} · medium</span>
+        <span>{CONFIDENCE_HIGH_RATIO.toLocaleString("en-US")} · HeyMoon commits</span>
       </div>
     </div>
   );

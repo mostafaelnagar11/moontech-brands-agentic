@@ -28,6 +28,7 @@ import {
   ADS, UNLOCK_AT, VAT_RATE, fmtCount, fmtUSD, pace, phaseTitle, vatOn, type Phase,
 } from "../mock/campaigns";
 import {
+  CONFIDENCE_HIGH_RATIO, CONFIDENCE_RULE,
   PLAN_BUDGET_MAX, PLAN_BUDGET_MIN, budgetForHigh, getConfidence, roasForHigh,
   CREATOR_SHARE, FOCUS_MULTIPLIER, MIN_MARKET_FIT, POOL_MAX, confidenceFrom, efficiency,
   expectedFor, familyOf, marketFit, revenuePerView,
@@ -688,10 +689,10 @@ function planBuild(read: BrandRead, strategy?: StrategyKey) {
         const [, p2, p3] = phasesFor(planBudget);
         p.planBudget = S(planBudget,
           `${fmtUSD(planBudget)} across all three phases is the smallest plan on which I can call a ${meta.multiple}x guarantee ${conf.label.toLowerCase()}. ` +
-          `Confidence is the plan budget divided by the multiple you are asking HeyMoon to guarantee: ${fmtUSD(planBudget)} ÷ ${meta.multiple} is ${Math.round(conf.ratio).toLocaleString("en-US")}, and anything from 12,000 up we can commit to. ` +
+          `Confidence is the plan budget divided by the multiple you are asking HeyMoon to guarantee: ${fmtUSD(planBudget)} ÷ ${meta.multiple} is ${Math.round(conf.ratio).toLocaleString("en-US")}, and anything from ${CONFIDENCE_HIGH_RATIO.toLocaleString("en-US")} up we can commit to. ` +
           `Only ${fmtUSD(PHASE1_BUDGET)} of it is due today.`,
           [
-            ev("p-conf", "policy", "how confidence is set", "Plan budget ÷ guaranteed multiple. 12,000 and above is high, 4,000 and above is medium, below that HeyMoon will not commit."),
+            ev("p-conf", "policy", "how confidence is set", CONFIDENCE_RULE),
             ev("p-split", "policy", "how the plan splits", `${fmtUSD(PHASE1_BUDGET)} warm-up, then ${fmtUSD(p2)} and ${fmtUSD(p3)}. Each is offered only when the phase before it reaches 80% of its target.`),
           ],
           "plan budget ÷ guaranteed multiple");
@@ -965,7 +966,7 @@ function edit_plan(i: { plan: Plan; patch: PlanPatch; because: string; by: "agen
         `${fmtUSD(planBudget)} across all three phases, against a ${multiple}x guarantee. That is a ratio of ` +
         `${Math.round(conf.ratio).toLocaleString("en-US")}, which is ${conf.label.toLowerCase()}. ${conf.desc} Only ${fmtUSD(PHASE1_BUDGET)} of it is due today.`,
       evidence: [
-        ev("p-conf", "policy", "how confidence is set", "Plan budget ÷ guaranteed multiple. 12,000 and above is high, 4,000 and above is medium, below that HeyMoon will not commit."),
+        ev("p-conf", "policy", "how confidence is set", CONFIDENCE_RULE),
         ev("p-split", "policy", "how the plan splits", `${fmtUSD(PHASE1_BUDGET)} warm-up, then ${fmtUSD(p2)} and ${fmtUSD(p3)}.`),
       ],
     };
@@ -1337,7 +1338,7 @@ function interpret(i: { text: string; plan?: Plan; paid?: boolean }): Interpreta
     if (need !== null) {
       return {
         kind: "edit", patch: { planBudget: need }, because: "because you asked for high confidence",
-        say: `Done. At ${fmtUSD(need)} across the three phases, a ${roas}x guarantee is high confidence. The ratio is 12,000, which is the line above which HeyMoon commits rather than hopes. Phase 1 is still ${fmtUSD(PHASE1_BUDGET)}, due today.`,
+        say: `Done. At ${fmtUSD(need)} across the three phases, a ${roas}x guarantee is high confidence. The ratio is ${Math.round(need / roas).toLocaleString("en-US")}, and ${CONFIDENCE_HIGH_RATIO.toLocaleString("en-US")} is the line above which HeyMoon commits rather than hopes. Phase 1 is still ${fmtUSD(PHASE1_BUDGET)}, due today.`,
       };
     }
     const best = roasForHigh(PLAN_BUDGET_MAX) ?? 3;

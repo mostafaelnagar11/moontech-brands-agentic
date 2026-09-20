@@ -86,6 +86,11 @@ const WHY_CHIP = `Why is it ${fmtUSD(PHASE1_BUDGET)}?`;
    this row offered four. A plan on screen can always be started, so the
    way to start it is always on screen. `liveChips` takes it back out
    once the payment card is open, so it is never offered twice. */
+/* The multiple the opening pitch quotes, and therefore the one the
+   calculator opens on. They were 4x and 5x, which had the agent talk
+   about one plan and then propose a different one. */
+const PITCH_MULTIPLE = 4;
+
 const PRE_CHIPS = ["Start Phase 1", "Kuwait only", "Women 25 to 45", "Guarantee 8x instead", WHY_CHIP];
 /* After payment there is exactly one thing left to do, and it is now
    ON the dashboard: the connect step moved there, because a task with
@@ -219,7 +224,7 @@ function ChatInner() {
   /* The two numbers the calculator owns, before there is a plan to hold
      them. Once the plan exists it is the source of truth and this only
      mirrors it. */
-  const [shape, setShape] = useState(() => suggestPlanShape(5));
+  const [shape, setShape] = useState(() => suggestPlanShape(PITCH_MULTIPLE));
   const [shapeSettled, setShapeSettled] = useState(false);
   /* The calculator IS the question while it is open. Chips underneath it
      would offer a second answer to a question the block already asks. */
@@ -1026,7 +1031,7 @@ function ChatInner() {
              calculator was once detected by grepping the transcript for
              its own opening line, and rewriting that line switched the
              whole branch off. */
-          const sug = suggestPlanShape(5);
+          const sug = suggestPlanShape(PITCH_MULTIPLE);
           setShape(sug);
           setShapeSettled(false);
           setShapeAsked(true);
