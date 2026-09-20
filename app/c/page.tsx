@@ -362,7 +362,12 @@ function ChatInner() {
     const ok = v.eligibility?.state === "ok";
     if (ok) {
       setPendingRead(v);
-      ask(`Here's what I found. Does it look right?`, ["Looks right", "Something's off"]);
+      /* A reaction, then the question. The agent has just read a whole
+         shop in fifteen seconds and used to report it like a form
+         submission. Reacting to the work rather than to the shop keeps
+         it true for every store: nobody's catalogue is being flattered,
+         the agent is just pleased with what it has to work with. */
+      ask(`Okay. That is plenty to work with.\n\nHere's what I found. Does it look right?`, ["Looks right", "Something's off"]);
     } else {
       /* What did not clear is on the block below, in the words the
          read itself used. Repeating it here would put someone else's
@@ -523,8 +528,10 @@ function ChatInner() {
         push({
           kind: "say",
           text:
-            `Here's your plan. Phase 1 is ${fmtUSD(v.budget.value)} for ${countWord(crew)} creator${crew === 1 ? "" : "s"}, ` +
-            `with ${fmtUSD(v.price.revenueTarget.value)} in sales guaranteed. If you sell less, HeyMoon pays you the difference.`,
+            `Done. Phase 1 is ${fmtUSD(v.budget.value)} for ${countWord(crew)} creator${crew === 1 ? "" : "s"}, ` +
+            `with ${fmtUSD(v.price.revenueTarget.value)} in sales guaranteed.\n\n` +
+            `And the part most brands do not believe until they read it: sell less than that and HeyMoon pays you ` +
+            `the difference.`,
         });
         push({ kind: "plan-card" });
         if (v.ladder.value.length) push({ kind: "ladder" });
@@ -1028,9 +1035,17 @@ function ChatInner() {
              which is true and still leaves a brand looking at a meter
              and three buttons with nothing asking them anything. Two
              sentences, which is the length rule, not none. */
+          /* The number is the pitch, so the pitch leads with it. What
+             makes it worth saying out loud is not that it is large, it
+             is that it is guaranteed: `planBudget * roas` is the figure
+             HeyMoon signs, not a forecast of one, which is why it can
+             be said this plainly. */
           say(
-            `Two numbers first. How big is the whole campaign, and what multiple of it do you want guaranteed in sales?\n\n` +
-            `Start at ${fmtUSD(sug.planBudget)} and ${sug.roas}x. That is the smallest plan HeyMoon can back at high confidence.`
+            `Now the interesting part. Two numbers.\n\n` +
+            `How big is the whole campaign, and what multiple of it do you want back in sales? ` +
+            `Say ${fmtUSD(sug.planBudget)} at ${sug.roas}x and HeyMoon guarantees ${fmtUSD(sug.planBudget * sug.roas)} in writing. ` +
+            `Not forecasts it. Guarantees it, and pays the difference if it misses.\n\n` +
+            `${fmtUSD(sug.planBudget)} at ${sug.roas}x is the smallest plan HeyMoon can back at high confidence.`
           );
           push({ kind: "score", planBudget: sug.planBudget, roas: sug.roas });
           ask("", [`${fmtUSD(sug.planBudget)} at ${sug.roas}x`, "Something smaller", "Guarantee 8x instead"]);
