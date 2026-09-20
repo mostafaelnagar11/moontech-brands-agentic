@@ -1035,16 +1035,22 @@ function ChatInner() {
              which is true and still leaves a brand looking at a meter
              and three buttons with nothing asking them anything. Two
              sentences, which is the length rule, not none. */
-          /* The number is the pitch, so the pitch leads with it. What
-             makes it worth saying out loud is not that it is large, it
-             is that it is guaranteed: `planBudget * roas` is the figure
-             HeyMoon signs, not a forecast of one, which is why it can
-             be said this plainly. */
+          /* The client's own words, verbatim, and their claim to make.
+             Two things in it are worth knowing when this is read back:
+             the $10k and $40k are a general illustration rather than a
+             quote for this brand, and the calculator directly below
+             opens on a different pair; and the line about the fee
+             following delivered ROAS is the one sentence here that the
+             rest of the product contradicts, because Phase 1 is a flat
+             $1,000 for every brand and the plan card says so three
+             times. Flagged, not edited: it is their pricing to
+             describe. */
           say(
-            `Now the interesting part. Two numbers.\n\n` +
-            `How big is the whole campaign, and what multiple of it do you want back in sales? ` +
-            `Say ${fmtUSD(sug.planBudget)} at ${sug.roas}x and HeyMoon guarantees ${fmtUSD(sug.planBudget * sug.roas)} in writing. ` +
-            `Not forecasts it. Guarantees it, and pays the difference if it misses.\n\n` +
+            `Wow, okay... this is interesting.\n\n` +
+            `Do you know that $10k in influencer spending could generate $40k+ in sales?\n\n` +
+            `Based on campaigns I've managed before, 4x+ ROAS is very possible.\n\n` +
+            `And the best part?\n` +
+            `Our fee is based on the ROAS we actually deliver. Wanna know more?\n\n` +
             `${fmtUSD(sug.planBudget)} at ${sug.roas}x is the smallest plan HeyMoon can back at high confidence.`
           );
           push({ kind: "score", planBudget: sug.planBudget, roas: sug.roas });
