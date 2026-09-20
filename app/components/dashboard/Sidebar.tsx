@@ -323,7 +323,7 @@ function Content({ collapsed, view, onView, brandName, onMobileClose }: Props) {
             className="absolute start-full top-8 z-50 ms-2 w-[232px] overflow-hidden rounded-control border border-hairline bg-white shadow-float"
           >
             <p className="px-3 pb-1 pt-2.5 text-[9px] font-semibold uppercase tracking-widest text-ink-faint">
-              {brandName}
+              Campaigns
             </p>
             {campaigns.map((c) => {
               const here = view !== "home" && view !== "settings" && c.id === activeId;
