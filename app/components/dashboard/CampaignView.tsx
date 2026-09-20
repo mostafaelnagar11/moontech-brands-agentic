@@ -230,7 +230,7 @@ function OneCampaign() {
       {/* The chart and the ladder read together: the line is this
           phase, the rows are the phases around it. Side by side you can
           see which rung the line belongs to without scrolling. */}
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-stretch">
         <Section
           title="Sales against target"
           aside={
@@ -242,22 +242,31 @@ function OneCampaign() {
             </span>
           }
         >
-          <Surface className="p-4">
-            <RevenueChart phase={phase} />
+          {/* The chart earns the extra height rather than floating in
+              it: the plot grows with the card and keeps the padding
+              even on all four sides. */}
+          <Surface className="flex h-full flex-col p-5">
+            <div className="flex min-h-[260px] flex-1 flex-col justify-center">
+              <RevenueChart phase={phase} />
+            </div>
           </Surface>
         </Section>
 
         <Section title="The phases">
-          <Surface>
-            <ul className="divide-y divide-hairline">
+          {/* Three rungs in a card sized for the chart beside it left a
+              third of the card empty. The rows share the height evenly
+              instead, so the list reads as a ladder with rungs at equal
+              intervals, which is what it is. */}
+          <Surface className="flex h-full flex-col">
+            <ul className="flex flex-1 flex-col divide-y divide-hairline">
               {phases.map((ph) => {
                 const isLive = ph.id === phase.id;
                 const done = ph.status === "ended";
                 return (
-                  <li key={ph.id}>
+                  <li key={ph.id} className="flex flex-1">
                   <button
                     onClick={() => openPhase(ph.id)}
-                    className="flex w-full items-center gap-3 px-4 py-3 text-start transition hover:bg-brand/[0.03]"
+                    className="flex w-full items-center gap-3 px-5 py-4 text-start transition hover:bg-brand/[0.03]"
                   >
                     <span
                       aria-hidden

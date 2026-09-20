@@ -448,17 +448,17 @@ export function HomeView() {
           which is exactly its height. */}
       <div className="grid gap-3 lg:grid-cols-3">
       {live && live.revTarget !== null ? (
-        <section className="rounded-card bg-brand p-6 sm:p-7 lg:col-span-2">
+        <section className="flex flex-col justify-center rounded-card bg-brand p-6 sm:p-7 lg:col-span-2">
           {/* Both ranks, in order. A campaign holds phases, and this
               line is the only place on the page where the one you are
               looking at is named inside the one it belongs to. */}
           <p className="text-eyebrow font-semibold uppercase tracking-[0.12em] text-white/70">
             {label} · {phaseTitle(live.phaseNo)} · {live.guaranteedRoas}x guaranteed
           </p>
-          <p className="num mt-2.5 text-[clamp(30px,4vw,38px)] font-semibold leading-none tracking-[-0.03em] text-white">
+          <p className="num mt-3 text-[clamp(30px,4vw,38px)] font-semibold leading-none tracking-[-0.03em] text-white">
             {fmtUSD(live.rev)}
           </p>
-          <p className="mt-2.5 max-w-[60ch] text-body leading-5 text-white/75">
+          <p className="mt-4 max-w-[60ch] text-body leading-5 text-white/75">
             of the {fmtUSD(live.revTarget)} HeyMoon guaranteed on this phase. If it closes short, HeyMoon pays you
             the difference.
           </p>
@@ -468,7 +468,7 @@ export function HomeView() {
               purple fill, which is to say not drawn at all. */}
           <RevenueRuler
             pct={livePct ?? 0}
-            className="mt-6"
+            className="mt-8"
             trackClass="bg-white/20"
             srLabel={`${phaseTitle(live.phaseNo)} sales against its guarantee.`}
           />
