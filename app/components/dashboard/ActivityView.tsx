@@ -71,9 +71,16 @@ export function ActivityView() {
 
   return (
     <div className="space-y-6">
-      {/* Three figures. The third is the claim the product rests on, and
-          it is a constant: no agent has a path to money. */}
-      <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
+      {/* One figure, which is the one the page is about.
+
+          "Money moved · $0 · never, and not a setting" was a constant
+          dressed as a metric: it cannot ever read anything else, so it
+          measured nothing, and the Fixed limits row immediately below
+          makes the same promise from the actual rules rather than from
+          a hardcoded zero. The undo counts fold into the line under the
+          figure, because they are about the same log and were two more
+          tiles to read to learn one thing. */}
+      <div className="grid gap-3 sm:grid-cols-2">
         <Tile
           tone="hero"
           label="Done without asking"
@@ -84,12 +91,6 @@ export function ActivityView() {
           label="Undone by you"
           value={undoneCount}
           sub={`${reversible} more can still be undone`}
-        />
-        <Tile
-          tone="good"
-          label="Money moved"
-          value={<span className="text-good-deep">$0</span>}
-          sub="never, and not a setting"
         />
       </div>
 

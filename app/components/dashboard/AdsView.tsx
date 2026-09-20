@@ -25,14 +25,14 @@ import {
   Warning, YoutubeLogo,
 } from "@phosphor-icons/react";
 import type { AdRecord } from "../../lib/agent/types";
-import { REVIEW_WINDOW_DAYS, draftDaysLeft, fmtUSD } from "../../lib/mock/campaigns";
+import { REVIEW_WINDOW_DAYS, draftDaysLeft } from "../../lib/mock/campaigns";
 import {
   setAdState, useAds, useLivePhase,
 } from "../../lib/store";
 import { LiveAdGrid } from "../AdCards";
 import { Claim } from "../Evidence";
 import { Avatar, Btn, Sheet } from "../ui";
-import { DataRow, Detail, Section, Surface, Tile } from "./kit";
+import { DataRow, Detail, Section, Surface } from "./kit";
 
 type Shelf = "waiting" | "live" | "declined";
 
@@ -86,8 +86,6 @@ export function AdsView() {
      Recomputed from the shelf rather than stored, so a decision made on
      a card never leaves a stale id behind in the batch. */
   const wouldApprove = waiting.filter((a) => a.compliance.verdict !== "hold").map((a) => a.id);
-  /* The same figure the live shelf used to state in its header. */
-  const attributed = live.reduce((n, a) => n + (a.performance?.revenue.value ?? 0), 0);
 
   const toggle = (id: string, on: boolean) => setSel((s) => (on ? [...s, id] : s.filter((x) => x !== id)));
   const approveSelected = () => { sel.forEach((id) => setAdState(id, "live")); setSel([]); };
@@ -102,26 +100,6 @@ export function AdsView() {
 
   return (
     <div className="space-y-6">
-      {/* Three counts, ranked. The queue is the one the page is for. */}
-      <div className="grid grid-cols-3 gap-3">
-        <Tile
-          tone={counts.waiting ? "hero" : "plain"}
-          label="Waiting on you"
-          value={counts.waiting}
-          sub={counts.waiting ? (held ? `${held} I'd hold` : "I'd approve them all") : "every draft decided"}
-        />
-        <Tile
-          label="Live"
-          value={counts.live}
-          sub={`${fmtUSD(attributed)} attributed`}
-        />
-        <Tile
-          label="Declined"
-          value={counts.declined}
-          sub={counts.declined ? "reopen any of them" : "none so far"}
-        />
-      </div>
-
       {/* The batch row. One line: what I would do, and the two presses
           that do it. The paragraph that used to explain the review
           window is now a chip on every card that has a clock on it. */}

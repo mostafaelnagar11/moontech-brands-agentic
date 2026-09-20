@@ -34,7 +34,7 @@ import {
   dismissInbox, type PanelView, useActivity, useAds, useLivePhase, useReadyPhase, useStore,
 } from "../../lib/store";
 import { useGo } from "../../lib/surface";
-import { DataRow, Detail, Section, Surface } from "./kit";
+import { Detail, Section, Surface } from "./kit";
 
 type Group = "money" | "blocking" | "fyi";
 
@@ -214,17 +214,6 @@ export function InboxView() {
         })
       )}
 
-      {/* The two promises the product rests on. They are stated here on
-          every visit, decided or not, because this is the view a brand
-          opens to find out what is being done without them. */}
-      <Section title="What I can never do">
-        <Surface>
-          <div className="divide-y divide-hairline">
-            <DataRow label="Money moved without asking" value={<span className="text-good-deep">Never</span>} />
-            <DataRow label="Ads published without asking" value={<span className="text-good-deep">Never</span>} />
-          </div>
-        </Surface>
-      </Section>
     </div>
   );
 }
